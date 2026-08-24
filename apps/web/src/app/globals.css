@@ -41,6 +41,8 @@
   --vidro-brilho: rgba(255, 255, 255, 0.9);
   --realce: rgba(42, 120, 214, 0.1);
   --sombra-realce: rgba(11, 11, 11, 0.45);
+  /* Sombra que avisa que a tabela continua rolando para o lado. */
+  --sombra-rolagem: rgba(11, 11, 11, 0.14);
 
   /* Gradiente do plano de fundo, atrás de tudo. */
   --fundo-base: #f4f4f1;
@@ -88,7 +90,9 @@
     --vidro-brilho: rgba(255, 255, 255, 0.14);
     --realce: rgba(57, 135, 229, 0.16);
   --sombra-realce: rgba(0, 0, 0, 0.8);
+  --sombra-rolagem: rgba(0, 0, 0, 0.55);
     --sombra-realce: rgba(0, 0, 0, 0.8);
+    --sombra-rolagem: rgba(0, 0, 0, 0.55);
 
     --fundo-base: #000000;
     --fundo-halo-1: rgba(57, 135, 229, 0.16);
@@ -671,6 +675,31 @@ a {
   min-width: 150px;
 }
 
+/*
+ * Larguras dos campos por classe, e não por `style` inline: assim a media query
+ * de celular consegue zerá-las sem precisar de `!important` (estilo inline vence
+ * regra externa, mas não vence outra regra quando a largura mora no CSS).
+ */
+.campo-largo {
+  min-width: 320px;
+}
+
+.campo-medio {
+  min-width: 220px;
+}
+
+.campo-busca {
+  min-width: 250px;
+}
+
+.campo-estreito {
+  min-width: 140px;
+}
+
+.campo-mini {
+  min-width: 90px;
+}
+
 .campo input:focus,
 .campo select:focus {
   outline: 2px solid var(--serie-1);
@@ -713,11 +742,20 @@ a {
 
 /* --- Tabela --- */
 
+/*
+ * A sombra na borda direita avisa que a tabela continua para o lado. Vale em
+ * qualquer tamanho de tela: um tablet de 768 px também corta as doze colunas, e
+ * sem o aviso ninguém descobre que há mais coluna adiante.
+ */
 .tabela-envolucro {
   overflow-x: auto;
   border-radius: var(--raio);
   border: 1px solid var(--vidro-borda);
-  background: var(--vidro);
+  background:
+    linear-gradient(to left, var(--sombra-rolagem), transparent 28px) right /
+      28px 100% no-repeat,
+    var(--vidro);
+  background-attachment: local, scroll;
 }
 
 table.tabela {
@@ -965,6 +1003,23 @@ table.tabela {
   font: inherit;
   font-size: 13px;
   margin-top: 12px;
+}
+
+/*
+ * Grid item não encolhe abaixo do próprio conteúdo: o `min-width` implícito é
+ * `auto`, não zero. Sem isto, um cartão com tabela larga estica a coluna e
+ * empurra a página inteira para fora da tela no celular — que era exatamente o
+ * que acontecia no detalhe da formulação.
+ */
+.grade-graficos > *,
+.grade-detalhe > *,
+.grade-kpis > * {
+  min-width: 0;
+}
+
+/* Os dois rótulos da navegação; o CSS escolhe qual mostrar. */
+.nav-rotulo-curto {
+  display: none;
 }
 
 @media (max-width: 720px) {
@@ -1261,4 +1316,246 @@ table.tabela {
   border-left: 2px solid var(--status-atencao);
   padding-left: 10px;
   margin-left: 2px;
+}
+
+
+/* ------------------------------------------------------------------ *
+ * Telas estreitas
+ *
+ * Três coisas guiaram os ajustes:
+ *
+ * 1. **Nada de rolagem horizontal da página.** Um grid item sem `min-width: 0`
+ *    ou um campo com largura fixa é o bastante para empurrar tudo para fora.
+ * 2. **Campo de formulário com 16px.** Abaixo disso o Safari do iPhone dá zoom
+ *    sozinho ao focar o campo, e a pessoa fica com a página torta.
+ * 3. **Alvo de toque de 44px.** É a medida que a Apple e o Google recomendam;
+ *    um botão de 30px erra muito com o dedo.
+ * ------------------------------------------------------------------ */
+
+@media (max-width: 720px) {
+  /* --- Cabeçalho e navegação --- */
+
+  .cabecalho-conteudo {
+    padding: 10px 16px;
+    gap: 10px;
+  }
+
+  .marca {
+    font-size: 14px;
+  }
+
+  /*
+   * A navegação rola na horizontal em vez de quebrar linha: mantém o cabeçalho
+   * com uma altura só, e nenhum item fica escondido atrás de menu.
+   */
+  .navegacao {
+    width: 100%;
+    margin-left: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    gap: 2px;
+  }
+
+  .navegacao::-webkit-scrollbar {
+    display: none;
+  }
+
+  .navegacao a {
+    white-space: nowrap;
+    flex: 0 0 auto;
+    /* 44px de alvo de toque, como nos botões. */
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    font-size: 13.5px;
+  }
+
+  /* O sublinhado acompanha o novo espaçamento horizontal. */
+  .navegacao a::after {
+    left: 12px;
+    right: 12px;
+    bottom: 5px;
+  }
+
+  .nav-rotulo-longo {
+    display: none;
+  }
+
+  .nav-rotulo-curto {
+    display: inline;
+  }
+
+  /* --- Tipografia --- */
+
+  .titulo-pagina {
+    font-size: 19px;
+  }
+
+  .kpi-valor {
+    font-size: 26px;
+  }
+
+  .cartao {
+    padding: 14px 15px;
+  }
+
+  /* --- Formulários --- */
+
+  /* Larguras mínimas pensadas para o desktop viram largura total no celular. */
+  .barra-filtros {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .campo {
+    min-width: 0;
+  }
+
+  .campo input,
+  .campo select,
+  .campo-largo,
+  .campo-medio,
+  .campo-busca,
+  .campo-estreito,
+  .campo-mini {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .barra-filtros .botao {
+    width: 100%;
+  }
+
+  /* --- Listas e tabelas --- */
+
+  .lista-dados {
+    grid-template-columns: 1fr auto;
+    gap: 8px 12px;
+  }
+
+  .lista-paineis li {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .lista-paineis-titulo {
+    flex: 1 1 100%;
+  }
+
+  .lista-paineis .botao {
+    width: auto;
+    min-height: 40px;
+  }
+
+  .paginacao {
+    justify-content: space-between;
+  }
+
+  .acoes-construtor .botao,
+  .acoes-grade .botao {
+    flex: 1 1 auto;
+  }
+
+  .cabecalho-pagina .botao {
+    width: auto;
+  }
+}
+
+/* Telas bem estreitas (iPhone SE e semelhantes). */
+@media (max-width: 400px) {
+  .principal {
+    padding: 12px;
+  }
+
+  .cabecalho-conteudo {
+    padding: 10px 12px;
+  }
+
+  .cartao {
+    padding: 13px 13px;
+  }
+
+  .titulo-pagina {
+    font-size: 18px;
+  }
+
+  .kpi-valor {
+    font-size: 24px;
+  }
+
+  .grade-kpis {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  /* Com duas colunas de indicador, a nota longa aperta demais. */
+  .kpi-nota {
+    font-size: 11px;
+  }
+}
+
+
+/* ------------------------------------------------------------------ *
+ * Aparelhos de toque
+ *
+ * Separado da largura de propósito: um tablet de 1024 px é tão de dedo quanto
+ * um celular de 360 px, e um monitor pequeno com mouse não precisa de alvo
+ * grande. `hover: none` identifica quem não tem cursor.
+ * ------------------------------------------------------------------ */
+
+@media (hover: none) {
+  /* 44px é a medida recomendada de alvo de toque; 30px erra muito com o dedo. */
+  .botao,
+  .navegacao a {
+    min-height: 44px;
+  }
+
+  .botao {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+
+  .navegacao a {
+    display: flex;
+    align-items: center;
+  }
+
+  /*
+   * Campo com fonte menor que 16px faz o Safari do iPhone dar zoom sozinho ao
+   * receber o foco, e a página fica torta até a pessoa afastar com os dedos.
+   */
+  .campo input,
+  .campo select,
+  .area-upload input[type='file'] {
+    font-size: 16px;
+    padding: 10px 12px;
+    min-height: 44px;
+  }
+
+  .mover-toque {
+    top: 6px;
+    right: 6px;
+    gap: 6px;
+  }
+
+  .botao-mover {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+
+  /* Espaço para os botões não cobrirem o título do cartão. */
+  .item-grade > .cartao > .cartao-titulo {
+    padding-right: 100px;
+    min-height: 32px;
+  }
+
+  /* Sem cursor não há hover: a elevação dos cartões só atrapalharia no toque. */
+  .cartao:hover {
+    transform: none;
+  }
 }

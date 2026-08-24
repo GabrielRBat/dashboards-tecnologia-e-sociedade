@@ -232,7 +232,7 @@ export function ConstrutorDashboard({ catalogo, dashboard }: Props) {
               value={nome}
               onChange={(e) => setNome(e.target.value)}
               placeholder="Ex.: Reologia das argamassas de revestimento"
-              style={{ minWidth: 320 }}
+              className="campo-largo"
             />
           </label>
           <label className="campo">
@@ -241,7 +241,7 @@ export function ConstrutorDashboard({ catalogo, dashboard }: Props) {
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
               placeholder="O que este painel responde"
-              style={{ minWidth: 320 }}
+              className="campo-largo"
             />
           </label>
         </div>
@@ -337,7 +337,7 @@ export function ConstrutorDashboard({ catalogo, dashboard }: Props) {
                 max={20}
                 value={faixas}
                 onChange={(e) => setFaixas(Number(e.target.value))}
-                style={{ minWidth: 90 }}
+                className="campo-mini"
               />
             </label>
           ) : null}
@@ -348,7 +348,7 @@ export function ConstrutorDashboard({ catalogo, dashboard }: Props) {
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
               placeholder="Automático se vazio"
-              style={{ minWidth: 220 }}
+              className="campo-medio"
             />
           </label>
         </div>

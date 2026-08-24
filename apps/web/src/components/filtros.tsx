@@ -80,7 +80,7 @@ export function BarraFiltros({
             editando.current = true;
             setBusca(e.target.value);
           }}
-          style={{ minWidth: 250 }}
+          className="campo-busca"
         />
       </label>
 
@@ -135,7 +135,7 @@ export function BarraFiltros({
           type="date"
           value={valor('dataInicio')}
           onChange={(e) => atualizar('dataInicio', e.target.value)}
-          style={{ minWidth: 140 }}
+          className="campo-estreito"
         />
       </label>
 
@@ -145,7 +145,7 @@ export function BarraFiltros({
           type="date"
           value={valor('dataFim')}
           onChange={(e) => atualizar('dataFim', e.target.value)}
-          style={{ minWidth: 140 }}
+          className="campo-estreito"
         />
       </label>
 

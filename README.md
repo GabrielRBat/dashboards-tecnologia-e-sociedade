@@ -196,6 +196,33 @@ mexem só em `opacity` e `transform`, que o compositor resolve sem recalcular
 layout. Quem tem **"reduzir movimento"** ligado no sistema recebe a interface
 parada — os realces de hover continuam, sem deslocamento.
 
+## No celular e no tablet
+
+A interface funciona de 320 px (iPhone SE) para cima. Duas coisas guiaram os
+ajustes, e vale saber a diferença porque elas não são a mesma:
+
+- **Largura** decide o *layout*: a navegação passa a rolar na horizontal com
+  rótulos curtos, os filtros viram uma coluna só, os indicadores ficam em duas
+  colunas abaixo de 400 px.
+- **Ausência de cursor** (`hover: none`) decide o *toque*: alvos de 44 px,
+  campos com fonte de 16 px, e os botões `‹ ›` no lugar da alça de arrasto.
+
+A separação importa: um tablet de 1024 px é tão de dedo quanto um celular, e um
+monitor pequeno com mouse não precisa de botão grande.
+
+Três detalhes que costumam passar batido:
+
+| Detalhe | Por quê |
+|---|---|
+| Campos com **16 px** no toque | Abaixo disso o Safari do iPhone dá zoom sozinho ao focar, e a página fica torta |
+| `min-width: 0` nos itens de grade | Grid item não encolhe abaixo do conteúdo por padrão; um cartão com tabela larga empurrava a página inteira para fora da tela |
+| Sombra na borda da tabela | As doze colunas não cabem em tela pequena; sem o aviso visual ninguém descobre que a tabela continua rolando |
+
+No **ranking dos 28 dias**, o eixo de nomes encolhe de 190 px para 104 px no
+celular e a nomenclatura é cortada **pelo começo** — "Argamassa Colante_7" vira
+"Colante_7". Cortar pelo fim transformaria duas formulações diferentes no mesmo
+rótulo, já que o que as distingue é o número final.
+
 ## Tema
 
 Em **Configurações → Aparência** o usuário escolhe entre três opções:

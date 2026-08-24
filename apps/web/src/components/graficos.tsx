@@ -44,6 +44,7 @@ import {
   PontoSqueeze,
 } from '@/lib/api';
 import { num, tipoProjeto } from '@/lib/formato';
+import { useTelaEstreita } from '@/lib/tela';
 
 const CORES = [
   'var(--serie-1)',
@@ -217,21 +218,48 @@ export function GraficoEvolucao({ dados }: { dados: PontoEvolucao[] }) {
   );
 }
 
+/**
+ * Encurta a nomenclatura preservando o fim.
+ *
+ * Cortar pelo começo transformaria "Argamassa Colante_7" e "Argamassa
+ * Colante_14" no mesmo "Argamassa Col…" — dois rótulos idênticos para
+ * formulações diferentes. O que distingue está no fim, no número. Antes disso,
+ * tira o prefixo "Argamassa", que se repete em todas e não separa nada.
+ */
+function encurtar(nome: string, limite: number): string {
+  const semPrefixo = nome.replace(/^Argamassa\s+/i, '');
+  if (semPrefixo.length <= limite) return semPrefixo;
+  return `…${semPrefixo.slice(-(limite - 1))}`;
+}
+
 /* --- Ranking de formulações aos 28 dias --- */
 
 export function GraficoComparativo({ dados }: { dados: ItemComparativo[] }) {
+  const estreita = useTelaEstreita();
+
   if (dados.length === 0) {
     return <SemDados>Nenhuma formulação com resistência aos 28 dias.</SemDados>;
   }
 
-  const altura = Math.max(240, dados.length * 26 + 40);
+  /*
+   * No celular o eixo de nomes precisa encolher, senão não sobra espaço para as
+   * barras: com os 190 px do desktop numa tela de 320 px restavam 24 px de área
+   * de plotagem. O nome vai truncado — o completo aparece no toque.
+   */
+  const larguraEixo = estreita ? 104 : 190;
+  const comRotulo = dados.map((d) => ({
+    ...d,
+    rotuloEixo: estreita ? encurtar(d.nomenclatura, 14) : d.nomenclatura,
+  }));
+
+  const altura = Math.max(240, dados.length * (estreita ? 30 : 26) + 40);
 
   return (
     <ResponsiveContainer width="100%" height={altura}>
       <BarChart
-        data={dados}
+        data={comRotulo}
         layout="vertical"
-        margin={{ top: 4, right: 46, bottom: 4, left: 8 }}
+        margin={{ top: 4, right: estreita ? 34 : 46, bottom: 4, left: 8 }}
         barCategoryGap={6}
       >
         <CartesianGrid stroke="var(--grade)" horizontal={false} />
@@ -247,10 +275,13 @@ export function GraficoComparativo({ dados }: { dados: ItemComparativo[] }) {
         />
         <YAxis
           type="category"
-          dataKey="nomenclatura"
+          dataKey="rotuloEixo"
           {...EIXO}
-          width={190}
-          tick={{ fill: 'var(--tinta-secundaria)', fontSize: 11.5 }}
+          width={larguraEixo}
+          tick={{
+            fill: 'var(--tinta-secundaria)',
+            fontSize: estreita ? 10.5 : 11.5,
+          }}
         />
         <Tooltip
           cursor={{ fill: 'var(--grade)', fillOpacity: 0.5 }}

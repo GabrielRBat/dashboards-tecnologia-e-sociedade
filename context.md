@@ -112,6 +112,11 @@ nos dois temas.
   foco) e toque (botões ‹ ›, que aparecem em `hover: none` — o arrasto HTML5 não
   funciona em tela de toque). Sem isso a funcionalidade existiria só para quem
   usa mouse.
+- **Responsividade separa largura de toque.** Largura decide layout (navegação
+  com rótulos curtos e rolagem, filtros em uma coluna, indicadores em duas);
+  `hover: none` decide alvo de toque de 44 px, fonte de 16 px nos campos e os
+  botões ‹ › no lugar do arrasto. Um tablet grande é de dedo, um monitor pequeno
+  com mouse não é — por isso não dá para tratar os dois pela mesma media query.
 - **Vidro com moderação, por desempenho.** Só o cabeçalho tem `backdrop-filter`
   (elemento único e fixo); os cartões usam translucidez sem desfoque. O gradiente
   do fundo fica numa camada `fixed` atrás de tudo, para não repintar a cada
