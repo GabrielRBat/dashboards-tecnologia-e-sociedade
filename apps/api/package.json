@@ -13,7 +13,8 @@
     "db:push": "drizzle-kit push",
     "db:seed": "tsx src/db/seed.ts",
     "db:studio": "drizzle-kit studio",
-    "criar-admin": "tsx src/db/criar-admin.ts"
+    "criar-admin": "tsx src/db/criar-admin.ts",
+    "redefinir-senha": "tsx src/db/redefinir-senha.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.6",

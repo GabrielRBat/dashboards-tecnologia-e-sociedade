@@ -110,6 +110,16 @@ nos dois temas.
   dados de P&D, e confirmou. Travas mantidas: conta nasce sempre `MEMBRO` (o
   papel nunca vem do corpo da requisição) e 3 registros por hora por IP.
   Registrado também em `ESPECIFICACOES.md`, com o caminho para fechar depois.
+- **Ambiente local usa `admin` / `admin`** (pedido do usuário em 2026-08-24).
+  As credenciais ficam **só no `.env`, que não é versionado** — o código segue
+  sorteando senha forte por padrão, então nenhuma instalação nova nasce fraca.
+  A regra de 10 caracteres continua valendo no registro, na criação pela
+  interface e na troca de senha; a exceção existe apenas nos comandos de
+  terminal, com aviso na tela. **Antes de qualquer deploy, redefinir.**
+- **O identificador de login não é só e-mail.** A interface exige e-mail no
+  cadastro, mas os comandos de terminal aceitam nome de usuário simples
+  (`admin`), porque conta de serviço não tem caixa de entrada. Por isso o campo
+  do login é `type="text"` — com `type="email"` o navegador recusaria "admin".
 - **Nada da Construxion neste projeto** (pedido do usuário em 2026-08-24). Não
   usar o domínio, o nome nem a sigla da empresa: e-mails de exemplo são
   `@exemplo.com`, o admin padrão é `admin@laboratorio.local` e a sigla da marca

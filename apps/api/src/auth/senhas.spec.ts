@@ -3,6 +3,7 @@ import {
   conferirSenha,
   emailPareceValido,
   gerarHash,
+  identificadorValido,
   normalizarEmail,
   validarSenha,
 } from './senhas';
@@ -90,5 +91,24 @@ describe('emailPareceValido', () => {
     expect(emailPareceValido('sem@dominio')).toBe(false);
     expect(emailPareceValido('com espaco@dominio.com')).toBe(false);
     expect(emailPareceValido('')).toBe(false);
+  });
+});
+
+describe('identificadorValido', () => {
+  it('aceita e-mail', () => {
+    expect(identificadorValido('pessoa@exemplo.com')).toBe(true);
+  });
+
+  it('aceita nome de usuário simples, usado pelos comandos de terminal', () => {
+    expect(identificadorValido('admin')).toBe(true);
+    expect(identificadorValido('lab.tecnica')).toBe(true);
+    expect(identificadorValido('conta_de-servico')).toBe(true);
+  });
+
+  it('recusa o que não serve como identificador', () => {
+    expect(identificadorValido('ab')).toBe(false); // curto demais
+    expect(identificadorValido('com espaço')).toBe(false);
+    expect(identificadorValido('Maiuscula')).toBe(false); // normalize antes
+    expect(identificadorValido('')).toBe(false);
   });
 });

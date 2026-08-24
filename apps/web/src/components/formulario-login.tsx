@@ -75,11 +75,18 @@ export function FormularioLogin() {
   return (
     <form className="formulario-login" onSubmit={(e) => void entrar(e)}>
       <label className="campo">
-        <span className="campo-rotulo">E-mail</span>
+        <span className="campo-rotulo">E-mail ou usuário</span>
         <input
-          type="email"
+          /*
+           * `text`, e não `email`: contas criadas pelo terminal podem ter um
+           * identificador simples (`admin`), e o navegador recusaria enviar o
+           * formulário com `type="email"`. Quem valida é a API.
+           */
+          type="text"
           name="email"
           autoComplete="username"
+          autoCapitalize="off"
+          spellCheck={false}
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}

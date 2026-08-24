@@ -75,3 +75,19 @@ const FORMATO_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export function emailPareceValido(email: string): boolean {
   return FORMATO_EMAIL.test(email);
 }
+
+/** Nome de usuário simples: letras, números, ponto, hífen e sublinhado. */
+const FORMATO_USUARIO = /^[a-z0-9._-]{3,}$/;
+
+/**
+ * Identificador de login aceito pelos **comandos administrativos**.
+ *
+ * O cadastro pela interface continua exigindo e-mail de verdade — é assim que
+ * se alcança a pessoa e é o que a tela pede. Mas os scripts de terminal também
+ * criam contas de serviço e de desenvolvimento, onde um `admin` sem arroba é o
+ * que se espera digitar. Aceitar as duas formas aqui evita a alternativa pior:
+ * afrouxar a validação do cadastro público para acomodar um caso de terminal.
+ */
+export function identificadorValido(valor: string): boolean {
+  return emailPareceValido(valor) || FORMATO_USUARIO.test(valor);
+}

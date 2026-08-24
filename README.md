@@ -257,11 +257,44 @@ npm run criar-admin
 
 Ele sorteia uma senha forte e a mostra **uma única vez** no terminal — anote,
 porque ela não fica gravada em lugar nenhum (só o hash) e o sistema pede a troca
-no primeiro acesso. Para definir a senha você mesmo, preencha `ADMIN_SENHA` no
-`.env` antes de rodar.
+no primeiro acesso. Para definir a senha você mesmo, preencha `ADMIN_NOME`,
+`ADMIN_EMAIL` e `ADMIN_SENHA` no `.env` antes de rodar.
 
 Rodar o comando de novo quando já existe administrador não cria outro: ele
 apenas mostra quem já está cadastrado.
+
+Perdeu a senha? Não há recuperação por e-mail — a saída é pelo terminal:
+
+```bash
+npm run redefinir-senha
+```
+
+Ele troca a senha de quem estiver em `ADMIN_EMAIL`. Com `ADMIN_SENHA` vazia,
+sorteia uma e mostra uma vez.
+
+### Identificador: e-mail ou usuário
+
+O cadastro pela interface exige **e-mail** — é assim que se alcança a pessoa.
+Já os comandos de terminal aceitam também um **nome de usuário simples**
+(`admin`, `lab.tecnica`), porque contas de serviço e de desenvolvimento não têm
+caixa de entrada. O campo do login é de texto livre por isso.
+
+### Senha fraca em desenvolvimento
+
+O sistema exige **10 caracteres** no registro, na criação de conta pela
+interface e na troca de senha — sem exceção.
+
+Os dois comandos de terminal abrem uma brecha: uma senha curta digitada de
+propósito em `ADMIN_SENHA` é aceita, com aviso na tela. É escolha consciente de
+quem já tem o `.env` e o banco na mão, e barrá-la só levaria a contornar o
+comando editando o banco direto.
+
+> **Este projeto está configurado com `admin` / `admin` para desenvolvimento
+> local.** As credenciais moram no `.env`, que **não é versionado** — o código
+> continua sorteando uma senha forte por padrão, então nenhuma instalação nova
+> nasce com elas. Antes de expor o sistema na internet, redefina: `admin` é a
+> primeira combinação que qualquer ataque tenta, e o auto-registro aberto já
+> deixa a porta destrancada.
 
 ### Como funciona
 
@@ -412,6 +445,7 @@ planilha mudar de layout, é o único arquivo a ajustar.
 | `npm run db:migrate` | Aplica as migrações |
 | `npm run db:seed` | Popula o banco com dados de exemplo |
 | `npm run criar-admin` | Cria o primeiro administrador (mostra a senha uma vez) |
+| `npm run redefinir-senha` | Troca a senha de uma conta pelo terminal, quando ninguém consegue entrar |
 | `npm run db:studio` | Abre o Drizzle Studio |
 
 > **Não rode `npm run build` com o `npm run dev` aberto.** Os dois escrevem na
