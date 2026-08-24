@@ -3,7 +3,7 @@
 /** Barra de filtros: escreve na URL, e as páginas leem os searchParams. */
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { ROTULOS_ORIGEM, ROTULOS_TIPO_PROJETO } from '@/lib/formato';
 
 export function BarraFiltros({
@@ -16,6 +16,18 @@ export function BarraFiltros({
   const params = useSearchParams();
   const [pendente, iniciar] = useTransition();
 
+  // O texto digitado vive aqui e só vira navegação depois de uma pausa. Sem
+  // isso, cada tecla recarregaria a visão geral inteira — "Contrapiso" seriam
+  // dez recargas, nove delas jogadas fora.
+  const buscaNaUrl = params.get('busca') ?? '';
+  const [busca, setBusca] = useState(buscaNaUrl);
+  const editando = useRef(false);
+
+  // Voltar/avançar no navegador, ou limpar os filtros, precisa refletir no campo.
+  useEffect(() => {
+    if (!editando.current) setBusca(buscaNaUrl);
+  }, [buscaNaUrl]);
+
   const atualizar = (chave: string, valor: string): void => {
     const novos = new URLSearchParams(params.toString());
     if (valor) novos.set(chave, valor);
@@ -25,7 +37,23 @@ export function BarraFiltros({
     iniciar(() => router.push(`${pathname}?${novos.toString()}`));
   };
 
+  const ESPERA_MS = 350;
+
+  useEffect(() => {
+    if (busca === buscaNaUrl) return;
+    const id = window.setTimeout(() => {
+      editando.current = false;
+      atualizar('busca', busca);
+    }, ESPERA_MS);
+    return () => window.clearTimeout(id);
+    // `atualizar` depende dos params atuais e é recriado a cada render; incluí-lo
+    // reiniciaria o temporizador sem parar.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [busca, buscaNaUrl]);
+
   const limpar = (): void => {
+    editando.current = false;
+    setBusca('');
     iniciar(() => router.push(pathname));
   };
 
@@ -45,10 +73,14 @@ export function BarraFiltros({
         <span className="campo-rotulo">Buscar</span>
         <input
           type="search"
-          placeholder="Nomenclatura, nº ou comentário"
-          defaultValue={valor('busca')}
-          onChange={(e) => atualizar('busca', e.target.value)}
-          style={{ minWidth: 230 }}
+          placeholder="Nome, nº, desenvolvedor ou comentário"
+          title="Procura no nome da formulação, no número, no nome do desenvolvedor e nos comentários"
+          value={busca}
+          onChange={(e) => {
+            editando.current = true;
+            setBusca(e.target.value);
+          }}
+          style={{ minWidth: 250 }}
         />
       </label>
 

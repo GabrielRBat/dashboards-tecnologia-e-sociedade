@@ -14,7 +14,9 @@
   --plano: #f9f9f7;
   --tinta-primaria: #0b0b0b;
   --tinta-secundaria: #52514e;
-  --tinta-suave: #898781;
+  /* #898781 dava 3,3:1 sobre o fundo claro — abaixo dos 4,5:1 de texto pequeno.
+     Este passo fica em 4,7:1 e mantém a hierarquia com a tinta secundária. */
+  --tinta-suave: #6f6d68;
   --grade: #e1e0d9;
   --eixo: #c3c2b7;
   --borda: rgba(11, 11, 11, 0.1);
@@ -25,6 +27,25 @@
   --serie-4: #eda100;
   --serie-5: #e87ba4;
   --serie-6: #008300;
+
+  /* Passo claro da série 1, para barras secundárias sem virar outra cor. */
+  --serie-1-suave: #b9d4f2;
+
+  /* Faixas normativas da curva granulométrica (NBR 7211). */
+  --zona-otima: rgba(42, 120, 214, 0.18);
+  --zona-utilizavel: rgba(42, 120, 214, 0.08);
+
+  /* Camada de vidro: superfície translúcida sobre o gradiente do fundo. */
+  --vidro: rgba(255, 255, 255, 0.72);
+  --vidro-borda: rgba(11, 11, 11, 0.09);
+  --vidro-brilho: rgba(255, 255, 255, 0.9);
+  --realce: rgba(42, 120, 214, 0.1);
+  --sombra-realce: rgba(11, 11, 11, 0.45);
+
+  /* Gradiente do plano de fundo, atrás de tudo. */
+  --fundo-base: #f4f4f1;
+  --fundo-halo-1: rgba(42, 120, 214, 0.1);
+  --fundo-halo-2: rgba(27, 175, 122, 0.08);
 
   --status-bom: #0ca30c;
   --status-atencao: #fab219;
@@ -56,6 +77,23 @@
     --serie-5: #d55181;
     --serie-6: #008300;
 
+    --serie-1-suave: #24405e;
+
+    --zona-otima: rgba(57, 135, 229, 0.22);
+    --zona-utilizavel: rgba(57, 135, 229, 0.1);
+
+    /* No escuro o vidro é uma pelicula clara sobre o preto, nao um cinza opaco. */
+    --vidro: rgba(255, 255, 255, 0.045);
+    --vidro-borda: rgba(255, 255, 255, 0.1);
+    --vidro-brilho: rgba(255, 255, 255, 0.14);
+    --realce: rgba(57, 135, 229, 0.16);
+  --sombra-realce: rgba(0, 0, 0, 0.8);
+    --sombra-realce: rgba(0, 0, 0, 0.8);
+
+    --fundo-base: #000000;
+    --fundo-halo-1: rgba(57, 135, 229, 0.16);
+    --fundo-halo-2: rgba(25, 158, 112, 0.1);
+
     --sucesso-texto: #0ca30c;
   }
 }
@@ -79,6 +117,21 @@
   --serie-5: #d55181;
   --serie-6: #008300;
 
+  --serie-1-suave: #24405e;
+
+  --zona-otima: rgba(57, 135, 229, 0.22);
+  --zona-utilizavel: rgba(57, 135, 229, 0.1);
+
+  /* No escuro o vidro é uma pelicula clara sobre o preto, nao um cinza opaco. */
+  --vidro: rgba(255, 255, 255, 0.045);
+  --vidro-borda: rgba(255, 255, 255, 0.1);
+  --vidro-brilho: rgba(255, 255, 255, 0.14);
+  --realce: rgba(57, 135, 229, 0.16);
+
+  --fundo-base: #000000;
+  --fundo-halo-1: rgba(57, 135, 229, 0.16);
+  --fundo-halo-2: rgba(25, 158, 112, 0.1);
+
   --sucesso-texto: #0ca30c;
 }
 
@@ -93,12 +146,29 @@ body {
 }
 
 body {
-  background: var(--plano);
+  background: var(--fundo-base);
   color: var(--tinta-primaria);
   font-family: var(--fonte);
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * O gradiente do fundo vive numa camada `fixed` atrás de tudo, e não no
+ * `body`. Assim o navegador o pinta uma vez só: se ficasse no fundo do body,
+ * cada rolagem obrigaria a repintar o degradê inteiro.
+ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(70% 55% at 12% -8%, var(--fundo-halo-1), transparent 68%),
+    radial-gradient(60% 50% at 92% 4%, var(--fundo-halo-2), transparent 66%),
+    var(--fundo-base);
 }
 
 a {
@@ -114,12 +184,38 @@ a {
   flex-direction: column;
 }
 
+/*
+ * O cabeçalho é o único elemento com desfoque de verdade (`backdrop-filter`).
+ * É caro: o navegador precisa reamostrar o que está atrás a cada quadro. Num
+ * elemento fixo e único isso se paga; espalhado pelos cartões, não — por isso
+ * os cartões usam translucidez sem desfoque.
+ */
 .cabecalho {
-  border-bottom: 1px solid var(--borda);
-  background: var(--superficie);
   position: sticky;
   top: 0;
   z-index: 10;
+  background: var(--vidro);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  border-bottom: 1px solid var(--vidro-borda);
+}
+
+/* Fio de luz na borda inferior — o brilho que dá o aspecto de vidro. */
+.cabecalho::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--vidro-brilho) 22%,
+    var(--vidro-brilho) 78%,
+    transparent
+  );
+  pointer-events: none;
 }
 
 .cabecalho-conteudo {
@@ -142,15 +238,21 @@ a {
 }
 
 .marca-sigla {
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  background: var(--serie-1);
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: linear-gradient(140deg, var(--serie-1), var(--serie-3));
   color: #fff;
   display: grid;
   place-items: center;
   font-size: 11px;
   font-weight: 700;
+  box-shadow: 0 2px 10px var(--realce);
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.marca:hover .marca-sigla {
+  transform: rotate(-6deg) scale(1.08);
 }
 
 .navegacao {
@@ -160,20 +262,40 @@ a {
 }
 
 .navegacao a {
-  padding: 6px 12px;
-  border-radius: 7px;
+  position: relative;
+  padding: 7px 13px;
+  border-radius: 8px;
   color: var(--tinta-secundaria);
   font-weight: 500;
-  transition: background 0.12s, color 0.12s;
+  transition: color 0.16s ease, background 0.16s ease;
 }
 
 .navegacao a:hover {
-  background: var(--plano);
+  background: var(--vidro-brilho);
   color: var(--tinta-primaria);
 }
 
+/* Sublinhado que cresce do centro: anima só `transform`, sem reflow. */
+.navegacao a::after {
+  content: '';
+  position: absolute;
+  left: 13px;
+  right: 13px;
+  bottom: 2px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--serie-1);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.navegacao a:hover::after,
+.navegacao a[data-ativo='true']::after {
+  transform: scaleX(1);
+}
+
 .navegacao a[data-ativo='true'] {
-  background: var(--plano);
   color: var(--tinta-primaria);
   font-weight: 600;
 }
@@ -201,12 +323,46 @@ a {
 
 /* --- Cartões --- */
 
+/*
+ * Vidro sem desfoque: fundo translúcido, borda clara e um brilho de um pixel na
+ * aresta superior. Dá a leitura de vidro sobre o gradiente e custa uma pintura
+ * comum — ao contrário de `backdrop-filter`, que numa página com uma dúzia de
+ * cartões cobraria caro a cada rolagem.
+ */
 .cartao {
-  background: var(--superficie);
-  border: 1px solid var(--borda);
+  position: relative;
+  background: var(--vidro);
+  border: 1px solid var(--vidro-borda);
   border-radius: var(--raio);
   box-shadow: var(--sombra);
   padding: 18px 20px;
+  transition:
+    transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.cartao::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: 0;
+  height: 1px;
+  border-radius: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--vidro-brilho),
+    transparent
+  );
+  pointer-events: none;
+}
+
+.cartao:hover {
+  transform: translateY(-2px);
+  border-color: var(--realce);
+  box-shadow: 0 10px 30px -12px var(--sombra-realce);
 }
 
 .cartao-titulo {
@@ -244,6 +400,29 @@ a {
   letter-spacing: -0.03em;
   line-height: 1.05;
   margin: 0;
+  font-variant-numeric: tabular-nums;
+  background: linear-gradient(
+    135deg,
+    var(--tinta-primaria),
+    var(--tinta-secundaria)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/*
+ * Nota abaixo de um gráfico: convenção adotada, limite da norma, ressalva.
+ * Usa a tinta secundária, e não a suave: no tema claro a suave fica em 3,2:1
+ * sobre o vidro, abaixo dos 4,5:1 que texto deste tamanho exige. É texto que
+ * muda a interpretação do gráfico — precisa ser lido, não só notado.
+ */
+.nota-grafico {
+  margin: 10px 0 0;
+  padding-left: 4px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--tinta-secundaria);
 }
 
 .kpi-unidade {
@@ -263,6 +442,178 @@ a {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(430px, 1fr));
   gap: 14px;
+}
+
+/*
+ * O item da grade é o wrapper, não o cartão: é ele que carrega a largura e o
+ * `order`. O cartão preenche a altura toda para que vizinhos de alturas
+ * diferentes fiquem alinhados.
+ */
+.item-grade {
+  position: relative;
+  display: flex;
+  min-width: 0;
+}
+
+.item-grade > .cartao {
+  transition:
+    opacity 0.18s ease,
+    transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.22s ease,
+    border-color 0.22s ease,
+    background 0.18s ease;
+}
+
+.item-grade > .cartao {
+  flex: 1;
+  min-width: 0;
+}
+
+/*
+ * O cartão que está sendo arrastado vira o **slot de destino**: some o conteúdo
+ * e fica um contorno tracejado, já na posição para onde ele vai. Como a grade se
+ * reorganiza ao vivo, o que se vê é o espaço abrindo no lugar certo — não um
+ * palpite sobre onde ele cairia.
+ */
+.item-grade[data-arrastando='true'] > .cartao {
+  background: var(--realce);
+  border: 1.5px dashed var(--serie-1);
+  box-shadow: none;
+}
+
+.item-grade[data-arrastando='true'] > .cartao > * {
+  opacity: 0.12;
+  /* O conteúdo não pode roubar os eventos de arrasto do slot. */
+  pointer-events: none;
+}
+
+.item-grade[data-arrastando='true'] > .cartao::before {
+  opacity: 0;
+}
+
+/* Os outros cartões recuam um pouco, para o slot ficar em evidência. */
+.grade-graficos[data-reordenando='true']
+  .item-grade[data-arrastando='false']
+  > .cartao {
+  opacity: 0.62;
+}
+
+/* Durante o arrasto, nenhum cartão deve reagir ao hover nem à alça. */
+.grade-graficos[data-reordenando='true'] .cartao:hover {
+  transform: none;
+  box-shadow: var(--sombra);
+}
+
+.item-grade[data-arrastando-algo='true'] .alca-arraste {
+  pointer-events: none;
+}
+
+.item-grade[data-arrastando='true'] .alca-arraste {
+  pointer-events: auto;
+  opacity: 1;
+  color: var(--serie-1);
+}
+
+.alca-arraste {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--tinta-suave);
+  font-size: 15px;
+  line-height: 1;
+  cursor: grab;
+  /* Discreta, mas nunca invisível: uma alça que só aparece no hover não existe
+     para quem navega por teclado nem para quem usa toque. */
+  opacity: 0.45;
+  transition: opacity 0.16s ease, background 0.16s ease, color 0.16s ease;
+}
+
+.item-grade:hover .alca-arraste,
+.alca-arraste:focus-visible {
+  opacity: 1;
+  background: var(--realce);
+  color: var(--tinta-primaria);
+}
+
+.alca-arraste:focus-visible {
+  outline: 2px solid var(--serie-1);
+  outline-offset: 1px;
+}
+
+.alca-arraste:active {
+  cursor: grabbing;
+}
+
+/*
+ * Botões de mover para telas de toque. `hover: none` identifica aparelhos sem
+ * cursor — onde o arrasto HTML5 não funciona e não há setas para apertar.
+ */
+.mover-toque {
+  display: none;
+}
+
+@media (hover: none) {
+  .alca-arraste {
+    display: none;
+  }
+
+  .mover-toque {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+    display: flex;
+    gap: 4px;
+  }
+
+  .botao-mover {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    font: inherit;
+    font-size: 17px;
+    line-height: 1;
+    border: 1px solid var(--vidro-borda);
+    border-radius: 8px;
+    background: var(--vidro);
+    color: var(--tinta-secundaria);
+    cursor: pointer;
+  }
+
+  .botao-mover:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+}
+
+.acoes-grade {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 0 10px;
+}
+
+.dica-grade {
+  margin: 0;
+  font-size: 12px;
+  color: var(--tinta-suave);
+}
+
+.botao-discreto {
+  padding: 5px 11px;
+  font-size: 12px;
 }
 
 .grafico-largo {
@@ -289,8 +640,8 @@ a {
   flex-wrap: wrap;
   margin-bottom: 18px;
   padding: 14px 16px;
-  background: var(--superficie);
-  border: 1px solid var(--borda);
+  background: var(--vidro);
+  border: 1px solid var(--vidro-borda);
   border-radius: var(--raio);
 }
 
@@ -365,8 +716,8 @@ a {
 .tabela-envolucro {
   overflow-x: auto;
   border-radius: var(--raio);
-  border: 1px solid var(--borda);
-  background: var(--superficie);
+  border: 1px solid var(--vidro-borda);
+  background: var(--vidro);
 }
 
 table.tabela {
@@ -398,8 +749,12 @@ table.tabela {
   border-bottom: none;
 }
 
+.tabela tbody tr {
+  transition: background 0.14s ease;
+}
+
 .tabela tbody tr:hover {
-  background: var(--plano);
+  background: var(--realce);
 }
 
 .numerico {
@@ -454,8 +809,8 @@ table.tabela {
 .aviso {
   padding: 14px 16px;
   border-radius: var(--raio);
-  border: 1px solid var(--borda);
-  background: var(--superficie);
+  border: 1px solid var(--vidro-borda);
+  background: var(--vidro);
   color: var(--tinta-secundaria);
   font-size: 13px;
 }
@@ -477,9 +832,10 @@ table.tabela {
 
 /* --- Tooltip dos gráficos --- */
 
+/* O tooltip fica opaco de propósito: sobre o gráfico, translucidez atrapalha. */
 .tooltip {
   background: var(--superficie);
-  border: 1px solid var(--borda);
+  border: 1px solid var(--vidro-borda);
   border-radius: 8px;
   padding: 9px 12px;
   box-shadow: 0 4px 14px rgba(11, 11, 11, 0.12);
@@ -596,7 +952,13 @@ table.tabela {
   border-radius: var(--raio);
   padding: 34px 24px;
   text-align: center;
-  background: var(--superficie);
+  background: var(--vidro);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.area-upload:hover {
+  border-color: var(--serie-1);
+  background: var(--realce);
 }
 
 .area-upload input[type='file'] {
@@ -651,13 +1013,17 @@ table.tabela {
   padding: 12px;
   border: 1px solid var(--eixo);
   border-radius: var(--raio);
-  background: var(--superficie);
+  background: var(--vidro);
   cursor: pointer;
-  transition: border-color 0.12s, box-shadow 0.12s;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .opcao-tema:hover {
-  border-color: var(--tinta-suave);
+  border-color: var(--serie-1);
+  transform: translateY(-2px);
 }
 
 .opcao-tema[data-selecionado='true'] {
@@ -708,4 +1074,191 @@ table.tabela {
   font-size: 12px;
   color: var(--tinta-suave);
   line-height: 1.4;
+}
+
+
+/* --- Movimento --- */
+
+/*
+ * Entrada curta e discreta dos cartões. `opacity` e `transform` são as duas
+ * propriedades que o compositor anima sozinho, sem recalcular layout.
+ * Duração baixa de propósito: a animação não pode atrasar a leitura do número.
+ */
+@keyframes surgir {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.grade-kpis > *,
+.grade-graficos > * {
+  animation: surgir 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/*
+ * O atraso em cascata para em 6 itens. Escalonar a página inteira faria o
+ * último cartão aparecer tarde demais — vira espera, não elegância.
+ */
+.grade-kpis > *:nth-child(2),
+.grade-graficos > *:nth-child(2) {
+  animation-delay: 0.04s;
+}
+.grade-kpis > *:nth-child(3),
+.grade-graficos > *:nth-child(3) {
+  animation-delay: 0.08s;
+}
+.grade-kpis > *:nth-child(4),
+.grade-graficos > *:nth-child(4) {
+  animation-delay: 0.12s;
+}
+.grade-kpis > *:nth-child(5),
+.grade-graficos > *:nth-child(5) {
+  animation-delay: 0.16s;
+}
+.grade-kpis > *:nth-child(n + 6),
+.grade-graficos > *:nth-child(n + 6) {
+  animation-delay: 0.2s;
+}
+
+.botao,
+.voltar,
+.campo input,
+.campo select {
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease,
+    transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.botao:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.botao:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.campo input:hover,
+.campo select:hover {
+  border-color: var(--tinta-suave);
+}
+
+/*
+ * Quem pediu menos movimento no sistema recebe a interface parada. Não é só
+ * preferência estética: movimento dispara enjoo e enxaqueca em parte das
+ * pessoas. Os estados de hover continuam, sem deslocamento.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .cartao:hover,
+  .opcao-tema:hover,
+  .botao:hover:not(:disabled) {
+    transform: none;
+  }
+
+  .marca:hover .marca-sigla {
+    transform: none;
+  }
+}
+
+
+/* --- Dashboards customizados --- */
+
+.cabecalho-pagina {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Cartão que é um link inteiro, na lista de dashboards. */
+.cartao-link {
+  display: block;
+  cursor: pointer;
+}
+
+.cartao-link:hover .cartao-titulo {
+  color: var(--serie-1);
+}
+
+.construtor {
+  display: grid;
+  gap: 14px;
+}
+
+.previa-painel {
+  border: 1px dashed var(--eixo);
+  border-radius: var(--raio);
+  padding: 14px 16px 8px;
+  background: var(--plano);
+}
+
+.lista-paineis {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.lista-paineis li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 1px solid var(--vidro-borda);
+  border-radius: 8px;
+  background: var(--plano);
+  font-size: 13px;
+}
+
+.lista-paineis-titulo {
+  font-weight: 550;
+  flex: 1;
+  min-width: 0;
+}
+
+.lista-paineis-tipo {
+  color: var(--tinta-suave);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.acoes-construtor {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.botao-perigo {
+  border-color: var(--status-critico);
+  color: var(--status-critico);
+}
+
+.botao-perigo:hover:not(:disabled) {
+  background: var(--status-critico);
+  color: #fff;
+}
+
+/* Ressalva que muda a leitura do gráfico — precisa de mais peso que uma nota. */
+.nota-alerta {
+  color: var(--tinta-secundaria);
+  border-left: 2px solid var(--status-atencao);
+  padding-left: 10px;
+  margin-left: 2px;
 }

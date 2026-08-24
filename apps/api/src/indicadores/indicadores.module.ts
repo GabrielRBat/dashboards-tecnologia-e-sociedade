@@ -7,6 +7,12 @@ import { IndicadoresService } from './indicadores.service';
 export class IndicadoresController {
   constructor(private readonly service: IndicadoresService) {}
 
+  /** Tudo o que a visão geral precisa, com uma leitura só do banco. */
+  @Get('painel')
+  painel(@Query() filtros: ListarFormulacoesDto) {
+    return this.service.painel(filtros);
+  }
+
   @Get('resumo')
   resumo(@Query() filtros: ListarFormulacoesDto) {
     return this.service.resumo(filtros);
@@ -35,6 +41,32 @@ export class IndicadoresController {
   @Get('granulometria')
   granulometria(@Query() filtros: ListarFormulacoesDto) {
     return this.service.granulometria(filtros);
+  }
+
+  /** Zonas da NBR 7211 sozinhas — a tela de detalhe usa só isso. */
+  @Get('zonas-granulometricas')
+  zonas() {
+    return this.service.zonasGranulometricas();
+  }
+
+  @Get('classificacao')
+  classificacao(@Query() filtros: ListarFormulacoesDto) {
+    return this.service.classificacao(filtros);
+  }
+
+  @Get('correlacoes')
+  correlacoes(@Query() filtros: ListarFormulacoesDto) {
+    return this.service.correlacoes(filtros);
+  }
+
+  @Get('squeeze-flow')
+  squeezeFlow(@Query() filtros: ListarFormulacoesDto) {
+    return this.service.squeezeFlow(filtros);
+  }
+
+  @Get('dispersao-idade')
+  dispersaoPorIdade(@Query() filtros: ListarFormulacoesDto) {
+    return this.service.dispersaoPorIdade(filtros);
   }
 }
 

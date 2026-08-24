@@ -9,6 +9,7 @@ import {
   retencaoAgua,
   teorFinos,
 } from '../calculos/calculos';
+import { moduloFinura, retidaAcumulada } from '../calculos/normas';
 
 /** Categorias que contam como ligante na relação água/ligante. */
 const CATEGORIAS_LIGANTE = ['CIMENTO', 'CAL'];
@@ -179,6 +180,7 @@ export function mapFormulacao(f: FormulacaoComRelacoes) {
       media([f.squeezeCarga1, f.squeezeCarga2, f.squeezeCarga3]),
       2,
     ),
+    moduloFinura: arredondar(moduloFinura(f.granulometria), 2),
     compressao28d,
     flexao28d,
     completude: calcularCompletude(f, resistencias, endurecidos),
@@ -202,9 +204,9 @@ export function mapFormulacao(f: FormulacaoComRelacoes) {
       teor: c.teor,
       material: c.material,
     })),
-    granulometria: [...f.granulometria].sort(
-      (a, b) => b.peneiraMm - a.peneiraMm,
-    ),
+    // Já sai acumulada: é a forma em que a curva é lida e comparada com as
+    // zonas da NBR 7211, e assim o cálculo mora só aqui.
+    granulometria: retidaAcumulada(f.granulometria),
     densAparenteMassa: f.densAparenteMassa,
     densAparenteVolume: f.densAparenteVolume,
     retencaoM0: f.retencaoM0,

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 
 const ITENS = [
   { href: '/', rotulo: 'Visão geral' },
+  { href: '/dashboards', rotulo: 'Dashboards' },
   { href: '/formulacoes', rotulo: 'Formulações' },
   { href: '/importar', rotulo: 'Importar planilha' },
   { href: '/configuracoes', rotulo: 'Configurações' },

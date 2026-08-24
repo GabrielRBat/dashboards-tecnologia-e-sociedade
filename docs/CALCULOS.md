@@ -123,11 +123,91 @@ No sistema ambos funcionam, a partir do cadastro de materiais de cada formulaç�
 
 ---
 
-## 5. Onde mexer
+## 5. Classificações e referências normativas
 
-- Fórmulas: `apps/api/src/calculos/calculos.ts` (funções puras, sem banco).
-- Testes: `apps/api/src/calculos/calculos.spec.ts` — **qualquer mudança de
-  fórmula precisa atualizar o teste correspondente**, que é o que garante a
-  rastreabilidade contra a planilha.
+Ficam em `apps/api/src/calculos/normas.ts`, separadas das fórmulas de ensaio: uma
+norma se revisa por conta própria, a fórmula de um ensaio não.
+
+### 5.1 Classes da NBR 13281
+
+Três famílias, sobre valores que o sistema já calcula: resistência à compressão
+aos 28 dias (**P1–P6**), densidade de massa no estado fresco (**D1–D6**) e
+retenção de água (**U1–U6**).
+
+**As faixas da norma se sobrepõem de propósito.** P2 vai de 1,5 a 3,0 MPa e P3 de
+2,5 a 4,5 MPa, porque na norma quem declara a classe do produto é o fabricante.
+Um painel precisa de uma regra determinística, então adotamos:
+
+> **Convenção:** a classe é a **mais alta que o valor alcança**. 2,8 MPa é P3,
+> não P2.
+
+Isso é decisão deste projeto, não da norma — se o laboratório preferir outra
+convenção, muda em `classificar()` e nos testes de `normas.spec.ts`.
+
+### 5.2 Zonas granulométricas da NBR 7211
+
+A norma define, por peneira, os limites de **% retida acumulada** da zona ótima e
+da zona utilizável. O gráfico desenha as duas faixas atrás das curvas.
+
+Duas observações:
+
+- A peneira de 9,5 mm tem os quatro limites em zero e por isso não entra — não
+  separa uma curva da outra e só encolheria a escala.
+- **As peneiras do ensaio e as da norma coincidem só em parte.** A planilha usa
+  1,70 · 1,40 · 1,18 · 0,60 · 0,30 · 0,15 · 0,09 mm; a norma, 6,3 · 4,75 · 2,36 ·
+  1,18 · 0,60 · 0,30 · 0,15 mm. Por isso o gráfico usa eixo numérico em escala
+  logarítmica, e não de categorias: cada série é desenhada na sua própria
+  abertura. O fundo (0 mm) fica de fora — não tem lugar numa escala log e a
+  acumulada nele é 100% por definição.
+
+### 5.3 Módulo de finura (NBR NM 248)
+
+Soma das % retidas acumuladas nas peneiras da **série normal**, dividida por 100.
+
+> **Atenção ao interpretar:** das peneiras da planilha, só 1,18 · 0,60 · 0,30 ·
+> 0,15 mm são da série normal — 1,70 · 1,40 · 0,09 mm não são. O módulo sai
+> portanto mais baixo do que sairia num ensaio feito com a série normal
+> completa, e **não é comparável** com valores de referência da literatura (a
+> zona ótima da NBR 7211 fica entre 2,20 e 2,90). Serve para comparar
+> formulações entre si, dentro deste conjunto. Para um módulo comparável, o
+> ensaio precisaria incluir as peneiras da série normal.
+
+### 5.4 Correlações entre ensaios
+
+Reta de mínimos quadrados com R², sobre dois pares que a literatura da área usa
+para conferir a coerência de um conjunto:
+
+| Correlação | Leitura |
+|---|---|
+| Flexão × compressão aos 28 dias | Costuma ser forte; R² baixo sugere problema de moldagem ou de ensaio. |
+| Módulo de elasticidade × compressão | O módulo vem de ultrassom, ensaio não destrutivo. |
+
+A reta só é traçada com **três pares ou mais**, e nunca quando todos os x são
+iguais — nos dois casos ela não diria nada.
+
+---
+
+## 6. Squeeze-flow: o que a planilha não guarda
+
+A NBR 15839 descreve o resultado do squeeze-flow como uma **curva carga ×
+deslocamento** com três estágios: deformação elástica, fluxo plástico e
+enrijecimento por deformação. É assim que o ensaio aparece publicado.
+
+**Essa curva não pode ser desenhada com os dados de hoje.** A planilha registra
+três repetições do ensaio, e de cada uma guarda um único par carga/deslocamento —
+não a curva. Por isso o dashboard mostra os pontos, e não os três estágios.
+
+Para ter a curva, o registro precisaria receber os dados brutos do equipamento.
+Fica anotado como possibilidade, não como pendência: é decisão do laboratório.
+
+---
+
+## 7. Onde mexer
+
+- Fórmulas de ensaio: `apps/api/src/calculos/calculos.ts` (puras, sem banco).
+- Classes e zonas normativas: `apps/api/src/calculos/normas.ts`.
+- Testes: `calculos.spec.ts` e `normas.spec.ts` — **qualquer mudança de fórmula
+  ou de convenção precisa atualizar o teste correspondente**, que é o que
+  garante a rastreabilidade contra a planilha e contra a norma.
 - Mapa de colunas da planilha: `apps/api/src/importacao/layout-planilha.ts` —
   se a planilha mudar de layout, é o único arquivo a ajustar.

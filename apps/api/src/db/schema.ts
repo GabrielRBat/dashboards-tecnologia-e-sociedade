@@ -11,6 +11,7 @@ import {
   doublePrecision,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   text,
@@ -218,6 +219,37 @@ export const corposDeProvaEndurecidos = pgTable(
 );
 
 // --- Relações (habilitam db.query.formulacoes.findMany({ with: ... })) ---
+
+/**
+ * Dashboard montado pelo usuário, com os painéis que ele escolheu.
+ *
+ * Os painéis ficam em `jsonb`, não numa tabela filha: são **configuração de
+ * tela**, não dado do laboratório. A forma deles muda quando o construtor ganha
+ * um tipo de gráfico novo, e não há consulta que precise filtrar ou agregar por
+ * painel — o que tornaria uma tabela relacional útil.
+ *
+ * Não há coluna de autor porque ainda não há login. Os dashboards são
+ * compartilhados: quem abrir a tela vê e edita os mesmos. Quando a autenticação
+ * entrar, é aqui que entra `criadoPor`.
+ */
+export const dashboards = pgTable(
+  'dashboards',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    nome: text('nome').notNull(),
+    descricao: text('descricao'),
+    paineis: jsonb('paineis').notNull().default([]),
+    criadoEm: timestamp('criado_em', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    atualizadoEm: timestamp('atualizado_em', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => ({
+    porNome: index('dashboards_nome_idx').on(t.nome),
+  }),
+);
 
 export const formulacoesRelations = relations(formulacoes, ({ many }) => ({
   componentes: many(componentesFormulacao),

@@ -3,7 +3,12 @@ import { Fragment } from 'react';
 import { notFound } from 'next/navigation';
 import { Cartao, ApiForaDoAr } from '@/components/estado';
 import { GraficoGranulometria } from '@/components/graficos';
-import { ApiIndisponivel, obterFormulacao } from '@/lib/api';
+import {
+  ApiIndisponivel,
+  LimiteZona,
+  obterFormulacao,
+  obterZonasGranulometricas,
+} from '@/lib/api';
 import {
   categoria,
   data,
@@ -23,8 +28,12 @@ export default async function PaginaFormulacao({
   params: { id: string };
 }) {
   let f;
+  let zonas: LimiteZona[] = [];
   try {
-    f = await obterFormulacao(params.id);
+    [f, zonas] = await Promise.all([
+      obterFormulacao(params.id),
+      obterZonasGranulometricas(),
+    ]);
   } catch (e) {
     if (e instanceof ApiIndisponivel) {
       return <ApiForaDoAr mensagem={e.message} />;
@@ -237,7 +246,7 @@ export default async function PaginaFormulacao({
 
         <Cartao
           titulo="Distribuição granulométrica"
-          legenda="Frequência de partículas por diâmetro de peneira"
+          legenda="Retida acumulada por peneira, com as zonas da NBR 7211"
         >
           {f.granulometria.length === 0 ? (
             <p className="vazio" style={{ fontSize: 13 }}>
@@ -249,13 +258,16 @@ export default async function PaginaFormulacao({
                 {
                   formulacaoId: f.id,
                   nomenclatura: f.nomenclatura,
+                  moduloFinura: f.calculados.moduloFinura,
                   pontos: f.granulometria.map((p) => ({
                     peneiraMm: p.peneiraMm,
                     rotulo: peneira(p.peneiraMm),
                     frequencia: p.frequencia,
+                    acumulada: p.acumulada,
                   })),
                 },
               ]}
+              zonas={zonas}
             />
           )}
         </Cartao>
