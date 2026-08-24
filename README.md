@@ -10,6 +10,9 @@ endurecido) e o sistema calcula, a partir dos dados brutos, todos os valores
 derivados: densidades, retenção de água, médias e desvios de resistência,
 módulo de elasticidade dinâmico e relação água/ligante.
 
+> **Para entrar:** usuário `admin`, senha `admin` — credenciais de
+> desenvolvimento desta instalação. Ver [Contas e acesso](#contas-e-acesso).
+>
 > **Importante:** três fórmulas da planilha original têm erro, e o sistema aplica
 > a versão correta. Isso faz alguns números divergirem da planilha, de propósito.
 > O detalhe está em [`docs/CALCULOS.md`](docs/CALCULOS.md) — vale a leitura antes
@@ -130,6 +133,10 @@ Dentro do container o PostgreSQL segue na 5432 — só o lado de fora muda.
 
 Para subir só um dos dois: `npm run dev:api` ou `npm run dev:web`.
 
+O sistema **pede login**. Nesta instalação, use `admin` / `admin` — detalhes e
+como trocar em [Contas e acesso](#contas-e-acesso). Numa instalação nova, crie o
+administrador com `npm run criar-admin`, que sorteia a senha e a mostra uma vez.
+
 ---
 
 ## Estrutura
@@ -245,6 +252,54 @@ inversão automática das cores claras.
 
 ## Contas e acesso
 
+O sistema pede login. Sem sessão, qualquer endereço leva à tela de entrada.
+
+### Entrar
+
+Nesta instalação, para desenvolvimento local:
+
+| Campo | Valor |
+|---|---|
+| **Usuário** | `admin` |
+| **Senha** | `admin` |
+
+O campo aceita **e-mail ou nome de usuário** — por isso `admin` funciona, sem
+arroba. Maiúsculas não importam: `ADMIN` entra igual.
+
+> Essas credenciais vivem no `.env`, que **não é versionado**. Quem clonar o
+> repositório não as recebe: o código sorteia uma senha forte por padrão. Para
+> trocá-las, use `npm run redefinir-senha` (ver *Primeiro acesso*, abaixo).
+>
+> **Antes de expor o sistema na internet, troque.** `admin`/`admin` é a primeira
+> combinação que qualquer varredura tenta, e o auto-registro aberto já deixa a
+> porta destrancada — juntos, dão acesso de administrador a qualquer visitante.
+
+Sem conta? Há duas formas de conseguir uma: criar a sua em **Criar conta**
+(`/registrar`), ou pedir a um administrador que a crie em **Equipe**. A sessão
+dura **12 horas**; depois disso o sistema pede o login de novo e devolve você à
+página em que estava.
+
+### "API indisponível" na tela de login
+
+A mensagem *"Não foi possível falar com a API em http://localhost:3333"* quer
+dizer que o frontend está de pé e a API não. Confira, nesta ordem:
+
+```bash
+curl http://localhost:3333/api/saude
+```
+
+- **Respondeu `{"status":"ok"}`?** A API está no ar; recarregue a página.
+- **Não respondeu?** Suba tudo com `npm run dev` na raiz.
+- **Subiu e caiu?** Veja a mensagem no terminal: quase sempre é `.env` faltando,
+  banco fora do ar ou `JWT_SEGREDO` ausente — cada caso tem instrução própria.
+- **O banco está de pé?** `docker compose up -d`.
+
+E uma causa que engana: **rodar `npm run build` com o `npm run dev` aberto
+derruba a API**. Os dois escrevem em `apps/api/dist`, o watch vê a mudança e
+entra em recompilação sem fim. Pare o `dev` antes de compilar.
+
+### Sessão por JWT
+
 Sessão por **JWT** (Passport no NestJS), senha guardada como hash **bcrypt**.
 
 ### Primeiro acesso
@@ -289,12 +344,8 @@ propósito em `ADMIN_SENHA` é aceita, com aviso na tela. É escolha consciente 
 quem já tem o `.env` e o banco na mão, e barrá-la só levaria a contornar o
 comando editando o banco direto.
 
-> **Este projeto está configurado com `admin` / `admin` para desenvolvimento
-> local.** As credenciais moram no `.env`, que **não é versionado** — o código
-> continua sorteando uma senha forte por padrão, então nenhuma instalação nova
-> nasce com elas. Antes de expor o sistema na internet, redefina: `admin` é a
-> primeira combinação que qualquer ataque tenta, e o auto-registro aberto já
-> deixa a porta destrancada.
+É o que permite o `admin`/`admin` desta instalação (ver *Entrar*, no início
+desta seção).
 
 ### Como funciona
 
