@@ -29,25 +29,29 @@ projeto entrega.
 Fases 1 a 3 concluídas e testadas, **sem autenticação** (a pedido do usuário, o
 login ficou para depois dos dashboards).
 
-> **Atenção ao retomar:** o repositório **não tem nenhum commit ainda** — todo o
-> projeto está como arquivo não versionado. O primeiro passo de qualquer sessão
-> nova é pedir autorização ao usuário e fazer o commit inicial (o `.gitignore`
-> já cobre `node_modules`, `.next`, `dist` e `.env`).
+Versionado desde 2026-08-24 no branch `master` de
+`github.com/GabrielRBat/dashboards-tecnologia-e-sociedade`.
+
+> **O repositório é público.** A "Planilha de Registro e cálculo" **não é
+> versionada** — são dados de P&D do laboratório. O `.gitignore` cobre `*.xlsx`
+> e `*.xlsm`, além de `node_modules`, `.next`, `dist`, `.env` e
+> `*.tsbuildinfo`. Antes de adicionar qualquer arquivo com dado real, conferir
+> se ele pode ficar exposto.
 
 Funcionando: visão geral com indicadores e cinco gráficos, lista de formulações
 com filtros, página de detalhe, importação da planilha `.xlsx` e aba de
 configurações com escolha de tema.
-
-Verificado também em 2026-08-24, ao subir o projeto do zero nesta máquina: banco
-na porta 5433, migrações e seed (64 formulações, 36 materiais), 25 testes
-passando, build da API limpo, os oito endpoints respondendo com HTTP 200 e as
-cinco telas conferidas no navegador sem erro de console nem overflow.
 
 Verificado: 25 testes unitários dos cálculos passando, 14 verificações de
 comportamento do seletor de tema, typecheck e build limpos na API e no frontend,
 API respondendo em todos os endpoints, as cinco telas conferidas em modo claro e
 escuro sem erro de console nem overflow, importação da planilha real com 60/60
 linhas e nenhum erro.
+
+Conferido de novo em 2026-08-24 subindo o projeto do zero nesta máquina: banco na
+porta 5433, migrações e seed (64 formulações, 36 materiais), 25 testes passando,
+build da API limpo, os oito endpoints em HTTP 200 e as cinco telas abertas no
+navegador sem erro de console nem overflow.
 
 ## Decisões tomadas
 
@@ -87,7 +91,6 @@ preencher a planilha, a importação já funciona.
 
 ## Pendências / próximos passos
 
-0. **Commit inicial** — nada foi versionado ainda. Pedir autorização antes.
 1. Autenticação: login, sessão e proteção de rotas.
 2. Cadastro e edição de formulações pela interface.
 3. Exportação dos dados filtrados.
