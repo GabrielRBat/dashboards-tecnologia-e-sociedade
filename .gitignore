@@ -1,0 +1,33 @@
+node_modules/
+dist/
+build/
+.next/
+out/
+coverage/
+
+.env
+.env.local
+.env.*.local
+!.env.example
+
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+.vscode/
+.idea/
+
+uploads/
+tmp/
+
+# Planilha real do laboratório — dados de P&D, não vão para o repositório público.
+# A importação continua funcionando com o arquivo local.
+*.xlsx
+*.xlsm
+
+# Descartes temporários
+_to_delete/
+
+# Artefatos de build do TypeScript
+*.tsbuildinfo
