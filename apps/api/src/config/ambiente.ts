@@ -81,6 +81,57 @@ export function obterDatabaseUrl(): string {
   );
 }
 
+/** Tamanho mínimo aceitável do segredo do JWT, em caracteres. */
+export const TAMANHO_MINIMO_SEGREDO = 32;
+
+/**
+ * Devolve o segredo que assina os tokens, ou recusa a subir.
+ *
+ * **A API não sobe sem segredo, e não tem valor padrão.** Um padrão embutido no
+ * código seria o mesmo em toda instalação — e como ele estaria no repositório,
+ * qualquer pessoa poderia forjar um token de administrador. Falhar na
+ * inicialização é ruim; subir com autenticação de mentira é pior.
+ */
+export function obterSegredoJwt(): string {
+  const segredo = process.env.JWT_SEGREDO;
+
+  if (!segredo || segredo.trim().length === 0) {
+    throw new Error(
+      [
+        'JWT_SEGREDO não definida.',
+        '',
+        'É a chave que assina os tokens de sessão. Sem ela a API não sobe, e',
+        'não existe valor padrão de propósito: um padrão no código valeria para',
+        'todas as instalações, e quem o lesse poderia forjar um acesso de',
+        'administrador.',
+        '',
+        'Gere um segredo e coloque no .env da raiz:',
+        `  node -e "console.log(require('crypto').randomBytes(48).toString('base64'))"`,
+        '',
+        'e acrescente a linha:',
+        '  JWT_SEGREDO="o-valor-gerado-acima"',
+      ].join('\n'),
+    );
+  }
+
+  if (segredo.trim().length < TAMANHO_MINIMO_SEGREDO) {
+    throw new Error(
+      [
+        `JWT_SEGREDO é curta demais (${segredo.trim().length} caracteres).`,
+        '',
+        `Use pelo menos ${TAMANHO_MINIMO_SEGREDO} caracteres aleatórios. Um segredo curto`,
+        'pode ser quebrado por força bruta, e quem o descobrir emite tokens de',
+        'administrador à vontade.',
+        '',
+        'Gere um assim:',
+        `  node -e "console.log(require('crypto').randomBytes(48).toString('base64'))"`,
+      ].join('\n'),
+    );
+  }
+
+  return segredo.trim();
+}
+
 /**
  * Transforma o erro num texto útil para quem está rodando o comando.
  * Banco fora do ar é o tropeço mais comum na primeira execução, e a mensagem

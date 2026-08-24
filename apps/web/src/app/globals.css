@@ -1559,3 +1559,120 @@ table.tabela {
     transform: none;
   }
 }
+
+
+/* --- Autenticação --- */
+
+.tela-login {
+  min-height: 70vh;
+  display: grid;
+  place-items: center;
+  padding: 20px 0;
+}
+
+.cartao-login {
+  width: 100%;
+  max-width: 420px;
+}
+
+.marca-login {
+  margin-bottom: 18px;
+}
+
+.titulo-login {
+  font-size: 21px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  margin: 0 0 4px;
+}
+
+.formulario-login {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.formulario-login .campo input {
+  width: 100%;
+}
+
+.menu-usuario {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.usuario-nome {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--tinta-secundaria);
+  padding: 6px 8px;
+  border-radius: 7px;
+  transition: color 0.16s ease, background 0.16s ease;
+}
+
+.usuario-nome:hover {
+  color: var(--tinta-primaria);
+  background: var(--vidro-brilho);
+}
+
+.etiqueta-papel {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--realce);
+  color: var(--serie-1);
+}
+
+.etiqueta-off {
+  color: var(--tinta-suave);
+  opacity: 0.75;
+}
+
+/* Aviso que carrega algo a ser anotado agora — mais peso que um aviso comum. */
+.aviso-destaque {
+  border-color: var(--status-atencao);
+  border-left-width: 3px;
+}
+
+.senha-provisoria {
+  display: inline-block;
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  border-radius: 7px;
+  background: var(--plano);
+  border: 1px solid var(--vidro-borda);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  color: var(--tinta-primaria);
+  user-select: all;
+}
+
+.acoes-linha {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  /* No celular o cabeçalho vira duas linhas: marca + usuário, depois a navegação. */
+  .menu-usuario {
+    order: 2;
+  }
+
+  .navegacao {
+    order: 3;
+  }
+
+  .usuario-nome {
+    font-size: 12.5px;
+  }
+}

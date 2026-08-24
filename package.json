@@ -16,6 +16,7 @@
     "db:generate": "npm run db:generate --workspace=@argamassas/api",
     "db:migrate": "npm run db:migrate --workspace=@argamassas/api",
     "db:seed": "npm run db:seed --workspace=@argamassas/api",
+    "criar-admin": "npm run criar-admin --workspace=@argamassas/api",
     "db:studio": "npm run db:studio --workspace=@argamassas/api",
     "lint": "npm run lint --workspaces --if-present"
   },

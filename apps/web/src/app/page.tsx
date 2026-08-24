@@ -20,6 +20,7 @@ import {
   obterOpcoes,
   obterPainel,
 } from '@/lib/api';
+import { ehRedirecionamento } from '@/lib/erros';
 import { inteiro, num } from '@/lib/formato';
 
 export const dynamic = 'force-dynamic';
@@ -268,6 +269,8 @@ export default async function PaginaVisaoGeral({
       </>
     );
   } catch (e) {
+    // Sessão vencida vira redirect, que é uma exceção: precisa passar.
+    if (ehRedirecionamento(e)) throw e;
     if (e instanceof ApiIndisponivel) {
       return <ApiForaDoAr mensagem={e.message} />;
     }

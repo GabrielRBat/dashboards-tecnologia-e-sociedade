@@ -26,8 +26,8 @@ projeto entrega.
 
 ## Estado atual
 
-Fases 1 a 3 concluídas e testadas, **sem autenticação** (a pedido do usuário, o
-login ficou para depois dos dashboards).
+Fases 1 a 4 concluídas e testadas — **com autenticação** (JWT, senhas em bcrypt,
+dois papéis).
 
 Versionado desde 2026-08-24 no branch `master` de
 `github.com/GabrielRBat/dashboards-tecnologia-e-sociedade`.
@@ -88,6 +88,32 @@ nos dois temas.
   do mesmo conjunto filtrado; um endpoint por gráfico faria o banco repetir a
   leitura dez vezes. Cada indicador é função pura sobre a lista carregada e o
   painel as encadeia. Medido: 32 ms contra 166 ms.
+- **Sessão em cookie `httpOnly`, gravado pelo Next.** Token no `localStorage`
+  seria lido por qualquer script da página. E o cookie precisa ser gravado pelo
+  Next, não pela API: ela responde noutra porta, e o cookie ficaria no domínio
+  dela, fora do alcance do frontend.
+- **Guard global de JWT: tudo nasce protegido**, e só sai da proteção o que tem
+  `@Publico()` (hoje: saúde, login, registro e duração da sessão). Proteger rota
+  a rota deixa endpoint novo aberto por esquecimento.
+- **Papel e situação vêm do banco a cada requisição**, não do token. Desativar
+  alguém vale na hora, não quando a sessão vencer.
+- **`bcryptjs` em vez de `bcrypt`**, mesma razão da troca do Prisma pelo
+  Drizzle: nada que compile binário nativo.
+- **Sessão de 12 horas, sem refresh token.** Para dez pessoas, o refresh seria
+  mais superfície de ataque (precisa ser guardado e revogado) sem resolver
+  problema que exista aqui.
+- **`JWT_SEGREDO` sem valor padrão.** A API recusa subir sem ele. Um padrão no
+  código valeria para toda instalação e permitiria forjar token de admin.
+- **AUTO-REGISTRO PÚBLICO ABERTO, decisão do usuário em 2026-08-24**, contra o
+  que a especificação dizia ("cadastro por administrador, sem auto-registro
+  público"). Ele foi avisado de que qualquer pessoa passa a criar conta e ver os
+  dados de P&D, e confirmou. Travas mantidas: conta nasce sempre `MEMBRO` (o
+  papel nunca vem do corpo da requisição) e 3 registros por hora por IP.
+  Registrado também em `ESPECIFICACOES.md`, com o caminho para fechar depois.
+- **Nada da Construxion neste projeto** (pedido do usuário em 2026-08-24). Não
+  usar o domínio, o nome nem a sigla da empresa: e-mails de exemplo são
+  `@exemplo.com`, o admin padrão é `admin@laboratorio.local` e a sigla da marca
+  é `AR`. É um projeto acadêmico, separado da empresa.
 - **O construtor de dashboards recusa cruzamento sem sentido, e explica.** O que
   decide é o **nível** do dado (formulação, corpo de prova, peneira), mais do que
   a unidade: cruzar níveis diferentes alinha grandezas que não se correspondem.
@@ -141,14 +167,19 @@ preencher a planilha, a importação já funciona.
 
 ## Pendências / próximos passos
 
-1. **Autenticação: login, sessão e proteção de rotas.** Subiu de prioridade —
-   os dashboards são compartilhados e sem dono, então hoje qualquer pessoa apaga
-   o trabalho de outra. Ao fazer, acrescentar `criadoPor` em `dashboards`.
+1. **`criadoPor` nos dashboards.** Agora que existe usuário, dá para saber quem
+   criou cada dashboard — hoje eles seguem compartilhados e sem dono, e qualquer
+   pessoa apaga o de qualquer outra.
 2. Cadastro e edição de formulações pela interface.
 3. Exportação dos dados filtrados.
-4. Deploy (provedores a definir).
+4. Deploy (provedores a definir). **Antes de expor na internet**, reveja o
+   auto-registro aberto: hoje qualquer visitante cria conta.
 
 ### Dívidas técnicas conhecidas
+
+- **Sem `criadoPor` em `dashboards` e sem histórico de importação.** A
+  especificação pede "quem importou, quando, quantas linhas" — agora que há
+  usuário, dá para registrar.
 
 - **`packages/shared` é código morto.** Nada o importa desde a troca para o
   Drizzle; os tipos do domínio estão duplicados em `apps/web/src/lib/api.ts`.
@@ -185,11 +216,14 @@ preencher a planilha, a importação já funciona.
   `postgresql-x64-17`) ocupando a porta 5432**, com senha diferente da do
   projeto. O banco do projeto roda na **5433**, definida em `DB_PORT` e na
   `DATABASE_URL` do `.env`. O serviço do Windows não foi mexido — é de outro uso.
-- **Não rodar `npm run build` com o `npm run dev` aberto.** Os dois escrevem em
-  `apps/web/.next`; o build de produção sobrescreve o que o dev está servindo e o
-  navegador passa a receber 404 nos scripts — a página abre e nada interativo
-  funciona. Já derrubou uma verificação nesta sessão. Para consertar: parar tudo,
-  apagar `apps/web/.next` e subir de novo.
+- **Não rodar `npm run build` com o `npm run dev` aberto — vale para os dois
+  apps.** No frontend, os dois escrevem em `apps/web/.next`: o build sobrescreve
+  o que o dev serve e o navegador recebe 404 nos scripts (a página abre e nada
+  interativo funciona). Na API é pior: o build escreve em `apps/api/dist`, o
+  `nest start --watch` vê a mudança, recompila, escreve de novo — e entra em
+  recompilação sem fim, sem nunca voltar a atender. Os dois casos já derrubaram
+  verificações nesta sessão. Para consertar: parar tudo, apagar `apps/web/.next`
+  e `apps/api/dist`, e subir de novo.
 - **Todo arquivo `.ps1` precisa ser salvo em UTF-8 com BOM.** O Windows
   PowerShell 5.1 lê script sem BOM como CP1252, e aí o travessão `—` vira uma
   sequência terminada em `"` (U+201D) — que o PowerShell aceita como

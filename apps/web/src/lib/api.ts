@@ -34,14 +34,52 @@ export function montarQuery(params: ParametrosBusca): string {
 
 export class ApiIndisponivel extends Error {}
 
+/** Sessão ausente, expirada ou revogada — quem chama redireciona ao login. */
+export class SessaoExpirada extends Error {}
+
+/** Autenticado, mas sem permissão para a ação. */
+export class SemPermissao extends Error {}
+
+/**
+ * Busca no servidor, levando o token da sessão.
+ *
+ * O token vive num cookie `httpOnly` que só o servidor lê, então esta função só
+ * roda em componente ou rota de servidor — que é onde todas as telas buscam
+ * dados neste projeto.
+ */
 async function buscar<T>(caminho: string): Promise<T> {
+  // Import dinâmico: `next/headers` só existe no servidor, e uma importação no
+  // topo quebraria qualquer componente cliente que importe deste arquivo.
+  const { obterToken } = await import('./sessao');
+  const token = obterToken();
+
   let resposta: Response;
   try {
-    resposta = await fetch(`${BASE}/api${caminho}`, { cache: 'no-store' });
+    resposta = await fetch(`${BASE}/api${caminho}`, {
+      cache: 'no-store',
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
   } catch {
     throw new ApiIndisponivel(
       `Não foi possível falar com a API em ${BASE}. Ela está rodando?`,
     );
+  }
+
+  if (resposta.status === 401) {
+    /*
+     * Sessão vencida ou revogada. Redirecionar aqui, e não lançar, é o que evita
+     * a tela branca de erro 500 que a pessoa veria ao voltar no dia seguinte.
+     * O caminho passa por uma rota que apaga o cookie — deixá-lo faria o
+     * middleware mandar de volta para a página, num laço sem fim.
+     */
+    const { redirect } = await import('next/navigation');
+    const { headers } = await import('next/headers');
+    const atual = headers().get('x-pathname') ?? '/';
+    redirect(`/api/sessao/expirar?destino=${encodeURIComponent(atual)}`);
+  }
+
+  if (resposta.status === 403) {
+    throw new SemPermissao('Você não tem permissão para ver isto.');
   }
 
   if (!resposta.ok) {
@@ -382,7 +420,21 @@ export interface Validacao {
   alerta?: string;
 }
 
+/** Conta de acesso ao sistema. Nunca inclui hash de senha. */
+export interface Usuario {
+  id: string;
+  nome: string;
+  email: string;
+  papel: 'ADMIN' | 'MEMBRO';
+  ativo: boolean;
+  precisaTrocarSenha: boolean;
+  ultimoAcessoEm: string | null;
+  criadoEm: string;
+}
+
 // --- Chamadas ---
+
+export const listarUsuarios = () => buscar<Usuario[]>('/usuarios');
 
 export const obterCatalogoMetricas = () =>
   buscar<CatalogoMetricas>('/dashboards/catalogo');
@@ -419,69 +471,3 @@ export const listarFormulacoes = (q: string) =>
 export const obterFormulacao = (id: string) =>
   buscar<Formulacao>(`/formulacoes/${id}`);
 export const obterOpcoes = () => buscar<OpcoesFiltro>('/formulacoes/opcoes');
-
-
-/* --- Mutações (chamadas do navegador) --- */
-
-/** Extrai a mensagem que a API mandou, em vez de um "500" genérico. */
-async function enviar<T>(
-  caminho: string,
-  metodo: 'POST' | 'PUT' | 'DELETE',
-  corpo?: unknown,
-): Promise<T> {
-  const resposta = await fetch(`${BASE}/api${caminho}`, {
-    method: metodo,
-    headers: corpo ? { 'Content-Type': 'application/json' } : undefined,
-    body: corpo ? JSON.stringify(corpo) : undefined,
-  });
-
-  if (!resposta.ok) {
-    let mensagem = `A API respondeu ${resposta.status}.`;
-    try {
-      const erro: unknown = await resposta.json();
-      if (
-        erro &&
-        typeof erro === 'object' &&
-        'message' in erro &&
-        typeof (erro as { message: unknown }).message === 'string'
-      ) {
-        mensagem = (erro as { message: string }).message;
-      }
-    } catch {
-      /* resposta sem JSON: fica a mensagem genérica */
-    }
-    throw new Error(mensagem);
-  }
-
-  return resposta.json() as Promise<T>;
-}
-
-export const criarDashboard = (dados: {
-  nome: string;
-  descricao?: string;
-  paineis?: PainelConfig[];
-}) => enviar<Dashboard>('/dashboards', 'POST', dados);
-
-export const salvarDashboard = (
-  id: string,
-  dados: { nome?: string; descricao?: string; paineis?: PainelConfig[] },
-) => enviar<Dashboard>(`/dashboards/${id}`, 'PUT', dados);
-
-export const excluirDashboard = (id: string) =>
-  enviar<{ removido: boolean }>(`/dashboards/${id}`, 'DELETE');
-
-export const validarPainel = (
-  tipo: TipoPainel,
-  metricaX: string,
-  metricaY?: string | null,
-) => {
-  const q = new URLSearchParams({ tipo, metricaX });
-  if (metricaY) q.set('metricaY', metricaY);
-  return buscar<Validacao>(`/dashboards/validar?${q.toString()}`);
-};
-
-export const previaPainel = (painel: PainelConfig, filtros: string) =>
-  enviar<PainelCalculado>('/dashboards/previa', 'POST', {
-    painel,
-    filtros: Object.fromEntries(new URLSearchParams(filtros.replace(/^\?/, ''))),
-  });

@@ -14,19 +14,21 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import type {
+  CatalogoMetricas,
+  Dashboard,
+  PainelCalculado,
+  PainelConfig,
+  TipoPainel,
+  Validacao,
+} from '@/lib/api';
 import {
-  type CatalogoMetricas,
-  type Dashboard,
-  type PainelCalculado,
-  type PainelConfig,
-  type TipoPainel,
-  type Validacao,
   criarDashboard,
   excluirDashboard,
   previaPainel,
   salvarDashboard,
   validarPainel,
-} from '@/lib/api';
+} from '@/lib/api-cliente';
 import { PainelCustomizado } from './painel-customizado';
 
 interface Props {

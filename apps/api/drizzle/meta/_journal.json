@@ -15,6 +15,13 @@
       "when": 1787583290138,
       "tag": "0001_nosy_killer_shrike",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787589565388,
+      "tag": "0002_tearful_shotgun",
+      "breakpoints": true
     }
   ]
 }

@@ -30,6 +30,15 @@ export const tipoProjetoEnum = pgEnum('tipo_projeto', [
 
 export const origemEnum = pgEnum('origem', ['PRODUCAO', 'LABORATORIO']);
 
+/**
+ * Papéis de acesso.
+ *
+ * São dois porque a especificação pede exatamente dois comportamentos: quem
+ * administra a equipe e quem usa o sistema. Um terceiro nível só faria sentido
+ * com regras que hoje não existem.
+ */
+export const papelEnum = pgEnum('papel', ['ADMIN', 'MEMBRO']);
+
 export const categoriaMaterialEnum = pgEnum('categoria_material', [
   'CIMENTO',
   'CAL',
@@ -219,6 +228,43 @@ export const corposDeProvaEndurecidos = pgTable(
 );
 
 // --- Relações (habilitam db.query.formulacoes.findMany({ with: ... })) ---
+
+/**
+ * Pessoas com acesso ao sistema.
+ *
+ * Não há auto-registro: quem cria conta é um administrador, como manda a
+ * especificação. Por isso não existe coluna de "e-mail confirmado" nem fluxo de
+ * convite — o cadastro já nasce válido.
+ *
+ * `senhaHash` guarda **só o hash bcrypt**, nunca a senha. O nome da coluna diz
+ * isso de propósito: `senha` convidaria a gravar o valor cru algum dia.
+ */
+export const usuarios = pgTable(
+  'usuarios',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    nome: text('nome').notNull(),
+    email: text('email').notNull(),
+    senhaHash: text('senha_hash').notNull(),
+    papel: papelEnum('papel').notNull().default('MEMBRO'),
+    ativo: boolean('ativo').notNull().default(true),
+    /* Obriga a trocar a senha no primeiro acesso, quando ela foi definida por
+       um administrador e passou por outra pessoa até chegar ao dono. */
+    precisaTrocarSenha: boolean('precisa_trocar_senha').notNull().default(false),
+    ultimoAcessoEm: timestamp('ultimo_acesso_em', { withTimezone: true }),
+    criadoEm: timestamp('criado_em', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    atualizadoEm: timestamp('atualizado_em', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => ({
+    /* O e-mail é a credencial: precisa ser único de verdade, no banco, e não só
+       na validação da aplicação. */
+    emailUnico: uniqueIndex('usuarios_email_unico').on(t.email),
+  }),
+);
 
 /**
  * Dashboard montado pelo usuário, com os painéis que ele escolheu.

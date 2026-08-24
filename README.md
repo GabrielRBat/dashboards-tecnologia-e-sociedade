@@ -55,8 +55,8 @@ módulo de elasticidade dinâmico e relação água/ligante.
 - **Configurações** — escolha do tema (Automático, Claro ou Escuro) e
   informações da instalação.
 
-Ainda **não** há login — por decisão de sequência, a autenticação entra depois
-(ver *Próximos passos*).
+- **Contas e acesso** — login com e-mail e senha, criação de conta, troca de
+  senha e gestão da equipe pelo administrador.
 
 ---
 
@@ -243,6 +243,61 @@ Os gráficos acompanham o tema porque as cores vêm de variáveis CSS: o modo es
 usa passos próprios da paleta, escolhidos para a superfície escura, e não uma
 inversão automática das cores claras.
 
+## Contas e acesso
+
+Sessão por **JWT** (Passport no NestJS), senha guardada como hash **bcrypt**.
+
+### Primeiro acesso
+
+Depois de subir o banco, crie o administrador:
+
+```bash
+npm run criar-admin
+```
+
+Ele sorteia uma senha forte e a mostra **uma única vez** no terminal — anote,
+porque ela não fica gravada em lugar nenhum (só o hash) e o sistema pede a troca
+no primeiro acesso. Para definir a senha você mesmo, preencha `ADMIN_SENHA` no
+`.env` antes de rodar.
+
+Rodar o comando de novo quando já existe administrador não cria outro: ele
+apenas mostra quem já está cadastrado.
+
+### Como funciona
+
+| Papel | Pode |
+|---|---|
+| **Membro** | Ver os ensaios, montar e editar dashboards |
+| **Administrador** | Tudo isso, mais criar contas, mudar papéis, desativar e redefinir senhas em **Equipe** |
+
+Há **duas** formas de uma conta nascer: qualquer pessoa cria a sua em
+`/registrar`, ou um administrador cria em **Equipe** (com senha provisória
+sorteada, que a pessoa troca no primeiro acesso). Contas novas são sempre
+**Membro** — o papel nunca vem da requisição, só de um administrador depois.
+
+> **Atenção:** o auto-registro é **aberto a qualquer e-mail**, por decisão
+> registrada em [`ESPECIFICACOES.md`](ESPECIFICACOES.md#41-autenticação). Quem
+> alcançar o endereço do sistema pode criar conta e ver os dados do laboratório.
+> Para fechar, remova a rota `POST /api/auth/registrar` e a página `/registrar`.
+
+### Decisões de segurança
+
+| Decisão | Motivo |
+|---|---|
+| Token em cookie **`httpOnly`**, não em `localStorage` | Qualquer script na página lê o `localStorage` e leva a sessão junto. O cookie `httpOnly` é invisível para JavaScript |
+| O cookie é gravado pelo **Next**, não pela API | A API responde noutra porta; o cookie ficaria no domínio dela, fora do alcance do frontend |
+| Guard **global**: tudo nasce protegido | Só o que tem `@Publico()` fica aberto. Proteger rota a rota deixa endpoint novo exposto por esquecimento |
+| Papel e situação relidos **do banco** a cada requisição | Desativar alguém vale na hora, e não quando o token vencer, doze horas depois |
+| Mesma mensagem para senha errada e e-mail inexistente | Diferenciar entregaria a lista de quem tem conta. O tempo de resposta também é igualado, com um hash de mentira |
+| **5 tentativas de login por minuto** por IP | O bcrypt atrasa a força bruta; o limite é o que a impede |
+| `JWT_SEGREDO` sem valor padrão, mínimo de 32 caracteres | Um padrão no código valeria para toda instalação, e quem o lesse forjaria um token de administrador. A API recusa subir sem ele |
+| **bcryptjs**, e não `bcrypt` | O `bcrypt` compila binário nativo. O projeto já trocou o Prisma pelo Drizzle pelo mesmo motivo |
+| Sessão de **12 horas**, sem refresh token | Cobre um dia de trabalho e expira. Refresh precisaria ser guardado e revogado — mais superfície de ataque sem problema a resolver aqui |
+
+O sistema também impede rebaixar, desativar ou excluir o **último administrador
+ativo** — sem isso, seria possível ficar sem ninguém capaz de criar contas, e
+sem caminho de volta pela interface.
+
 ## Busca e filtros
 
 O campo de busca procura, de uma vez, em quatro lugares:
@@ -356,6 +411,7 @@ planilha mudar de layout, é o único arquivo a ajustar.
 | `npm run db:generate` | Gera migração a partir do schema |
 | `npm run db:migrate` | Aplica as migrações |
 | `npm run db:seed` | Popula o banco com dados de exemplo |
+| `npm run criar-admin` | Cria o primeiro administrador (mostra a senha uma vez) |
 | `npm run db:studio` | Abre o Drizzle Studio |
 
 > **Não rode `npm run build` com o `npm run dev` aberto.** Os dois escrevem na
@@ -401,10 +457,9 @@ relação água/ligante e a retenção de água fica entre 78% e 98%.
 
 ## Próximos passos
 
-1. Autenticação (login, sessão, proteção de rotas) — os usuários da equipe.
-2. Cadastro e edição de formulações pela interface, sem depender da planilha.
-3. Exportação dos dados filtrados.
-4. Deploy.
+1. Cadastro e edição de formulações pela interface, sem depender da planilha.
+2. Exportação dos dados filtrados.
+3. Deploy.
 
 ---
 

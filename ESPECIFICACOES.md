@@ -17,7 +17,7 @@ Aplicação web com login, onde a equipe interna acessa dashboards com os result
 | Frontend | **Next.js** (React, TypeScript) | App Router; interface dos dashboards, telas de login e upload. |
 | Backend | **NestJS** (TypeScript) | API REST; autenticação, importação de planilhas, regras de negócio. |
 | Banco de dados | **PostgreSQL 16** | Via **Drizzle ORM** (TypeScript puro, migrações SQL versionadas). Substituiu o Prisma — ver nota abaixo. |
-| Autenticação | JWT (Passport no NestJS) | Login com e-mail/senha; senhas com hash (bcrypt). **Ainda não implementado** — ver Fase 1. |
+| Autenticação | JWT (Passport no NestJS) | Login com e-mail/senha; senhas com hash (bcryptjs). ✅ Implementado. |
 | Gráficos | Recharts | Gráficos dos dashboards no frontend. |
 | Importação | ExcelJS | Leitura da planilha .xlsx no backend. |
 | Hospedagem (sugestão) | Vercel (frontend) + Railway ou Render (API + Postgres) | Custo baixo nessa escala; a definir na fase de deploy. |
@@ -44,9 +44,27 @@ Dashboard/
 ## 4. Funcionalidades
 
 ### 4.1 Autenticação
-- Login com e-mail e senha; sessão via JWT.
-- Cadastro de usuários feito por um administrador (sem auto-registro público).
+- Login com e-mail e senha; sessão via JWT (Passport), senhas com hash bcrypt.
+- **Auto-registro público aberto** (`/registrar`): qualquer pessoa cria conta.
+- Administrador também cria e gerencia contas em **Equipe**.
 - Rotas do frontend e da API protegidas (usuário não autenticado é redirecionado ao login).
+- Dois papéis: **Administrador** (gerencia a equipe) e **Membro** (usa o sistema).
+
+> **Mudança de decisão — 2026-08-24.** Esta seção dizia *"cadastro de usuários
+> feito por um administrador (sem auto-registro público)"*. O usuário pediu
+> explicitamente a tela de registro aberta, ciente de que **qualquer pessoa com
+> o endereço do sistema passa a poder criar conta e ver as formulações e ensaios
+> do laboratório** — que são dados de P&D. A decisão é dele; o registro fica
+> aqui para não haver dúvida sobre o que mudou e por quê.
+>
+> Duas travas permanecem, independentes da interface: a conta criada por
+> auto-registro **nasce sempre como Membro** (o papel não é aceito do corpo da
+> requisição, senão bastaria pedir `ADMIN` para virar administrador), e há
+> limite de 3 registros por hora por IP.
+>
+> Para fechar depois, se o laboratório mudar de ideia: basta remover a rota
+> `POST /api/auth/registrar` e a página `/registrar`; a gestão por administrador
+> continua funcionando sozinha.
 
 ### 4.2 Importação de dados
 - Upload de planilhas Excel/CSV com os resultados dos ensaios.
@@ -87,13 +105,13 @@ A ordem foi alterada a pedido do usuário: os dashboards vieram antes da
 autenticação.
 
 1. **Fase 1 — Fundação:** monorepo, apps Next.js e NestJS, banco Postgres +
-   Drizzle. ✅ **Concluída.** A autenticação foi adiada e é o próximo passo.
+   Drizzle. ✅ **Concluída.**
 2. **Fase 2 — Dados:** modelo de dados dos ensaios, importação de `.xlsx` com
    validação, cálculos do laboratório. ✅ **Concluída.**
 3. **Fase 3 — Dashboards:** visão geral com gráficos, filtros, tabela e página de
    detalhe. ✅ **Concluída.**
-4. **Fase 4 — Autenticação:** login, sessão, proteção de rotas, cadastro de
-   usuários por administrador. ⬜ Pendente.
+4. **Fase 4 — Autenticação:** login, sessão, proteção de rotas, gestão de
+   contas por administrador e auto-registro público. ✅ **Concluída.**
 5. **Fase 5 — Deploy:** hospedagem na nuvem, variáveis de ambiente, backups do
    banco. ⬜ Pendente.
 

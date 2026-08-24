@@ -15,14 +15,22 @@ const ITENS = [
   { href: '/formulacoes', rotulo: 'Formulações', curto: 'Fórmulas' },
   { href: '/importar', rotulo: 'Importar planilha', curto: 'Importar' },
   { href: '/configuracoes', rotulo: 'Configurações', curto: 'Ajustes' },
+  { href: '/equipe', rotulo: 'Equipe', curto: 'Equipe', soAdmin: true },
 ];
 
-export function Navegacao() {
+export function Navegacao({ ehAdmin = false }: { ehAdmin?: boolean }) {
   const pathname = usePathname();
+
+  /*
+   * Esconder o item não é a proteção — a API recusa quem não é administrador de
+   * qualquer forma. É só não oferecer um caminho que terminaria em "sem
+   * permissão".
+   */
+  const visiveis = ITENS.filter((i) => !i.soAdmin || ehAdmin);
 
   return (
     <nav className="navegacao">
-      {ITENS.map((item) => {
+      {visiveis.map((item) => {
         const ativo =
           item.href === '/'
             ? pathname === '/'

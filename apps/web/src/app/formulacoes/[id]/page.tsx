@@ -9,6 +9,7 @@ import {
   obterFormulacao,
   obterZonasGranulometricas,
 } from '@/lib/api';
+import { ehRedirecionamento } from '@/lib/erros';
 import {
   categoria,
   data,
@@ -35,6 +36,8 @@ export default async function PaginaFormulacao({
       obterZonasGranulometricas(),
     ]);
   } catch (e) {
+    // Sessão vencida vira redirect, que é uma exceção: precisa passar.
+    if (ehRedirecionamento(e)) throw e;
     if (e instanceof ApiIndisponivel) {
       return <ApiForaDoAr mensagem={e.message} />;
     }

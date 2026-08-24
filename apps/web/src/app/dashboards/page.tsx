@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ApiForaDoAr } from '@/components/estado';
 import { ApiIndisponivel, listarDashboards } from '@/lib/api';
+import { ehRedirecionamento } from '@/lib/erros';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +10,8 @@ export default async function PaginaDashboards() {
   try {
     dashboards = await listarDashboards();
   } catch (e) {
+    // Sessão vencida vira redirect, que é uma exceção: precisa passar.
+    if (ehRedirecionamento(e)) throw e;
     if (e instanceof ApiIndisponivel) return <ApiForaDoAr mensagem={e.message} />;
     throw e;
   }

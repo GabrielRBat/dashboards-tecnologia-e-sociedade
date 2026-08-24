@@ -1,0 +1,942 @@
+{
+  "id": "d5b60fef-13ab-4a01-9e33-f2bd5f5f7de9",
+  "prevId": "0b85e0d6-9ada-42d2-a21c-8625c2477a3f",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.componentes_formulacao": {
+      "name": "componentes_formulacao",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "formulacao_id": {
+          "name": "formulacao_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "material_id": {
+          "name": "material_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "teor": {
+          "name": "teor",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "componentes_formulacao_unico": {
+          "name": "componentes_formulacao_unico",
+          "columns": [
+            {
+              "expression": "formulacao_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "material_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "componentes_formulacao_formulacao_id_formulacoes_id_fk": {
+          "name": "componentes_formulacao_formulacao_id_formulacoes_id_fk",
+          "tableFrom": "componentes_formulacao",
+          "tableTo": "formulacoes",
+          "columnsFrom": [
+            "formulacao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "componentes_formulacao_material_id_materiais_id_fk": {
+          "name": "componentes_formulacao_material_id_materiais_id_fk",
+          "tableFrom": "componentes_formulacao",
+          "tableTo": "materiais",
+          "columnsFrom": [
+            "material_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.corpos_de_prova_endurecidos": {
+      "name": "corpos_de_prova_endurecidos",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "formulacao_id": {
+          "name": "formulacao_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "idade_dias": {
+          "name": "idade_dias",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "indice": {
+          "name": "indice",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "l1": {
+          "name": "l1",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "l2": {
+          "name": "l2",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "h1": {
+          "name": "h1",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "h2": {
+          "name": "h2",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "c1": {
+          "name": "c1",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "c2": {
+          "name": "c2",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "massa": {
+          "name": "massa",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "v1": {
+          "name": "v1",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "v2": {
+          "name": "v2",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "v3": {
+          "name": "v3",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "corpos_de_prova_endurecidos_unico": {
+          "name": "corpos_de_prova_endurecidos_unico",
+          "columns": [
+            {
+              "expression": "formulacao_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "idade_dias",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "indice",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "corpos_de_prova_endurecidos_formulacao_id_formulacoes_id_fk": {
+          "name": "corpos_de_prova_endurecidos_formulacao_id_formulacoes_id_fk",
+          "tableFrom": "corpos_de_prova_endurecidos",
+          "tableTo": "formulacoes",
+          "columnsFrom": [
+            "formulacao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.dashboards": {
+      "name": "dashboards",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "descricao": {
+          "name": "descricao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "paineis": {
+          "name": "paineis",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "atualizado_em": {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "dashboards_nome_idx": {
+          "name": "dashboards_nome_idx",
+          "columns": [
+            {
+              "expression": "nome",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ensaios_resistencia": {
+      "name": "ensaios_resistencia",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "formulacao_id": {
+          "name": "formulacao_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "tipo_resistencia",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "idade_dias": {
+          "name": "idade_dias",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valores": {
+          "name": "valores",
+          "type": "double precision[]",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "ensaios_resistencia_unico": {
+          "name": "ensaios_resistencia_unico",
+          "columns": [
+            {
+              "expression": "formulacao_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "tipo",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "idade_dias",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "ensaios_resistencia_formulacao_id_formulacoes_id_fk": {
+          "name": "ensaios_resistencia_formulacao_id_formulacoes_id_fk",
+          "tableFrom": "ensaios_resistencia",
+          "tableTo": "formulacoes",
+          "columnsFrom": [
+            "formulacao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.formulacoes": {
+      "name": "formulacoes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "numeracao": {
+          "name": "numeracao",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nomenclatura": {
+          "name": "nomenclatura",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tipo_projeto": {
+          "name": "tipo_projeto",
+          "type": "tipo_projeto",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "desenvolvedor": {
+          "name": "desenvolvedor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "alimentador": {
+          "name": "alimentador",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "avaliador": {
+          "name": "avaliador",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "data": {
+          "name": "data",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "origem": {
+          "name": "origem",
+          "type": "origem",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "comentarios": {
+          "name": "comentarios",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "teor_agua": {
+          "name": "teor_agua",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "massa_agua": {
+          "name": "massa_agua",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dens_aparente_massa": {
+          "name": "dens_aparente_massa",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dens_aparente_volume": {
+          "name": "dens_aparente_volume",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "retencao_m0": {
+          "name": "retencao_m0",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "retencao_m1": {
+          "name": "retencao_m1",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "retencao_m2": {
+          "name": "retencao_m2",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dens_fresco_massa": {
+          "name": "dens_fresco_massa",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dens_fresco_volume": {
+          "name": "dens_fresco_volume",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "squeeze_deslocamento_1": {
+          "name": "squeeze_deslocamento_1",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "squeeze_deslocamento_2": {
+          "name": "squeeze_deslocamento_2",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "squeeze_deslocamento_3": {
+          "name": "squeeze_deslocamento_3",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "squeeze_carga_1": {
+          "name": "squeeze_carga_1",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "squeeze_carga_2": {
+          "name": "squeeze_carga_2",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "squeeze_carga_3": {
+          "name": "squeeze_carga_3",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "atualizado_em": {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "formulacoes_numeracao_unica": {
+          "name": "formulacoes_numeracao_unica",
+          "columns": [
+            {
+              "expression": "numeracao",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "formulacoes_tipo_projeto_idx": {
+          "name": "formulacoes_tipo_projeto_idx",
+          "columns": [
+            {
+              "expression": "tipo_projeto",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "formulacoes_origem_idx": {
+          "name": "formulacoes_origem_idx",
+          "columns": [
+            {
+              "expression": "origem",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "formulacoes_data_idx": {
+          "name": "formulacoes_data_idx",
+          "columns": [
+            {
+              "expression": "data",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.materiais": {
+      "name": "materiais",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "categoria": {
+          "name": "categoria",
+          "type": "categoria_material",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ativo": {
+          "name": "ativo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "ordem": {
+          "name": "ordem",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "materiais_nome_unico": {
+          "name": "materiais_nome_unico",
+          "columns": [
+            {
+              "expression": "nome",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "materiais_categoria_idx": {
+          "name": "materiais_categoria_idx",
+          "columns": [
+            {
+              "expression": "categoria",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.pontos_granulometricos": {
+      "name": "pontos_granulometricos",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "formulacao_id": {
+          "name": "formulacao_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "peneira_mm": {
+          "name": "peneira_mm",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "frequencia": {
+          "name": "frequencia",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "pontos_granulometricos_unico": {
+          "name": "pontos_granulometricos_unico",
+          "columns": [
+            {
+              "expression": "formulacao_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "peneira_mm",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pontos_granulometricos_formulacao_id_formulacoes_id_fk": {
+          "name": "pontos_granulometricos_formulacao_id_formulacoes_id_fk",
+          "tableFrom": "pontos_granulometricos",
+          "tableTo": "formulacoes",
+          "columnsFrom": [
+            "formulacao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.usuarios": {
+      "name": "usuarios",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "senha_hash": {
+          "name": "senha_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "papel": {
+          "name": "papel",
+          "type": "papel",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'MEMBRO'"
+        },
+        "ativo": {
+          "name": "ativo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "precisa_trocar_senha": {
+          "name": "precisa_trocar_senha",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "ultimo_acesso_em": {
+          "name": "ultimo_acesso_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "atualizado_em": {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "usuarios_email_unico": {
+          "name": "usuarios_email_unico",
+          "columns": [
+            {
+              "expression": "email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.categoria_material": {
+      "name": "categoria_material",
+      "schema": "public",
+      "values": [
+        "CIMENTO",
+        "CAL",
+        "FILER",
+        "AREIA_FINA",
+        "AREIA_MEDIA",
+        "ADITIVO_RETENTOR_AGUA",
+        "ADITIVO_INCORPORADOR_AR",
+        "FIBRA",
+        "SUPERPLASTIFICANTE"
+      ]
+    },
+    "public.origem": {
+      "name": "origem",
+      "schema": "public",
+      "values": [
+        "PRODUCAO",
+        "LABORATORIO"
+      ]
+    },
+    "public.papel": {
+      "name": "papel",
+      "schema": "public",
+      "values": [
+        "ADMIN",
+        "MEMBRO"
+      ]
+    },
+    "public.tipo_projeto": {
+      "name": "tipo_projeto",
+      "schema": "public",
+      "values": [
+        "NP",
+        "MT",
+        "AT",
+        "RC",
+        "PE"
+      ]
+    },
+    "public.tipo_resistencia": {
+      "name": "tipo_resistencia",
+      "schema": "public",
+      "values": [
+        "FLEXAO",
+        "COMPRESSAO"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
