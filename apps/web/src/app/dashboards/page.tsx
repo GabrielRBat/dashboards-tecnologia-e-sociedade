@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ApiForaDoAr } from '@/components/estado';
-import { ApiIndisponivel, listarDashboards } from '@/lib/api';
+import { ApiIndisponivel, listarDashboards, type Dashboard } from '@/lib/api';
 import { ehRedirecionamento } from '@/lib/erros';
 
 export const dynamic = 'force-dynamic';
@@ -20,8 +20,8 @@ export default async function PaginaDashboards() {
     <>
       <h1 className="titulo-pagina">Dashboards</h1>
       <p className="subtitulo-pagina">
-        Painéis montados pela equipe, com as métricas que cada análise precisa.
-        São <strong>compartilhados</strong>: todo mundo vê e pode editar os mesmos.
+        Painéis montados pela equipe. Você vê os abertos a todos, os dos seus
+        grupos e os que criou — quem monta escolhe quem enxerga.
       </p>
 
       <div className="acoes-grade">
@@ -47,10 +47,39 @@ export default async function PaginaDashboards() {
                 {d.paineis.length} gráfico(s) · atualizado em{' '}
                 {new Date(d.atualizadoEm).toLocaleDateString('pt-BR')}
               </p>
+              <span
+                className="etiqueta-visibilidade"
+                data-tipo={d.visibilidade}
+                title={descreverVisibilidade(d)}
+              >
+                {rotuloVisibilidade(d)}
+              </span>
             </Link>
           ))}
         </div>
       )}
     </>
   );
+}
+
+function rotuloVisibilidade(d: Dashboard): string {
+  if (d.visibilidade === 'PRIVADO') return 'Só de quem criou';
+  if (d.visibilidade === 'GRUPOS') {
+    return d.grupos.length === 1
+      ? '1 grupo'
+      : `${d.grupos.length} grupos`;
+  }
+  return 'Todos';
+}
+
+function descreverVisibilidade(d: Dashboard): string {
+  if (d.visibilidade === 'PRIVADO') {
+    return 'Só quem criou e os administradores enxergam.';
+  }
+  if (d.visibilidade === 'GRUPOS') {
+    return d.grupos.length === 0
+      ? 'Restrito a grupos, mas nenhum grupo foi escolhido — só quem criou enxerga.'
+      : 'Visível para quem está nos grupos escolhidos.';
+  }
+  return 'Qualquer pessoa com acesso ao sistema enxerga.';
 }

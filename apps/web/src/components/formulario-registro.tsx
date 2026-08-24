@@ -2,6 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import {
+  ListaRequisitos,
+  motivoBloqueio,
+  requisitosDaSenha,
+} from './requisitos-senha';
 
 /**
  * Criação de conta.
@@ -19,18 +24,21 @@ export function FormularioRegistro() {
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState(false);
 
-  const curta = senha.length > 0 && senha.length < 10;
-  const diferem = confirmacao.length > 0 && senha !== confirmacao;
+  const requisitos = requisitosDaSenha(senha, confirmacao);
+  const bloqueio = motivoBloqueio(
+    [
+      { rotulo: 'nome', preenchido: nome.trim().length > 0 },
+      { rotulo: 'e-mail', preenchido: email.trim().length > 0 },
+      { rotulo: 'senha', preenchido: senha.length > 0 },
+      { rotulo: 'a repetição da senha', preenchido: confirmacao.length > 0 },
+    ],
+    requisitos,
+  );
+  const podeEnviar = !enviando && bloqueio === null;
 
   async function criar(evento: React.FormEvent) {
     evento.preventDefault();
     setErro('');
-
-    if (senha !== confirmacao) {
-      setErro('A confirmação não confere com a senha.');
-      return;
-    }
-
     setEnviando(true);
     try {
       const resposta = await fetch('/api/sessao/registrar', {
@@ -102,11 +110,6 @@ export function FormularioRegistro() {
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
         />
-        <span className="nota-grafico" style={{ margin: '2px 0 0' }}>
-          {curta
-            ? 'Faltam caracteres: o mínimo é 10.'
-            : 'Pelo menos 10 caracteres. Uma frase curta funciona bem e é fácil de lembrar.'}
-        </span>
       </label>
 
       <label className="campo">
@@ -119,12 +122,12 @@ export function FormularioRegistro() {
           value={confirmacao}
           onChange={(e) => setConfirmacao(e.target.value)}
         />
-        {diferem ? (
-          <span className="nota-grafico" style={{ margin: '2px 0 0' }}>
-            As duas não conferem.
-          </span>
-        ) : null}
       </label>
+
+      <ListaRequisitos
+        requisitos={requisitos}
+        mostrar={senha.length > 0 || confirmacao.length > 0}
+      />
 
       {erro ? (
         <p className="aviso aviso-erro" role="alert">
@@ -132,13 +135,16 @@ export function FormularioRegistro() {
         </p>
       ) : null}
 
-      <button
-        type="submit"
-        className="botao botao-primario"
-        disabled={enviando || curta || diferem || !nome || !email || !senha}
-      >
-        {enviando ? 'Criando…' : 'Criar conta'}
-      </button>
+      <div className="acao-com-motivo">
+        <button type="submit" className="botao botao-primario" disabled={!podeEnviar}>
+          {enviando ? 'Criando…' : 'Criar conta'}
+        </button>
+        {bloqueio && !enviando ? (
+          <p className="motivo-bloqueio" aria-live="polite">
+            {bloqueio}
+          </p>
+        ) : null}
+      </div>
     </form>
   );
 }

@@ -10,15 +10,21 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
+import { AuthModule } from '../auth/auth.module';
+import { Autenticado } from '../auth/guards';
+import { UsuarioNaRequisicao } from '../auth/jwt.strategy';
 import { FormulacoesModule } from '../formulacoes/formulacoes.module';
 import { ListarFormulacoesDto } from '../formulacoes/dto/listar-formulacoes.dto';
 import { TipoPainel } from './catalogo';
 import { DashboardsService, PainelConfig } from './dashboards.service';
+import { Visibilidade } from './visibilidade';
 
 interface CorpoDashboard {
   nome: string;
   descricao?: string;
   paineis?: PainelConfig[];
+  visibilidade?: Visibilidade;
+  grupos?: string[];
 }
 
 @Controller('dashboards')
@@ -50,13 +56,16 @@ export class DashboardsController {
   }
 
   @Get()
-  listar() {
-    return this.service.listar();
+  listar(@Autenticado() usuario: UsuarioNaRequisicao) {
+    return this.service.listar(usuario);
   }
 
   @Get(':id')
-  obter(@Param('id', ParseUUIDPipe) id: string) {
-    return this.service.obter(id);
+  obter(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Autenticado() usuario: UsuarioNaRequisicao,
+  ) {
+    return this.service.obter(id, usuario);
   }
 
   /** Dados calculados de todos os painéis, respeitando os filtros da tela. */
@@ -64,31 +73,39 @@ export class DashboardsController {
   dados(
     @Param('id', ParseUUIDPipe) id: string,
     @Query() filtros: ListarFormulacoesDto,
+    @Autenticado() usuario: UsuarioNaRequisicao,
   ) {
-    return this.service.dados(id, filtros);
+    return this.service.dados(id, filtros, usuario);
   }
 
   @Post()
-  criar(@Body() corpo: CorpoDashboard) {
-    return this.service.criar(corpo);
+  criar(
+    @Body() corpo: CorpoDashboard,
+    @Autenticado() usuario: UsuarioNaRequisicao,
+  ) {
+    return this.service.criar(corpo, usuario);
   }
 
   @Put(':id')
   atualizar(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() corpo: Partial<CorpoDashboard>,
+    @Autenticado() usuario: UsuarioNaRequisicao,
   ) {
-    return this.service.atualizar(id, corpo);
+    return this.service.atualizar(id, corpo, usuario);
   }
 
   @Delete(':id')
-  remover(@Param('id', ParseUUIDPipe) id: string) {
-    return this.service.remover(id);
+  remover(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Autenticado() usuario: UsuarioNaRequisicao,
+  ) {
+    return this.service.remover(id, usuario);
   }
 }
 
 @Module({
-  imports: [FormulacoesModule],
+  imports: [FormulacoesModule, AuthModule],
   controllers: [DashboardsController],
   providers: [DashboardsService],
 })

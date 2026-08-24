@@ -1,17 +1,26 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { arredondar, media, desvioPadrao } from '../calculos/calculos';
 import { regressaoLinear } from '../calculos/normas';
 import { DB, Database } from '../db/db.module';
-import { dashboards } from '../db/schema';
+import { GruposService } from '../auth/grupos.service';
+import { dashboards, dashboardsGrupos, grupos as tabelaGrupos } from '../db/schema';
 import { ListarFormulacoesDto } from '../formulacoes/dto/listar-formulacoes.dto';
 import { FormulacaoDetalhada } from '../formulacoes/formulacao.mapper';
 import { FormulacoesService } from '../formulacoes/formulacoes.service';
+import {
+  QuemPergunta,
+  Visibilidade,
+  motivoSemAcesso,
+  podeEditar,
+  podeVer,
+} from './visibilidade';
 import {
   AGREGACOES,
   Agregacao,
@@ -38,12 +47,45 @@ export interface PainelConfig {
 const AGREGACOES_VALIDAS = new Set(AGREGACOES.map((a) => a.chave));
 const TIPOS_VALIDOS = new Set(TIPOS_PAINEL.map((t) => t.chave));
 
+const VISIBILIDADES: Visibilidade[] = ['TODOS', 'GRUPOS', 'PRIVADO'];
+
 @Injectable()
 export class DashboardsService {
   constructor(
     @Inject(DB) private readonly db: Database,
     private readonly formulacoes: FormulacoesService,
+    private readonly gruposService: GruposService,
   ) {}
+
+  /** Monta o "quem pergunta" com os grupos da pessoa, base de toda decisão. */
+  private async contexto(usuario: {
+    id: string;
+    papel: 'ADMIN' | 'MEMBRO';
+  }): Promise<QuemPergunta> {
+    return {
+      id: usuario.id,
+      papel: usuario.papel,
+      grupos: await this.gruposService.gruposDoUsuario(usuario.id),
+    };
+  }
+
+  /** Grupos vinculados a cada dashboard informado. */
+  private async gruposDosDashboards(
+    ids: string[],
+  ): Promise<Map<string, string[]>> {
+    const mapa = new Map<string, string[]>(ids.map((id) => [id, []]));
+    if (ids.length === 0) return mapa;
+
+    const vinculos = await this.db
+      .select()
+      .from(dashboardsGrupos)
+      .where(inArray(dashboardsGrupos.dashboardId, ids));
+
+    for (const v of vinculos) {
+      mapa.get(v.dashboardId)?.push(v.grupoId);
+    }
+    return mapa;
+  }
 
   /** Catálogo completo, para o construtor montar os seletores. */
   catalogo() {
@@ -67,23 +109,84 @@ export class DashboardsService {
     return validarCruzamento(tipo, metricaX, metricaY);
   }
 
-  async listar() {
-    const linhas = await this.db.select().from(dashboards);
-    return [...linhas].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  /** Só os dashboards que a pessoa pode ver. */
+  async listar(usuario: { id: string; papel: 'ADMIN' | 'MEMBRO' }) {
+    const [linhas, quem] = await Promise.all([
+      this.db.select().from(dashboards),
+      this.contexto(usuario),
+    ]);
+
+    const gruposPorDash = await this.gruposDosDashboards(linhas.map((l) => l.id));
+
+    const acessoDe = (d: (typeof linhas)[number]) => ({
+      criadoPor: d.criadoPor,
+      visibilidade: d.visibilidade,
+      grupos: gruposPorDash.get(d.id) ?? [],
+    });
+
+    return linhas
+      .filter((d) => podeVer(acessoDe(d), quem))
+      .map((d) => ({
+        ...d,
+        grupos: gruposPorDash.get(d.id) ?? [],
+        podeEditar: podeEditar(acessoDe(d), quem),
+      }))
+      .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
   }
 
-  async obter(id: string) {
+  /**
+   * Um dashboard, conferindo o acesso.
+   *
+   * Responde **404, e não 403**, para quem não pode ver: um "acesso negado"
+   * confirmaria que aquele dashboard existe, e o nome dele costuma dizer no que
+   * a equipe está trabalhando. Quem pode ver mas não editar recebe 403 ao
+   * salvar - ali a existência já não é segredo.
+   */
+  async obter(
+    id: string,
+    usuario: { id: string; papel: 'ADMIN' | 'MEMBRO' },
+    exigirEdicao = false,
+  ) {
     const [linha] = await this.db
       .select()
       .from(dashboards)
       .where(eq(dashboards.id, id));
 
     if (!linha) throw new NotFoundException(`Dashboard ${id} não encontrado`);
-    return linha;
+
+    const quem = await this.contexto(usuario);
+    const gruposDoDash = (await this.gruposDosDashboards([id])).get(id) ?? [];
+    const acesso = {
+      criadoPor: linha.criadoPor,
+      visibilidade: linha.visibilidade,
+      grupos: gruposDoDash,
+    };
+
+    if (!podeVer(acesso, quem)) {
+      throw new NotFoundException(`Dashboard ${id} não encontrado`);
+    }
+
+    if (exigirEdicao && !podeEditar(acesso, quem)) {
+      throw new ForbiddenException(
+        'Só quem criou o dashboard (ou um administrador) pode alterá-lo.',
+      );
+    }
+
+    return { ...linha, grupos: gruposDoDash, podeEditar: podeEditar(acesso, quem) };
   }
 
-  async criar(dados: { nome: string; descricao?: string; paineis?: PainelConfig[] }) {
+  async criar(
+    dados: {
+      nome: string;
+      descricao?: string;
+      paineis?: PainelConfig[];
+      visibilidade?: Visibilidade;
+      grupos?: string[];
+    },
+    usuario: { id: string; papel: 'ADMIN' | 'MEMBRO' },
+  ) {
     const paineis = this.validarPaineis(dados.paineis ?? []);
+    const visibilidade = this.validarVisibilidade(dados.visibilidade);
 
     const [criado] = await this.db
       .insert(dashboards)
@@ -91,17 +194,30 @@ export class DashboardsService {
         nome: dados.nome.trim(),
         descricao: dados.descricao?.trim() || null,
         paineis,
+        criadoPor: usuario.id,
+        visibilidade,
       })
       .returning();
 
-    return criado;
+    if (visibilidade === 'GRUPOS') {
+      await this.definirGrupos(criado.id, dados.grupos ?? []);
+    }
+
+    return this.obter(criado.id, usuario);
   }
 
   async atualizar(
     id: string,
-    dados: { nome?: string; descricao?: string; paineis?: PainelConfig[] },
+    dados: {
+      nome?: string;
+      descricao?: string;
+      paineis?: PainelConfig[];
+      visibilidade?: Visibilidade;
+      grupos?: string[];
+    },
+    usuario: { id: string; papel: 'ADMIN' | 'MEMBRO' },
   ) {
-    await this.obter(id); // 404 se não existe
+    const atual = await this.obter(id, usuario, true);
 
     const campos: Record<string, unknown> = { atualizadoEm: new Date() };
     if (dados.nome !== undefined) campos.nome = dados.nome.trim();
@@ -111,20 +227,70 @@ export class DashboardsService {
     if (dados.paineis !== undefined) {
       campos.paineis = this.validarPaineis(dados.paineis);
     }
+    if (dados.visibilidade !== undefined) {
+      campos.visibilidade = this.validarVisibilidade(dados.visibilidade);
+    }
 
-    const [atualizado] = await this.db
-      .update(dashboards)
-      .set(campos)
-      .where(eq(dashboards.id, id))
-      .returning();
+    await this.db.update(dashboards).set(campos).where(eq(dashboards.id, id));
 
-    return atualizado;
+    if (dados.grupos !== undefined || dados.visibilidade !== undefined) {
+      const visibilidadeFinal =
+        (campos.visibilidade as Visibilidade | undefined) ?? atual.visibilidade;
+
+      /*
+       * Sair de GRUPOS limpa os vínculos. Deixá-los para trás faria o painel
+       * voltar a ser visível para as mesmas pessoas se alguém restaurasse a
+       * visibilidade depois - uma permissão que ninguém lembra de ter dado.
+       */
+      await this.definirGrupos(
+        id,
+        visibilidadeFinal === 'GRUPOS' ? (dados.grupos ?? []) : [],
+      );
+    }
+
+    return this.obter(id, usuario);
   }
 
-  async remover(id: string) {
-    await this.obter(id);
+  async remover(id: string, usuario: { id: string; papel: 'ADMIN' | 'MEMBRO' }) {
+    await this.obter(id, usuario, true);
     await this.db.delete(dashboards).where(eq(dashboards.id, id));
     return { removido: true };
+  }
+
+  private validarVisibilidade(valor?: Visibilidade): Visibilidade {
+    if (valor === undefined) return 'TODOS';
+    if (!VISIBILIDADES.includes(valor)) {
+      throw new BadRequestException(`Visibilidade desconhecida: ${valor}.`);
+    }
+    return valor;
+  }
+
+  /** Substitui os grupos que enxergam o dashboard. */
+  private async definirGrupos(dashboardId: string, ids: string[]): Promise<void> {
+    const unicos = [...new Set(ids.filter(Boolean))];
+
+    if (unicos.length > 0) {
+      const existem = await this.db
+        .select()
+        .from(tabelaGrupos)
+        .where(inArray(tabelaGrupos.id, unicos));
+
+      if (existem.length !== unicos.length) {
+        throw new BadRequestException(
+          'A lista de grupos tem um grupo que não existe mais.',
+        );
+      }
+    }
+
+    await this.db
+      .delete(dashboardsGrupos)
+      .where(eq(dashboardsGrupos.dashboardId, dashboardId));
+
+    if (unicos.length > 0) {
+      await this.db
+        .insert(dashboardsGrupos)
+        .values(unicos.map((grupoId) => ({ dashboardId, grupoId })));
+    }
   }
 
   /**
@@ -185,8 +351,12 @@ export class DashboardsService {
    * Calcula os dados de todos os painéis de um dashboard, com uma leitura só do
    * banco — mesma razão do `/indicadores/painel`.
    */
-  async dados(id: string, filtros: ListarFormulacoesDto) {
-    const dashboard = await this.obter(id);
+  async dados(
+    id: string,
+    filtros: ListarFormulacoesDto,
+    usuario: { id: string; papel: 'ADMIN' | 'MEMBRO' },
+  ) {
+    const dashboard = await this.obter(id, usuario);
     const paineis = (dashboard.paineis ?? []) as PainelConfig[];
     const itens = await this.formulacoes.listarTodas(filtros);
 
@@ -195,6 +365,9 @@ export class DashboardsService {
         id: dashboard.id,
         nome: dashboard.nome,
         descricao: dashboard.descricao,
+        visibilidade: dashboard.visibilidade,
+        grupos: dashboard.grupos,
+        podeEditar: dashboard.podeEditar,
       },
       totalFormulacoes: itens.length,
       paineis: paineis.map((p) => this.calcularPainel(p, itens)),

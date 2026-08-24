@@ -132,10 +132,21 @@ nos dois temas.
 - **A validação roda também na gravação, não só na tela.** A da interface é
   conveniência; a do servidor é a que vale. Sem ela bastaria uma requisição
   direta para gravar um gráfico enganoso, que passaria a existir para a equipe.
-- **Dashboards no banco, compartilhados, sem dono** (decisão do usuário em
-  2026-08-24, ciente do risco): sem login, qualquer pessoa edita e exclui os de
-  qualquer outra. Mitigado com confirmação na exclusão e aviso na tela. Quando a
-  autenticação entrar, acrescentar `criadoPor` na tabela `dashboards`.
+- **Dashboards têm dono e visibilidade** (pedido do usuário em 2026-08-24).
+  Três níveis: `TODOS`, `GRUPOS` (via `dashboards_grupos`) e `PRIVADO`. Autor e
+  administradores enxergam sempre. **Editar é mais restrito que ver** — só autor
+  ou admin; enxergar não dá direito de mudar para todos.
+- **Quem não pode ver um dashboard recebe 404, não 403.** Um "acesso negado"
+  confirmaria a existência, e o nome do painel costuma dizer no que a equipe
+  está trabalhando.
+- **`GRUPOS` sem nenhum grupo marcado equivale a privado, nunca a "todos".** É o
+  engano perigoso: um campo esquecido publicaria o painel para a equipe inteira.
+  A regra está em `metricas/visibilidade.ts`, com 16 testes.
+- **Dashboards anteriores ao login ficaram sem autor.** Não há como descobrir
+  quem os fez. Seguem abertos a todos e editáveis por quem os vê — travá-los em
+  "só administrador" tiraria da equipe algo que hoje é dela.
+- **Grupos são gerenciados só por administradores.** Quem entra em qual grupo é
+  decisão de gestão; deixar cada um se incluir esvaziaria a restrição.
 - **Painéis em `jsonb`, não em tabela filha.** São configuração de tela: a forma
   muda a cada tipo de gráfico novo e nenhuma consulta precisa filtrar por painel.
 - **Ordem dos gráficos no `localStorage`, como o tema.** É preferência de cada
@@ -177,9 +188,8 @@ preencher a planilha, a importação já funciona.
 
 ## Pendências / próximos passos
 
-1. **`criadoPor` nos dashboards.** Agora que existe usuário, dá para saber quem
-   criou cada dashboard — hoje eles seguem compartilhados e sem dono, e qualquer
-   pessoa apaga o de qualquer outra.
+1. **Histórico de importação** ("quem importou, quando, quantas linhas"), que a
+   especificação pede e agora é possível, com usuário identificado.
 2. Cadastro e edição de formulações pela interface.
 3. Exportação dos dados filtrados.
 4. Deploy (provedores a definir). **Antes de expor na internet**, reveja o
@@ -187,9 +197,8 @@ preencher a planilha, a importação já funciona.
 
 ### Dívidas técnicas conhecidas
 
-- **Sem `criadoPor` em `dashboards` e sem histórico de importação.** A
-  especificação pede "quem importou, quando, quantas linhas" — agora que há
-  usuário, dá para registrar.
+- **Sem histórico de importação.** A especificação pede "quem importou, quando,
+  quantas linhas" — agora que há usuário identificado, dá para registrar.
 
 - **`packages/shared` é código morto.** Nada o importa desde a troca para o
   Drizzle; os tipos do domínio estão duplicados em `apps/web/src/lib/api.ts`.

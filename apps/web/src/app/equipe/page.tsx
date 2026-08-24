@@ -1,7 +1,13 @@
 import { redirect } from 'next/navigation';
 import { ApiForaDoAr } from '@/components/estado';
 import { GestaoEquipe } from '@/components/gestao-equipe';
-import { ApiIndisponivel, SemPermissao, listarUsuarios } from '@/lib/api';
+import { GestaoGrupos } from '@/components/gestao-grupos';
+import {
+  ApiIndisponivel,
+  SemPermissao,
+  listarGrupos,
+  listarUsuarios,
+} from '@/lib/api';
 import { ehRedirecionamento } from '@/lib/erros';
 import { obterSessaoAtual } from '@/lib/sessao-servidor';
 
@@ -25,8 +31,9 @@ export default async function PaginaEquipe() {
   }
 
   let usuarios;
+  let grupos;
   try {
-    usuarios = await listarUsuarios();
+    [usuarios, grupos] = await Promise.all([listarUsuarios(), listarGrupos()]);
   } catch (e) {
     // Sessão vencida vira redirect, que é uma exceção: precisa passar.
     if (ehRedirecionamento(e)) throw e;
@@ -49,6 +56,13 @@ export default async function PaginaEquipe() {
         aqui.
       </p>
       <GestaoEquipe usuarios={usuarios} euId={sessao.id} />
+
+      <h2 className="titulo-secao">Grupos</h2>
+      <p className="subtitulo-pagina">
+        Equipes internas. Servem para dizer quem vê quais dashboards sem listar
+        pessoa por pessoa em cada um.
+      </p>
+      <GestaoGrupos grupos={grupos} usuarios={usuarios} />
     </>
   );
 }

@@ -352,7 +352,7 @@ desta seção).
 | Papel | Pode |
 |---|---|
 | **Membro** | Ver os ensaios, montar e editar dashboards |
-| **Administrador** | Tudo isso, mais criar contas, mudar papéis, desativar e redefinir senhas em **Equipe** |
+| **Administrador** | Tudo isso, mais gerenciar contas e grupos em **Equipe**, e ver e editar qualquer dashboard |
 
 Há **duas** formas de uma conta nascer: qualquer pessoa cria a sua em
 `/registrar`, ou um administrador cria em **Equipe** (com senha provisória
@@ -442,12 +442,53 @@ interface para o gráfico enganoso passar a existir para toda a equipe.
 O R² também vem traduzido em palavras ("relação fraca — pouco confiável para
 prever"), porque o número sozinho leva a superinterpretar.
 
+### Quem pode ver
+
+Ao montar um dashboard, escolhe-se quem enxerga:
+
+| Opção | Quem vê |
+|---|---|
+| **Todos** | Qualquer pessoa com acesso ao sistema |
+| **Grupos escolhidos** | Só quem está nos grupos marcados |
+| **Só eu** | Ninguém mais |
+
+Quem criou e os administradores enxergam sempre — sem isso, o painel particular
+de alguém que saiu da equipe ficaria órfão e invisível, e ninguém poderia
+limpá-lo.
+
+**Editar é mais restrito que ver:** só quem criou, ou um administrador. Enxergar
+um painel não dá o direito de mudá-lo para todo mundo.
+
+Dois detalhes que evitam engano:
+
+- **"Grupos escolhidos" sem nenhum grupo marcado não vira "todos".** Fica igual
+  a particular, e a tela avisa. O contrário publicaria o painel para a equipe
+  inteira por causa de um campo esquecido.
+- **Quem não pode ver recebe 404, não "acesso negado".** Um 403 confirmaria que
+  aquele dashboard existe, e o nome costuma dizer no que a equipe está
+  trabalhando.
+
+### Grupos
+
+Em **Equipe → Grupos**, um administrador cria equipes internas (Reologia,
+Estado endurecido…) e escolhe quem entra. É o que permite dizer "este painel é
+do pessoal da reologia" sem listar pessoa por pessoa: quando alguém entra ou sai
+do grupo, todos os dashboards acompanham na hora.
+
+Excluir um grupo não apaga contas. Os dashboards que só ele enxergava passam a
+ser vistos apenas por quem os criou e pelos administradores — perder acesso é
+recuperável, vazar não.
+
 ### Onde ficam salvos
 
-Na tabela `dashboards`, em `jsonb` — são configuração de tela, não dado de
-laboratório. **Como ainda não há login, são compartilhados e sem dono:** qualquer
-pessoa vê, edita e exclui os de qualquer outra. A exclusão pede confirmação. Com
-a autenticação, entra a coluna de autor.
+Na tabela `dashboards`, com os painéis em `jsonb` — são configuração de tela,
+não dado de laboratório. A visibilidade fica em coluna própria e os grupos em
+`dashboards_grupos`.
+
+Os dashboards criados **antes de existir login** ficaram sem autor: não há como
+descobrir quem os fez, e inventar seria pior que admitir a lacuna. Eles seguem
+abertos a todos e continuam editáveis por quem os vê — travá-los em "só
+administrador" tiraria da equipe algo que hoje é dela.
 
 > A **ordem dos gráficos** dentro de um dashboard segue a mesma regra da visão
 > geral: fica no navegador de cada pessoa, e é reposicionável por arrasto.

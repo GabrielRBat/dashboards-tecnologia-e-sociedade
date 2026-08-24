@@ -17,10 +17,12 @@ import { useRouter } from 'next/navigation';
 import type {
   CatalogoMetricas,
   Dashboard,
+  Grupo,
   PainelCalculado,
   PainelConfig,
   TipoPainel,
   Validacao,
+  Visibilidade,
 } from '@/lib/api';
 import {
   criarDashboard,
@@ -35,6 +37,8 @@ interface Props {
   catalogo: CatalogoMetricas;
   /** Dashboard existente, ou `null` para criar um novo. */
   dashboard: Dashboard | null;
+  /** Grupos disponíveis. Vazio quando ninguém criou grupo ainda. */
+  grupos: Grupo[];
 }
 
 /** Agrupa as métricas por grupo, para o `<select>` sair organizado. */
@@ -49,13 +53,19 @@ function porGrupo(catalogo: CatalogoMetricas, apenas?: 'continua' | 'categorica'
   return [...grupos.entries()];
 }
 
-export function ConstrutorDashboard({ catalogo, dashboard }: Props) {
+export function ConstrutorDashboard({ catalogo, dashboard, grupos }: Props) {
   const router = useRouter();
 
   const [nome, setNome] = useState(dashboard?.nome ?? '');
   const [descricao, setDescricao] = useState(dashboard?.descricao ?? '');
   const [paineis, setPaineis] = useState<PainelConfig[]>(
     dashboard?.paineis ?? [],
+  );
+  const [visibilidade, setVisibilidade] = useState<Visibilidade>(
+    dashboard?.visibilidade ?? 'TODOS',
+  );
+  const [gruposEscolhidos, setGruposEscolhidos] = useState<string[]>(
+    dashboard?.grupos ?? [],
   );
 
   // Painel em edição.
@@ -174,10 +184,18 @@ export function ConstrutorDashboard({ catalogo, dashboard }: Props) {
           nome,
           descricao,
           paineis,
+          visibilidade,
+          grupos: gruposEscolhidos,
         });
         router.push(`/dashboards/${dashboard.id}`);
       } else {
-        const criado = await criarDashboard({ nome, descricao, paineis });
+        const criado = await criarDashboard({
+          nome,
+          descricao,
+          paineis,
+          visibilidade,
+          grupos: gruposEscolhidos,
+        });
         router.push(`/dashboards/${criado.id}`);
       }
       router.refresh();
@@ -185,7 +203,7 @@ export function ConstrutorDashboard({ catalogo, dashboard }: Props) {
       setErro(e instanceof Error ? e.message : String(e));
       setSalvando(false);
     }
-  }, [nome, descricao, paineis, dashboard, router]);
+  }, [nome, descricao, paineis, visibilidade, gruposEscolhidos, dashboard, router]);
 
   const excluir = useCallback(async () => {
     if (!dashboard) return;
@@ -247,6 +265,105 @@ export function ConstrutorDashboard({ catalogo, dashboard }: Props) {
             />
           </label>
         </div>
+      </section>
+
+      <section className="cartao">
+        <h2 className="cartao-titulo">Quem pode ver</h2>
+        <p className="cartao-legenda">
+          Vale para o dashboard inteiro. Quem criou e os administradores sempre
+          enxergam.
+        </p>
+
+        <fieldset className="opcoes-visibilidade">
+          <legend className="sr-apenas">Visibilidade</legend>
+
+          <label className="opcao-visibilidade" data-selecionado={visibilidade === 'TODOS'}>
+            <input
+              type="radio"
+              name="visibilidade"
+              value="TODOS"
+              checked={visibilidade === 'TODOS'}
+              onChange={() => setVisibilidade('TODOS')}
+            />
+            <span className="opcao-visibilidade-texto">
+              <strong>Todos</strong>
+              <span>Qualquer pessoa com acesso ao sistema</span>
+            </span>
+          </label>
+
+          <label
+            className="opcao-visibilidade"
+            data-selecionado={visibilidade === 'GRUPOS'}
+            data-desabilitado={grupos.length === 0}
+          >
+            <input
+              type="radio"
+              name="visibilidade"
+              value="GRUPOS"
+              checked={visibilidade === 'GRUPOS'}
+              disabled={grupos.length === 0}
+              onChange={() => setVisibilidade('GRUPOS')}
+            />
+            <span className="opcao-visibilidade-texto">
+              <strong>Grupos escolhidos</strong>
+              <span>
+                {grupos.length === 0
+                  ? 'Nenhum grupo existe ainda — um administrador cria em Equipe'
+                  : 'Só quem estiver nos grupos marcados abaixo'}
+              </span>
+            </span>
+          </label>
+
+          <label className="opcao-visibilidade" data-selecionado={visibilidade === 'PRIVADO'}>
+            <input
+              type="radio"
+              name="visibilidade"
+              value="PRIVADO"
+              checked={visibilidade === 'PRIVADO'}
+              onChange={() => setVisibilidade('PRIVADO')}
+            />
+            <span className="opcao-visibilidade-texto">
+              <strong>Só eu</strong>
+              <span>Ninguém mais vê, exceto administradores</span>
+            </span>
+          </label>
+        </fieldset>
+
+        {visibilidade === 'GRUPOS' ? (
+          <>
+            <fieldset className="escolha-pessoas" style={{ marginTop: 12 }}>
+              <legend className="campo-rotulo">Grupos que enxergam</legend>
+              {grupos.map((g) => (
+                <label key={g.id} className="pessoa-opcao">
+                  <input
+                    type="checkbox"
+                    checked={gruposEscolhidos.includes(g.id)}
+                    onChange={(e) =>
+                      setGruposEscolhidos((atuais) =>
+                        e.target.checked
+                          ? [...atuais, g.id]
+                          : atuais.filter((id) => id !== g.id),
+                      )
+                    }
+                  />
+                  {g.nome}
+                  <span className="grupo-contagem">
+                    {g.membros.length === 1
+                      ? '1 pessoa'
+                      : `${g.membros.length} pessoas`}
+                  </span>
+                </label>
+              ))}
+            </fieldset>
+
+            {gruposEscolhidos.length === 0 ? (
+              <p className="nota-grafico nota-alerta">
+                Nenhum grupo marcado: por enquanto só você e os administradores
+                enxergam este dashboard.
+              </p>
+            ) : null}
+          </>
+        ) : null}
       </section>
 
       <section className="cartao">

@@ -17,6 +17,7 @@ import type {
   PainelConfig,
   TipoPainel,
   Validacao,
+  Visibilidade,
 } from './api';
 
 async function ponte<T>(corpo: {
@@ -67,11 +68,19 @@ export const criarDashboard = (dados: {
   nome: string;
   descricao?: string;
   paineis?: PainelConfig[];
+  visibilidade?: Visibilidade;
+  grupos?: string[];
 }) => ponte<Dashboard>({ acao: 'criar', dados });
 
 export const salvarDashboard = (
   id: string,
-  dados: { nome?: string; descricao?: string; paineis?: PainelConfig[] },
+  dados: {
+    nome?: string;
+    descricao?: string;
+    paineis?: PainelConfig[];
+    visibilidade?: Visibilidade;
+    grupos?: string[];
+  },
 ) => ponte<Dashboard>({ acao: 'salvar', id, dados });
 
 export const excluirDashboard = (id: string) =>

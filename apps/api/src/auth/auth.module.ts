@@ -25,6 +25,7 @@ import {
   Publico,
 } from './guards';
 import { JwtStrategy, UsuarioNaRequisicao } from './jwt.strategy';
+import { GruposService } from './grupos.service';
 import { Papel, UsuariosService } from './usuarios.service';
 
 @Controller('auth')
@@ -167,6 +168,50 @@ export class UsuariosController {
   }
 }
 
+/**
+ * Grupos — as equipes internas que decidem quem vê quais dashboards.
+ *
+ * Só administradores mexem: quem entra em qual grupo é decisão de gestão, e
+ * deixar cada um se incluir onde quisesse esvaziaria a restrição de
+ * visibilidade.
+ */
+@Controller('grupos')
+@UseGuards(PapeisGuard)
+@ExigePapel('ADMIN')
+export class GruposController {
+  constructor(private readonly grupos: GruposService) {}
+
+  @Get()
+  listar() {
+    return this.grupos.listar();
+  }
+
+  @Get(':id')
+  obter(@Param('id', ParseUUIDPipe) id: string) {
+    return this.grupos.obter(id);
+  }
+
+  @Post()
+  criar(
+    @Body() corpo: { nome: string; descricao?: string; membros?: string[] },
+  ) {
+    return this.grupos.criar(corpo);
+  }
+
+  @Put(':id')
+  atualizar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() corpo: { nome?: string; descricao?: string; membros?: string[] },
+  ) {
+    return this.grupos.atualizar(id, corpo);
+  }
+
+  @Delete(':id')
+  remover(@Param('id', ParseUUIDPipe) id: string) {
+    return this.grupos.remover(id);
+  }
+}
+
 @Module({
   imports: [
     PassportModule,
@@ -186,10 +231,11 @@ export class UsuariosController {
     // Teto geral por IP; o login tem limite próprio, bem mais apertado.
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 200 }]),
   ],
-  controllers: [AuthController, UsuariosController],
+  controllers: [AuthController, UsuariosController, GruposController],
   providers: [
     AuthService,
     UsuariosService,
+    GruposService,
     JwtStrategy,
     /*
      * Guards globais: tudo nasce protegido, e só sai da proteção o que estiver
@@ -199,6 +245,6 @@ export class UsuariosController {
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
-  exports: [UsuariosService, AuthService],
+  exports: [UsuariosService, AuthService, GruposService],
 })
 export class AuthModule {}

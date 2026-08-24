@@ -364,13 +364,30 @@ export interface PainelConfig {
   faixas?: number | null;
 }
 
+export type Visibilidade = 'TODOS' | 'GRUPOS' | 'PRIVADO';
+
 export interface Dashboard {
   id: string;
   nome: string;
   descricao: string | null;
   paineis: PainelConfig[];
+  criadoPor: string | null;
+  visibilidade: Visibilidade;
+  /** Ids dos grupos que enxergam, quando a visibilidade é GRUPOS. */
+  grupos: string[];
+  /** Se quem está pedindo pode alterar este dashboard. */
+  podeEditar: boolean;
   criadoEm: string;
   atualizadoEm: string;
+}
+
+/** Uma equipe interna. */
+export interface Grupo {
+  id: string;
+  nome: string;
+  descricao: string | null;
+  criadoEm: string;
+  membros: { id: string; nome: string; email: string }[];
 }
 
 export interface EixoPainel {
@@ -409,7 +426,14 @@ export interface PainelCalculado {
 }
 
 export interface DadosDashboard {
-  dashboard: { id: string; nome: string; descricao: string | null };
+  dashboard: {
+    id: string;
+    nome: string;
+    descricao: string | null;
+    visibilidade: Visibilidade;
+    grupos: string[];
+    podeEditar: boolean;
+  };
   totalFormulacoes: number;
   paineis: PainelCalculado[];
 }
@@ -435,6 +459,7 @@ export interface Usuario {
 // --- Chamadas ---
 
 export const listarUsuarios = () => buscar<Usuario[]>('/usuarios');
+export const listarGrupos = () => buscar<Grupo[]>('/grupos');
 
 export const obterCatalogoMetricas = () =>
   buscar<CatalogoMetricas>('/dashboards/catalogo');

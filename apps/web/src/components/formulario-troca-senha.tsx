@@ -2,6 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import {
+  ListaRequisitos,
+  motivoBloqueio,
+  requisitosDaSenha,
+} from './requisitos-senha';
 
 /** Troca da própria senha, conferindo a atual. */
 export function FormularioTrocaSenha() {
@@ -13,21 +18,27 @@ export function FormularioTrocaSenha() {
   const [pronto, setPronto] = useState(false);
   const [enviando, setEnviando] = useState(false);
 
-  const curta = senhaNova.length > 0 && senhaNova.length < 10;
-  const diferem = confirmacao.length > 0 && senhaNova !== confirmacao;
+  const requisitos = requisitosDaSenha(senhaNova, confirmacao);
+  const igualAtual = senhaNova.length > 0 && senhaNova === senhaAtual;
+
+  const bloqueio =
+    motivoBloqueio(
+      [
+        { rotulo: 'senha atual', preenchido: senhaAtual.length > 0 },
+        { rotulo: 'senha nova', preenchido: senhaNova.length > 0 },
+        { rotulo: 'a repetição da senha nova', preenchido: confirmacao.length > 0 },
+      ],
+      requisitos,
+    ) ??
+    (igualAtual ? 'A senha nova precisa ser diferente da atual.' : null);
+
+  const podeEnviar = !enviando && bloqueio === null;
 
   async function enviar(evento: React.FormEvent) {
     evento.preventDefault();
     setErro('');
-
-    // Conferir aqui evita uma ida ao servidor para dizer o óbvio; a validação
-    // que vale continua sendo a da API.
-    if (senhaNova !== confirmacao) {
-      setErro('A confirmação não confere com a senha nova.');
-      return;
-    }
-
     setEnviando(true);
+
     try {
       const resposta = await fetch('/api/sessao/senha', {
         method: 'POST',
@@ -87,11 +98,6 @@ export function FormularioTrocaSenha() {
           value={senhaNova}
           onChange={(e) => setSenhaNova(e.target.value)}
         />
-        <span className="nota-grafico" style={{ margin: '2px 0 0' }}>
-          {curta
-            ? 'Faltam caracteres: o mínimo é 10.'
-            : 'Pelo menos 10 caracteres. Uma frase curta funciona bem.'}
-        </span>
       </label>
 
       <label className="campo">
@@ -103,12 +109,18 @@ export function FormularioTrocaSenha() {
           value={confirmacao}
           onChange={(e) => setConfirmacao(e.target.value)}
         />
-        {diferem ? (
-          <span className="nota-grafico" style={{ margin: '2px 0 0' }}>
-            As duas não conferem.
-          </span>
-        ) : null}
       </label>
+
+      <ListaRequisitos
+        requisitos={requisitos}
+        mostrar={senhaNova.length > 0 || confirmacao.length > 0}
+      />
+
+      {igualAtual ? (
+        <p className="nota-grafico nota-alerta">
+          A senha nova é igual à atual — escolha outra.
+        </p>
+      ) : null}
 
       {erro ? (
         <p className="aviso aviso-erro" role="alert">
@@ -116,13 +128,20 @@ export function FormularioTrocaSenha() {
         </p>
       ) : null}
 
-      <button
-        type="submit"
-        className="botao botao-primario"
-        disabled={enviando || curta || diferem || !senhaAtual || !senhaNova}
-      >
-        {enviando ? 'Trocando…' : 'Trocar senha'}
-      </button>
+      <div className="acao-com-motivo">
+        <button type="submit" className="botao botao-primario" disabled={!podeEnviar}>
+          {enviando ? 'Trocando…' : 'Trocar senha'}
+        </button>
+        {/*
+          O motivo fica ao lado do botão bloqueado, e não escondido num "tente e
+          descubra". `aria-live` faz o leitor de tela anunciar a mudança.
+        */}
+        {bloqueio && !enviando ? (
+          <p className="motivo-bloqueio" aria-live="polite">
+            {bloqueio}
+          </p>
+        ) : null}
+      </div>
     </form>
   );
 }

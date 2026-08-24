@@ -14,6 +14,7 @@ import {
   jsonb,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -38,6 +39,22 @@ export const origemEnum = pgEnum('origem', ['PRODUCAO', 'LABORATORIO']);
  * com regras que hoje não existem.
  */
 export const papelEnum = pgEnum('papel', ['ADMIN', 'MEMBRO']);
+
+/**
+ * Quem enxerga um dashboard.
+ *
+ * - `TODOS`    — qualquer pessoa com acesso ao sistema.
+ * - `GRUPOS`   — só quem pertence a algum dos grupos vinculados (mais o autor).
+ * - `PRIVADO`  — só quem criou.
+ *
+ * Administradores enxergam tudo, em qualquer caso: sem isso, um dashboard
+ * privado de alguém que saiu da equipe ficaria órfão e invisível para sempre.
+ */
+export const visibilidadeEnum = pgEnum('visibilidade', [
+  'TODOS',
+  'GRUPOS',
+  'PRIVADO',
+]);
 
 export const categoriaMaterialEnum = pgEnum('categoria_material', [
   'CIMENTO',
@@ -267,6 +284,46 @@ export const usuarios = pgTable(
 );
 
 /**
+ * Grupo de pessoas — uma equipe dentro da equipe.
+ *
+ * Serve para dizer quem vê o quê sem listar pessoa por pessoa em cada
+ * dashboard: quando alguém entra ou sai do laboratório, muda-se o grupo e todos
+ * os dashboards acompanham.
+ */
+export const grupos = pgTable(
+  'grupos',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    nome: text('nome').notNull(),
+    descricao: text('descricao'),
+    criadoEm: timestamp('criado_em', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => ({
+    nomeUnico: uniqueIndex('grupos_nome_unico').on(t.nome),
+  }),
+);
+
+/** Quem está em cada grupo. */
+export const membrosGrupo = pgTable(
+  'membros_grupo',
+  {
+    grupoId: uuid('grupo_id')
+      .notNull()
+      .references(() => grupos.id, { onDelete: 'cascade' }),
+    usuarioId: uuid('usuario_id')
+      .notNull()
+      .references(() => usuarios.id, { onDelete: 'cascade' }),
+  },
+  (t) => ({
+    // A dupla é a chave: ninguém entra duas vezes no mesmo grupo.
+    chave: primaryKey({ columns: [t.grupoId, t.usuarioId] }),
+    porUsuario: index('membros_grupo_usuario_idx').on(t.usuarioId),
+  }),
+);
+
+/**
  * Dashboard montado pelo usuário, com os painéis que ele escolheu.
  *
  * Os painéis ficam em `jsonb`, não numa tabela filha: são **configuração de
@@ -285,6 +342,16 @@ export const dashboards = pgTable(
     nome: text('nome').notNull(),
     descricao: text('descricao'),
     paineis: jsonb('paineis').notNull().default([]),
+    /*
+     * Quem criou. Fica nulo nos dashboards feitos antes de existir login — não
+     * há como descobrir o autor depois, e inventar um seria pior que admitir a
+     * lacuna. Sem autor, valem as regras de visibilidade e o acesso de
+     * administrador.
+     */
+    criadoPor: uuid('criado_por').references(() => usuarios.id, {
+      onDelete: 'set null',
+    }),
+    visibilidade: visibilidadeEnum('visibilidade').notNull().default('TODOS'),
     criadoEm: timestamp('criado_em', { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -294,6 +361,24 @@ export const dashboards = pgTable(
   },
   (t) => ({
     porNome: index('dashboards_nome_idx').on(t.nome),
+    porAutor: index('dashboards_autor_idx').on(t.criadoPor),
+  }),
+);
+
+/** Grupos que enxergam um dashboard de visibilidade `GRUPOS`. */
+export const dashboardsGrupos = pgTable(
+  'dashboards_grupos',
+  {
+    dashboardId: uuid('dashboard_id')
+      .notNull()
+      .references(() => dashboards.id, { onDelete: 'cascade' }),
+    grupoId: uuid('grupo_id')
+      .notNull()
+      .references(() => grupos.id, { onDelete: 'cascade' }),
+  },
+  (t) => ({
+    chave: primaryKey({ columns: [t.dashboardId, t.grupoId] }),
+    porGrupo: index('dashboards_grupos_grupo_idx').on(t.grupoId),
   }),
 );
 

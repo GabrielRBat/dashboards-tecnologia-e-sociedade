@@ -55,7 +55,14 @@ async function repassar(
 
 export async function POST(requisicao: Request) {
   const { acao, id, dados } = (await requisicao.json()) as {
-    acao: 'criar' | 'atualizar' | 'redefinir-senha' | 'remover';
+    acao:
+      | 'criar'
+      | 'atualizar'
+      | 'redefinir-senha'
+      | 'remover'
+      | 'grupo-criar'
+      | 'grupo-atualizar'
+      | 'grupo-remover';
     id?: string;
     dados?: unknown;
   };
@@ -69,6 +76,12 @@ export async function POST(requisicao: Request) {
       return repassar(`/usuarios/${id}/redefinir-senha`, 'POST', dados);
     case 'remover':
       return repassar(`/usuarios/${id}`, 'DELETE');
+    case 'grupo-criar':
+      return repassar('/grupos', 'POST', dados);
+    case 'grupo-atualizar':
+      return repassar(`/grupos/${id}`, 'PUT', dados);
+    case 'grupo-remover':
+      return repassar(`/grupos/${id}`, 'DELETE');
     default:
       return NextResponse.json({ mensagem: 'Ação desconhecida.' }, { status: 400 });
   }

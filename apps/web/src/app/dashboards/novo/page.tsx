@@ -1,15 +1,26 @@
 import Link from 'next/link';
 import { ApiForaDoAr } from '@/components/estado';
 import { ConstrutorDashboard } from '@/components/construtor-dashboard';
-import { ApiIndisponivel, obterCatalogoMetricas } from '@/lib/api';
+import {
+  ApiIndisponivel,
+  listarGrupos,
+  obterCatalogoMetricas,
+} from '@/lib/api';
 import { ehRedirecionamento } from '@/lib/erros';
 
 export const dynamic = 'force-dynamic';
 
 export default async function PaginaNovoDashboard() {
   let catalogo;
+  /*
+   * Grupos só aparecem para administradores; para os demais a API responde 403.
+   * Nesse caso a lista fica vazia e a opção "grupos escolhidos" some, em vez de
+   * derrubar a página inteira por uma permissão que nem todos precisam ter.
+   */
+  let grupos: Awaited<ReturnType<typeof listarGrupos>> = [];
   try {
     catalogo = await obterCatalogoMetricas();
+    grupos = await listarGrupos().catch(() => []);
   } catch (e) {
     // Sessão vencida vira redirect, que é uma exceção: precisa passar.
     if (ehRedirecionamento(e)) throw e;
@@ -27,7 +38,7 @@ export default async function PaginaNovoDashboard() {
         Escolha o tipo de gráfico e as métricas. Combinações que produziriam um
         resultado sem significado são recusadas, com o motivo.
       </p>
-      <ConstrutorDashboard catalogo={catalogo} dashboard={null} />
+      <ConstrutorDashboard catalogo={catalogo} dashboard={null} grupos={grupos} />
     </>
   );
 }

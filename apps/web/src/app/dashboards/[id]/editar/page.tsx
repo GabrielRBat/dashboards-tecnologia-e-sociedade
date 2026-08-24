@@ -4,6 +4,7 @@ import { ApiForaDoAr } from '@/components/estado';
 import { ConstrutorDashboard } from '@/components/construtor-dashboard';
 import {
   ApiIndisponivel,
+  listarGrupos,
   obterCatalogoMetricas,
   obterDashboard,
 } from '@/lib/api';
@@ -18,11 +19,13 @@ export default async function PaginaEditarDashboard({
 }) {
   let catalogo;
   let dashboard;
+  let grupos: Awaited<ReturnType<typeof listarGrupos>> = [];
   try {
     [catalogo, dashboard] = await Promise.all([
       obterCatalogoMetricas(),
       obterDashboard(params.id),
     ]);
+    grupos = await listarGrupos().catch(() => []);
   } catch (e) {
     // Sessão vencida vira redirect, que é uma exceção: precisa passar.
     if (ehRedirecionamento(e)) throw e;
@@ -39,7 +42,11 @@ export default async function PaginaEditarDashboard({
       <p className="subtitulo-pagina">
         Este dashboard é compartilhado — as mudanças valem para toda a equipe.
       </p>
-      <ConstrutorDashboard catalogo={catalogo} dashboard={dashboard} />
+      <ConstrutorDashboard
+        catalogo={catalogo}
+        dashboard={dashboard}
+        grupos={grupos}
+      />
     </>
   );
 }
