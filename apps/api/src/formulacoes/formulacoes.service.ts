@@ -36,6 +36,10 @@ export class FormulacoesService {
   private montarWhere(filtros: ListarFormulacoesDto): SQL | undefined {
     const condicoes: SQL[] = [];
 
+    if (filtros.ids?.length) {
+      condicoes.push(inArray(formulacoes.id, filtros.ids));
+    }
+
     if (filtros.busca?.trim()) {
       const termo = `%${filtros.busca.trim()}%`;
       const alternativas: SQL[] = [

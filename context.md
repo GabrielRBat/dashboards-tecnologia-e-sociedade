@@ -38,12 +38,14 @@ Versionado desde 2026-08-24 no branch `master` de
 > `*.tsbuildinfo`. Antes de adicionar qualquer arquivo com dado real, conferir
 > se ele pode ficar exposto.
 
-Funcionando: visão geral com indicadores e **doze gráficos**, **dashboards
-customizados** montados pela equipe, lista de formulações com filtros, página de
-detalhe, importação da planilha `.xlsx` e aba de configurações com escolha de
-tema.
+Funcionando: visão geral com indicadores e **doze gráficos** (com rótulos
+descritivos nos eixos X e Y), **dashboards customizados** montados pela equipe,
+lista de formulações com filtros e **comparação de até 3 formulações** (ciclo
+completo: evolução, tabela e granulometria), página de detalhe, importação da
+planilha `.xlsx` e aba de configurações com escolha de tema.
 
-Verificado: 46 testes unitários passando (25 de cálculos, 21 das normas), 14 verificações de
+Verificado: 48 testes unitários passando (25 de cálculos, 21 das normas, 2 do
+filtro `ids`), 14 verificações de
 comportamento do seletor de tema, typecheck e build limpos na API e no frontend,
 API respondendo em todos os endpoints, as cinco telas conferidas em modo claro e
 escuro sem erro de console nem overflow, importação da planilha real com 60/60
@@ -129,6 +131,10 @@ nos dois temas.
   a unidade: cruzar níveis diferentes alinha grandezas que não se correspondem.
   Também barra dispersão com eixo categórico, barras sem categoria e métrica
   contra ela mesma. Tudo em `metricas/catalogo.ts`, com 18 testes.
+- **Comparação de formulações: no máximo 3.** A lista permite marcar e abrir
+  `/formulacoes/comparar`; a API rejeita `ids` com mais de 3 (ArrayMaxSize). O
+  ciclo mostrado cobre evolução da resistência, tabela dos três estados e
+  granulometria — o recorte pedido para decidir qual formulação utilizar.
 - **A validação roda também na gravação, não só na tela.** A da interface é
   conveniência; a do servidor é a que vale. Sem ela bastaria uma requisição
   direta para gravar um gráfico enganoso, que passaria a existir para a equipe.

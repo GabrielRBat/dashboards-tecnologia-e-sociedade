@@ -39,8 +39,10 @@ módulo de elasticidade dinâmico e relação água/ligante.
 
   Os gráficos normativos seguem o que a literatura da área publica — curva
   granulométrica em escala logarítmica com as faixas da norma atrás, média com
-  barra de erro, correlações com R². As convenções adotadas (e o que os dados de
-  hoje **não** permitem desenhar) estão em [`docs/CALCULOS.md`](docs/CALCULOS.md).
+  barra de erro, correlações com R². Os eixos trazem o nome da grandeza medida
+  (e a unidade), para cada gráfico dizer sozinho a que ensaio se refere. As
+  convenções adotadas (e o que os dados de hoje **não** permitem desenhar) estão
+  em [`docs/CALCULOS.md`](docs/CALCULOS.md).
   Os cartões são **reposicionáveis**: arraste pela alça e a grade se reorganiza
   ao vivo, mostrando onde o cartão vai cair. A ordem fica salva no navegador de
   cada pessoa. Funciona também pelo teclado (setas, com a alça em foco) e por
@@ -51,6 +53,9 @@ módulo de elasticidade dinâmico e relação água/ligante.
   equipe.
 - **Formulações** — tabela com todos os registros e os valores já calculados,
   com busca e filtros por tipo de projeto, origem, desenvolvedor e período.
+  Marque **até 3** na lista e use **Comparar** para ver o ciclo de ensaios lado
+  a lado (evolução da resistência, tabela anidro/fresco/endurecido e
+  granulometria).
 - **Detalhe da formulação** — composição, os três estados, resistências por
   idade com desvio padrão, corpos de prova do estado endurecido e granulometria.
 - **Importar planilha** — sobe o arquivo `.xlsx` do laboratório e grava as
@@ -404,6 +409,22 @@ recargas do painel, nove delas jogadas fora.
 
 Todos os filtros vivem na URL, então um recorte pode ser copiado e enviado a
 outra pessoa: `/?busca=Contrapiso&tipoProjeto=RC`.
+
+## Comparar formulações
+
+Em **Formulações**, marque até **3** linhas (checkbox à esquerda) e use
+**Comparar** na barra inferior. A página `/formulacoes/comparar` mostra o ciclo
+completo das selecionadas:
+
+| Bloco | O que compara |
+|---|---|
+| Evolução da compressão | Linhas por formulação aos 3/7/14/28 dias |
+| Evolução da flexão | Idem, tração na flexão |
+| Tabela | Identificação, anidro, fresco e endurecido (resistências, densidade e módulo) |
+| Granulometria | Curvas sobrepostas com as zonas da NBR 7211 |
+
+Menos de 2 selecionadas não abre a comparação; a 4ª é bloqueada na lista e a API
+recusa `ids` com mais de 3.
 
 ## Dashboards customizados
 

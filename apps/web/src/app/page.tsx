@@ -180,8 +180,8 @@ export default async function PaginaVisaoGeral({
           >
             <GraficoCorrelacao
               dados={correlacoes.flexaoCompressao}
-              rotuloX="Compressão"
-              rotuloY="Flexão"
+              rotuloX="Resistência à compressão"
+              rotuloY="Resistência à tração na flexão"
               unidadeX="MPa"
               unidadeY="MPa"
             />
@@ -198,8 +198,8 @@ export default async function PaginaVisaoGeral({
           >
             <GraficoCorrelacao
               dados={correlacoes.moduloCompressao}
-              rotuloX="Compressão"
-              rotuloY="Módulo"
+              rotuloX="Resistência à compressão"
+              rotuloY="Módulo de elasticidade dinâmico"
               unidadeX="MPa"
               unidadeY="MPa"
               casasY={0}
