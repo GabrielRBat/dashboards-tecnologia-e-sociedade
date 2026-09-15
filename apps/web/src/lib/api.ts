@@ -8,6 +8,7 @@ export type ParametrosBusca = Record<string, string | string[] | undefined>;
 export function montarQuery(params: ParametrosBusca): string {
   const query = new URLSearchParams();
   const permitidos = [
+    'ids',
     'busca',
     'tipoProjeto',
     'origem',
@@ -109,6 +110,17 @@ export interface PontoEvolucao {
   compressao: number | null;
   flexao: number | null;
   amostras: number;
+}
+
+/** Curva de resistência de uma formulação (comparação lado a lado). */
+export interface CurvaEvolucao {
+  formulacaoId: string;
+  nomenclatura: string;
+  pontos: {
+    idadeDias: number;
+    compressao: number | null;
+    flexao: number | null;
+  }[];
 }
 
 export interface ItemComparativo {
@@ -475,6 +487,8 @@ export const obterPainel = (q: string) =>
 export const obterResumo = (q: string) => buscar<Resumo>(`/indicadores/resumo${q}`);
 export const obterEvolucaoMedia = (q: string) =>
   buscar<PontoEvolucao[]>(`/indicadores/evolucao-media${q}`);
+export const obterEvolucaoPorFormulacao = (q: string) =>
+  buscar<CurvaEvolucao[]>(`/indicadores/evolucao${q}`);
 export const obterComparativo = (q: string) =>
   buscar<ItemComparativo[]>(`/indicadores/comparativo${q}`);
 export const obterDispersao = (q: string) =>

@@ -4,6 +4,8 @@ Formato: **data** — tipo — descrição.
 
 ## 2026-09-14
 
+- **2026-09-14** — fix — Tabela comparativa do ciclo de ensaios: linhas horizontais contínuas atravessando a coluna do ensaio e as colunas das formulações (antes a borda só existia nos `td`, e o nome da propriedade ficava sem separação).
+- **2026-09-14** — feature — Comparação de até 3 formulações: seleção por checkbox na lista `/formulacoes`, página `/formulacoes/comparar` com evolução da compressão e da flexão, tabela do ciclo (anidro/fresco/endurecido) e granulometria sobreposta. Filtro `ids` na API (máx. 3).
 - **2026-09-14** — feature — Rótulos descritivos nos eixos X e Y de todos os gráficos da visão geral e dos painéis customizados (idade do ensaio, resistência em MPa, relação água/ligante, abertura de peneira, classes NBR 13281, carga/deslocamento do squeeze-flow, etc.), em vez de só a unidade abreviada.
 
 ## 2026-08-24

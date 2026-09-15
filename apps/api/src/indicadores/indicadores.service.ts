@@ -75,7 +75,9 @@ export class IndicadoresService {
   }
 
   async evolucaoPorFormulacao(filtros: ListarFormulacoesDto, limite = 8) {
-    return this.evolucaoPorFormulacaoDe(await this.carregar(filtros), limite);
+    // Com ids explícitos (comparação), devolve todas as pedidas — sem o teto genérico.
+    const teto = filtros.ids?.length ? filtros.ids.length : limite;
+    return this.evolucaoPorFormulacaoDe(await this.carregar(filtros), teto);
   }
 
   async comparativo28d(filtros: ListarFormulacoesDto, limite = 12) {
@@ -87,7 +89,8 @@ export class IndicadoresService {
   }
 
   async granulometria(filtros: ListarFormulacoesDto, limite = 6) {
-    return this.granulometriaDe(await this.carregar(filtros), limite);
+    const teto = filtros.ids?.length ? filtros.ids.length : limite;
+    return this.granulometriaDe(await this.carregar(filtros), teto);
   }
 
   async classificacao(filtros: ListarFormulacoesDto) {

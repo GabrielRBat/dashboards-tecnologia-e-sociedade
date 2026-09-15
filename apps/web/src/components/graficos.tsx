@@ -34,6 +34,7 @@ import type { ReactNode } from 'react';
 import {
   Classificacao,
   Correlacao,
+  CurvaEvolucao,
   CurvaGranulometrica,
   DispersaoIdade,
   FamiliaClasses,
@@ -1174,6 +1175,145 @@ export function GraficoDispersaoIdade({ dados }: { dados: DispersaoIdade[] }) {
         A barra vertical é o desvio padrão entre todos os corpos de prova do
         filtro — a média sozinha esconde a variabilidade do ensaio.
       </p>
+    </>
+  );
+}
+
+/* --- Evolução por formulação (comparação lado a lado) --- */
+
+export function GraficoEvolucaoComparativo({
+  curvas,
+  metrica,
+}: {
+  curvas: CurvaEvolucao[];
+  metrica: 'compressao' | 'flexao';
+}) {
+  const rotulo =
+    metrica === 'compressao'
+      ? 'Resistência à compressão (MPa)'
+      : 'Resistência à tração na flexão (MPa)';
+
+  const comDados = curvas.filter((c) =>
+    c.pontos.some((p) => p[metrica] !== null),
+  );
+
+  if (comDados.length === 0) {
+    return (
+      <SemDados>
+        Nenhuma das formulações tem ensaio de{' '}
+        {metrica === 'compressao' ? 'compressão' : 'flexão'} preenchido.
+      </SemDados>
+    );
+  }
+
+  const idades = [3, 7, 14, 28];
+  const dados = idades.map((idade) => {
+    const linha: Record<string, number | null> = { idadeDias: idade };
+    for (const c of comDados) {
+      linha[c.formulacaoId] =
+        c.pontos.find((p) => p.idadeDias === idade)?.[metrica] ?? null;
+    }
+    return linha;
+  });
+
+  return (
+    <>
+      <ResponsiveContainer width="100%" height={280}>
+        <LineChart
+          data={dados}
+          margin={{ top: 12, right: 44, bottom: 20, left: 2 }}
+        >
+          <CartesianGrid stroke="var(--grade)" vertical={false} />
+          <XAxis
+            dataKey="idadeDias"
+            {...EIXO}
+            tickFormatter={(v: number) => `${v}d`}
+            label={{
+              value: 'Idade do ensaio (dias)',
+              position: 'insideBottom',
+              offset: -12,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+            }}
+          />
+          <YAxis
+            {...EIXO}
+            width={58}
+            label={{
+              value: rotulo,
+              angle: -90,
+              position: 'insideLeft',
+              offset: 16,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+            }}
+          />
+          <Tooltip
+            cursor={{ stroke: 'var(--eixo)', strokeWidth: 1 }}
+            content={({ active, payload, label }) => {
+              if (!active || !payload?.length) return null;
+              const daCurva = payload.filter((p) =>
+                comDados.some((c) => c.formulacaoId === p.dataKey),
+              );
+              if (daCurva.length === 0) return null;
+              return (
+                <Tip
+                  titulo={`${label} dias`}
+                  linhas={daCurva.map((p) => {
+                    const i = comDados.findIndex(
+                      (c) => c.formulacaoId === p.dataKey,
+                    );
+                    return {
+                      cor: CORES[i % CORES.length] as string,
+                      rotulo: comDados[i]?.nomenclatura ?? String(p.dataKey),
+                      valor:
+                        p.value === null || p.value === undefined
+                          ? '—'
+                          : `${num(Number(p.value), 2)} MPa`,
+                    };
+                  })}
+                />
+              );
+            }}
+          />
+          {comDados.map((c, i) => (
+            <Line
+              key={c.formulacaoId}
+              type="monotone"
+              dataKey={c.formulacaoId}
+              name={c.nomenclatura}
+              stroke={CORES[i % CORES.length]}
+              strokeWidth={2}
+              isAnimationActive={false}
+              connectNulls
+              dot={{ r: 3.5, strokeWidth: 2, fill: 'var(--superficie)' }}
+              activeDot={{ r: 5 }}
+            >
+              <LabelList
+                dataKey={c.formulacaoId}
+                content={({ index, x, y, value }) =>
+                  index === dados.length - 1 &&
+                  value !== undefined &&
+                  value !== null ? (
+                    <text
+                      x={Number(x) + 8}
+                      y={Number(y) + 4}
+                      fill="var(--tinta-secundaria)"
+                      fontSize={11}
+                    >
+                      {num(Number(value), 1)}
+                    </text>
+                  ) : null
+                }
+              />
+            </Line>
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
+      <Legenda
+        itens={comDados.map((c, i) => ({
+          cor: CORES[i % CORES.length] as string,
+          rotulo: c.nomenclatura,
+        }))}
+      />
     </>
   );
 }

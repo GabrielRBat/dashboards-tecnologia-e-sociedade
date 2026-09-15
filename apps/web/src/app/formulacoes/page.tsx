@@ -3,6 +3,11 @@ import { Suspense } from 'react';
 import { BarraFiltros } from '@/components/filtros';
 import { ApiForaDoAr } from '@/components/estado';
 import {
+  BarraComparacao,
+  CheckboxComparacao,
+  ProvedorComparacao,
+} from '@/components/selecao-comparacao';
+import {
   ApiIndisponivel,
   ParametrosBusca,
   listarFormulacoes,
@@ -43,11 +48,11 @@ export default async function PaginaFormulacoes({
     };
 
     return (
-      <>
+      <ProvedorComparacao>
         <h1 className="titulo-pagina">Formulações</h1>
         <p className="subtitulo-pagina">
           Todos os registros da planilha de alimentação, com os valores já
-          calculados.
+          calculados. Marque até 3 para comparar o ciclo de ensaios.
         </p>
 
         <Suspense fallback={null}>
@@ -64,6 +69,9 @@ export default async function PaginaFormulacoes({
               <table className="tabela">
                 <thead>
                   <tr>
+                    <th className="col-comparar" scope="col">
+                      <span className="sr-only">Comparar</span>
+                    </th>
                     <th>Nº</th>
                     <th>Nomenclatura</th>
                     <th>Tipo</th>
@@ -81,6 +89,12 @@ export default async function PaginaFormulacoes({
                 <tbody>
                   {pagina.itens.map((f) => (
                     <tr key={f.id}>
+                      <td className="col-comparar">
+                        <CheckboxComparacao
+                          id={f.id}
+                          nomenclatura={f.nomenclatura}
+                        />
+                      </td>
                       <td className="numerico">{f.numeracao}</td>
                       <td>
                         <Link
@@ -92,7 +106,10 @@ export default async function PaginaFormulacoes({
                       </td>
                       <td>
                         {f.tipoProjeto ? (
-                          <span className="etiqueta" title={tipoProjeto(f.tipoProjeto)}>
+                          <span
+                            className="etiqueta"
+                            title={tipoProjeto(f.tipoProjeto)}
+                          >
                             {f.tipoProjeto}
                           </span>
                         ) : (
@@ -101,7 +118,9 @@ export default async function PaginaFormulacoes({
                       </td>
                       <td>{origem(f.origem)}</td>
                       <td>{data(f.data)}</td>
-                      <td>{f.desenvolvedor ?? <span className="vazio">—</span>}</td>
+                      <td>
+                        {f.desenvolvedor ?? <span className="vazio">—</span>}
+                      </td>
                       <td className="numerico">
                         {num(f.calculados.relacaoAguaLigante, 3)}
                       </td>
@@ -111,7 +130,9 @@ export default async function PaginaFormulacoes({
                       <td className="numerico">
                         {num(f.calculados.densidadeFresco, 0)}
                       </td>
-                      <td className="numerico">{num(f.calculados.flexao28d, 2)}</td>
+                      <td className="numerico">
+                        {num(f.calculados.flexao28d, 2)}
+                      </td>
                       <td className="numerico">
                         {num(f.calculados.compressao28d, 2)}
                       </td>
@@ -151,7 +172,9 @@ export default async function PaginaFormulacoes({
             </div>
           </>
         )}
-      </>
+
+        <BarraComparacao />
+      </ProvedorComparacao>
     );
   } catch (e) {
     // Sessão vencida vira redirect, que é uma exceção: precisa passar.

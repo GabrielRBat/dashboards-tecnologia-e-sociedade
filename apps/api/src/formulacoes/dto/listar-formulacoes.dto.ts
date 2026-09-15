@@ -1,5 +1,6 @@
 import { Transform } from 'class-transformer';
 import {
+  ArrayMaxSize,
   IsArray,
   IsDateString,
   IsIn,
@@ -25,6 +26,16 @@ const paraLista = ({ value }: { value: unknown }): string[] | undefined => {
 };
 
 export class ListarFormulacoesDto {
+  /** Até 3 ids — usado na comparação lado a lado de formulações. */
+  @IsOptional()
+  @Transform(paraLista)
+  @IsArray()
+  @ArrayMaxSize(3, {
+    message: 'A comparação admite no máximo 3 formulações.',
+  })
+  @IsString({ each: true })
+  ids?: string[];
+
   @IsOptional()
   @IsString()
   busca?: string;
