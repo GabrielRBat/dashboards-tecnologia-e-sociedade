@@ -24,3 +24,23 @@ describe('ListarFormulacoesDto — filtro ids', () => {
     );
   });
 });
+
+describe('ListarFormulacoesDto — campoBusca', () => {
+  it('aceita os campos de busca conhecidos', async () => {
+    const dto = plainToInstance(ListarFormulacoesDto, {
+      busca: 'Revestimento',
+      campoBusca: 'nomenclatura',
+    });
+    const erros = await validate(dto);
+    expect(erros).toHaveLength(0);
+  });
+
+  it('recusa campo de busca desconhecido', async () => {
+    const dto = plainToInstance(ListarFormulacoesDto, {
+      busca: 'Revestimento',
+      campoBusca: 'avaliador',
+    });
+    const erros = await validate(dto);
+    expect(erros.some((e) => e.property === 'campoBusca')).toBe(true);
+  });
+});

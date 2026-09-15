@@ -6,6 +6,14 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { ROTULOS_ORIGEM, ROTULOS_TIPO_PROJETO } from '@/lib/formato';
 
+const CAMPOS_BUSCA = [
+  { valor: 'todos', rotulo: 'Tudo' },
+  { valor: 'nomenclatura', rotulo: 'Nome' },
+  { valor: 'numeracao', rotulo: 'Nº' },
+  { valor: 'desenvolvedor', rotulo: 'Desenvolvedor' },
+  { valor: 'comentarios', rotulo: 'Comentário' },
+];
+
 export function BarraFiltros({
   desenvolvedores,
 }: {
@@ -30,8 +38,11 @@ export function BarraFiltros({
 
   const atualizar = (chave: string, valor: string): void => {
     const novos = new URLSearchParams(params.toString());
-    if (valor) novos.set(chave, valor);
-    else novos.delete(chave);
+    if (valor && !(chave === 'campoBusca' && valor === 'todos')) {
+      novos.set(chave, valor);
+    } else {
+      novos.delete(chave);
+    }
     // Qualquer mudança de filtro volta para a primeira página.
     novos.delete('pagina');
     iniciar(() => router.push(`${pathname}?${novos.toString()}`));
@@ -60,6 +71,7 @@ export function BarraFiltros({
   const valor = (chave: string): string => params.get(chave) ?? '';
   const temFiltro = [
     'busca',
+    'campoBusca',
     'tipoProjeto',
     'origem',
     'desenvolvedor',
@@ -82,6 +94,21 @@ export function BarraFiltros({
           }}
           className="campo-busca"
         />
+      </label>
+
+      <label className="campo">
+        <span className="campo-rotulo">Buscar em</span>
+        <select
+          value={valor('campoBusca') || 'todos'}
+          onChange={(e) => atualizar('campoBusca', e.target.value)}
+          className="campo-mini"
+        >
+          {CAMPOS_BUSCA.map((campo) => (
+            <option key={campo.valor} value={campo.valor}>
+              {campo.rotulo}
+            </option>
+          ))}
+        </select>
       </label>
 
       <label className="campo">

@@ -8,6 +8,7 @@ import {
   GraficoDispersaoIdade,
   GraficoDistribuicao,
   GraficoEvolucao,
+  GraficoFrequenciaGranulometrica,
   GraficoGranulometria,
   GraficoSqueezeFlow,
 } from '@/components/graficos';
@@ -123,6 +124,19 @@ export default async function PaginaVisaoGeral({
         ),
       },
       {
+        id: 'frequencia-granulometrica',
+        titulo: 'Frequência retida por peneira',
+        largura: 2,
+        node: (
+          <Cartao
+            titulo="Frequência retida por peneira"
+            legenda="Distribuição de partículas por faixa granulométrica"
+          >
+            <GraficoFrequenciaGranulometrica curvas={granulometria.curvas} />
+          </Cartao>
+        ),
+      },
+      {
         id: 'classes-compressao',
         titulo: 'Classes de resistência à compressão',
         node: (
@@ -201,6 +215,25 @@ export default async function PaginaVisaoGeral({
               rotuloX="Resistência à compressão"
               rotuloY="Módulo de elasticidade dinâmico"
               unidadeX="MPa"
+              unidadeY="MPa"
+              casasY={0}
+            />
+          </Cartao>
+        ),
+      },
+      {
+        id: 'modulo-densidade-endurecida',
+        titulo: 'Módulo de elasticidade e densidade endurecida',
+        node: (
+          <Cartao
+            titulo="Módulo de elasticidade e densidade endurecida"
+            legenda="Corpos de prova aos 28 dias no estado endurecido"
+          >
+            <GraficoCorrelacao
+              dados={correlacoes.moduloDensidadeEndurecida}
+              rotuloX="Densidade média endurecida"
+              rotuloY="Módulo de elasticidade dinâmico"
+              unidadeX="kg/m³"
               unidadeY="MPa"
               casasY={0}
             />

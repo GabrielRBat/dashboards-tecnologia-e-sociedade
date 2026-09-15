@@ -22,17 +22,19 @@ módulo de elasticidade dinâmico e relação água/ligante.
 
 ## O que já funciona
 
-- **Visão geral** — indicadores do conjunto filtrado e doze gráficos:
+- **Visão geral** — indicadores do conjunto filtrado e quatorze gráficos:
 
   | Gráfico | O que mostra |
   |---|---|
   | Evolução da resistência por idade | Compressão e flexão aos 3/7/14/28 dias |
   | Resistência e dispersão por idade | A mesma média com **desvio padrão** entre os corpos de prova |
   | Curvas granulométricas | Retida acumulada em escala log, sobre as **zonas ótima e utilizável da NBR 7211** |
+  | Frequência retida por peneira | Curva de frequência da distribuição de partículas |
   | Classes de compressão, retenção e densidade | Distribuição pelas classes **P, U e D da NBR 13281** |
   | Squeeze-flow | Carga × deslocamento, comportamento reológico no estado fresco |
   | Flexão × compressão | Correlação entre os dois ensaios mecânicos, com reta de tendência e R² |
   | Módulo de elasticidade × compressão | Módulo dinâmico por ultrassom aos 28 dias |
+  | Módulo de elasticidade × densidade endurecida | Relação entre densidade média e módulo dinâmico aos 28 dias |
   | Relação água/ligante × resistência | Cada ponto é uma formulação |
   | Distribuição por tipo de projeto | Quantidade de formulações |
   | Ranking aos 28 dias | Formulações mais resistentes |
@@ -43,6 +45,9 @@ módulo de elasticidade dinâmico e relação água/ligante.
   (e a unidade), para cada gráfico dizer sozinho a que ensaio se refere. As
   convenções adotadas (e o que os dados de hoje **não** permitem desenhar) estão
   em [`docs/CALCULOS.md`](docs/CALCULOS.md).
+  O teor de ar incorporado ficou de fora porque a planilha versionada neste
+  projeto ainda não traz esse campo; quando a versão nova da planilha estiver
+  disponível, ele deve entrar no mapa de importação antes de virar indicador.
   Os cartões são **reposicionáveis**: arraste pela alça e a grade se reorganiza
   ao vivo, mostrando onde o cartão vai cair. A ordem fica salva no navegador de
   cada pessoa. Funciona também pelo teclado (setas, com a alça em foco) e por
@@ -400,15 +405,17 @@ O campo de busca procura, de uma vez, em quatro lugares:
 
 Cuidado com números curtos: `1` casa com o texto de `Revestimento_1`, `_10`,
 `_21`… além da formulação nº 1. Para achar uma formulação específica pelo
-número, o seletor da tabela é mais direto.
+número, escolha **Nº** em **Buscar em**; nesse modo a busca só aceita número
+exato. O padrão **Tudo** mantém o comportamento antigo, procurando nos quatro
+campos de uma vez.
 
-A busca **filtra o painel inteiro**, não só a tabela — os doze gráficos passam a
+A busca **filtra o painel inteiro**, não só a tabela — os quatorze gráficos passam a
 falar do subconjunto encontrado. Digitar não dispara uma consulta por tecla: o
 campo espera 350 ms de pausa antes de navegar, senão "Contrapiso" custaria dez
 recargas do painel, nove delas jogadas fora.
 
 Todos os filtros vivem na URL, então um recorte pode ser copiado e enviado a
-outra pessoa: `/?busca=Contrapiso&tipoProjeto=RC`.
+outra pessoa: `/?busca=Contrapiso&campoBusca=nomenclatura&tipoProjeto=RC`.
 
 ## Comparar formulações
 
@@ -581,11 +588,11 @@ planilha mudar de layout, é o único arquivo a ajustar.
 | `/api/indicadores/squeeze-flow` | Carga × deslocamento por formulação |
 | `/api/indicadores/comparativo` · `/dispersao` | Ranking aos 28 dias; água/ligante × resistência |
 
-A visão geral mostra dez recortes **do mesmo conjunto filtrado**. Um endpoint por
-gráfico faria o banco devolver as mesmas formulações dez vezes, e esse custo
-cresce com o tamanho do laboratório — não com o número de gráficos. Por isso a
-página usa só o `/painel`: com as 64 formulações do seed, **32 ms contra 166 ms**
-das nove chamadas separadas.
+A visão geral mostra vários recortes **do mesmo conjunto filtrado**. Um endpoint
+por gráfico faria o banco devolver as mesmas formulações repetidas vezes, e esse
+custo cresce com o tamanho do laboratório — não com o número de gráficos. Por
+isso a página usa só o `/painel`: com as 64 formulações do seed, **32 ms contra
+166 ms** das chamadas separadas medidas na implementação original.
 
 Os endpoints individuais continuam existindo, para quem precisar de um recorte
 só. Cada indicador é uma função pura sobre a lista já carregada, e o `/painel`

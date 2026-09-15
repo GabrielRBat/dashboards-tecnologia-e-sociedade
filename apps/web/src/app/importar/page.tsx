@@ -16,8 +16,6 @@ interface Resultado {
   erros: ErroImportacao[];
 }
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3333';
-
 export default function PaginaImportar() {
   const [arquivo, setArquivo] = useState<File | null>(null);
   const [enviando, setEnviando] = useState(false);
@@ -36,7 +34,7 @@ export default function PaginaImportar() {
       const corpo = new FormData();
       corpo.append('arquivo', arquivo);
 
-      const resposta = await fetch(`${API}/api/importacao/planilha`, {
+      const resposta = await fetch('/api/importacao/planilha', {
         method: 'POST',
         body: corpo,
       });
@@ -51,7 +49,7 @@ export default function PaginaImportar() {
       setResultado(dados as Resultado);
     } catch {
       setErro(
-        `Não foi possível falar com a API em ${API}. Confira se ela está rodando.`,
+        'Não foi possível enviar a planilha. Confira se a API está rodando.',
       );
     } finally {
       setEnviando(false);

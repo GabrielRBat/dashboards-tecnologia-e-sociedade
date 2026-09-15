@@ -312,13 +312,17 @@ export class IndicadoresService {
   /**
    * Correlações entre ensaios, com reta de mínimos quadrados e R².
    *
-   * São os dois pares que a literatura da área usa para conferir a coerência de
-   * um conjunto: flexão × compressão e módulo de elasticidade dinâmico ×
-   * compressão (o módulo vem de ultrassom, ensaio não destrutivo).
+   * São pares que ajudam a conferir a coerência de um conjunto: flexão ×
+   * compressão, módulo de elasticidade dinâmico × compressão e módulo ×
+   * densidade endurecida. O módulo vem de ultrassom, ensaio não destrutivo.
    */
   private correlacoesDe(itens: Itens) {
+    const endurecido28De = (f: FormulacaoDetalhada) =>
+      f.endurecidos.find((e) => e.idadeDias === 28);
     const moduloDe = (f: FormulacaoDetalhada): number | null =>
-      f.endurecidos.find((e) => e.idadeDias === 28)?.moduloMedio ?? null;
+      endurecido28De(f)?.moduloMedio ?? null;
+    const densidadeEndurecidaDe = (f: FormulacaoDetalhada): number | null =>
+      endurecido28De(f)?.densidadeMedia ?? null;
 
     const montar = (
       x: (f: FormulacaoDetalhada) => number | null,
@@ -355,6 +359,7 @@ export class IndicadoresService {
         (f) => f.calculados.flexao28d,
       ),
       moduloCompressao: montar((f) => f.calculados.compressao28d, moduloDe),
+      moduloDensidadeEndurecida: montar(densidadeEndurecidaDe, moduloDe),
     };
   }
 

@@ -38,15 +38,16 @@ Versionado desde 2026-08-24 no branch `master` de
 > `*.tsbuildinfo`. Antes de adicionar qualquer arquivo com dado real, conferir
 > se ele pode ficar exposto.
 
-Funcionando: visão geral com indicadores e **doze gráficos** (com rótulos
+Funcionando: visão geral com indicadores e **quatorze gráficos** (com rótulos
 descritivos nos eixos X e Y), **dashboards customizados** montados pela equipe,
-lista de formulações com filtros e **comparação de até 3 formulações** (ciclo
-completo: evolução, tabela e granulometria), página de detalhe, importação da
-planilha `.xlsx` e aba de configurações com escolha de tema.
+lista de formulações com filtros, busca com escolha do campo pesquisado e
+**comparação de até 3 formulações** (ciclo completo: evolução, tabela e
+granulometria), página de detalhe, importação da planilha `.xlsx` e aba de
+configurações com escolha de tema.
 
-Verificado: 48 testes unitários passando (25 de cálculos, 21 das normas, 2 do
-filtro `ids`), 14 verificações de
-comportamento do seletor de tema, typecheck e build limpos na API e no frontend,
+Verificado: 98 testes unitários passando e build completo limpo na API e no
+frontend. Antes desta rodada, também havia 14 verificações de comportamento do
+seletor de tema,
 API respondendo em todos os endpoints, as cinco telas conferidas em modo claro e
 escuro sem erro de console nem overflow, importação da planilha real com 60/60
 linhas e nenhum erro.
@@ -54,9 +55,9 @@ linhas e nenhum erro.
 Conferido de novo em 2026-08-24 subindo o projeto do zero nesta máquina: banco na
 porta 5433, migrações e seed (64 formulações, 36 materiais), 46 testes passando,
 build da API e typecheck do frontend limpos, os treze endpoints de indicadores em
-HTTP 200, as cinco telas no navegador sem erro de console nem overflow, os doze
-gráficos renderizando em 1280px e em 375px, e contraste de texto acima de 4,5:1
-nos dois temas.
+HTTP 200, as cinco telas no navegador sem erro de console nem overflow, os
+gráficos então existentes renderizando em 1280px e em 375px, e contraste de
+texto acima de 4,5:1 nos dois temas.
 
 ## Decisões tomadas
 
@@ -81,6 +82,18 @@ nos dois temas.
   curva granulométrica em escala log com as zonas da NBR 7211 atrás, classes da
   NBR 13281, média com barra de erro, correlações com reta e R². Pesquisado na
   literatura de ensaios de argamassa antes de implementar.
+- **A granulometria agora tem duas leituras complementares:** a curva de retida
+  acumulada continua sendo a comparável com a NBR 7211; a curva de frequência
+  retida por peneira mostra a distribuição de partículas da própria planilha.
+- **Elasticidade no estado endurecido aparece em dois cruzamentos:** módulo
+  dinâmico × compressão aos 28 dias e módulo dinâmico × densidade média
+  endurecida aos 28 dias. A densidade vem dos mesmos corpos de prova do estado
+  endurecido, não da densidade no estado fresco.
+- **Teor de ar incorporado não foi implementado nesta rodada.** A versão da
+  planilha presente no projeto não traz esse campo; inventar o indicador a
+  partir de outra grandeza misturaria conceitos. Quando a planilha nova chegar,
+  o caminho é mapear a coluna em `importacao/layout-planilha.ts`, persistir o
+  dado bruto e só então criar gráfico/filtro.
 - **Convenção nossa para as classes da NBR 13281:** as faixas da norma se
   sobrepõem de propósito (P2 vai de 1,5 a 3,0 e P3 de 2,5 a 4,5; na norma quem
   declara é o fabricante). O sistema adota a **classe mais alta que o valor
@@ -170,6 +183,11 @@ nos dois temas.
   `hover: none` decide alvo de toque de 44 px, fonte de 16 px nos campos e os
   botões ‹ › no lugar do arrasto. Um tablet grande é de dedo, um monitor pequeno
   com mouse não é — por isso não dá para tratar os dois pela mesma media query.
+- **Busca com campo escolhido pelo usuário.** O padrão `Tudo` mantém o
+  comportamento anterior (nomenclatura, comentários, desenvolvedor e numeração
+  exata quando o termo é número). O parâmetro `campoBusca` restringe a busca a
+  nomenclatura, número, desenvolvedor ou comentários e fica na URL junto com os
+  demais filtros.
 - **Vidro com moderação, por desempenho.** Só o cabeçalho tem `backdrop-filter`
   (elemento único e fixo); os cartões usam translucidez sem desfoque. O gradiente
   do fundo fica numa camada `fixed` atrás de tudo, para não repintar a cada
@@ -198,7 +216,9 @@ preencher a planilha, a importação já funciona.
    especificação pede e agora é possível, com usuário identificado.
 2. Cadastro e edição de formulações pela interface.
 3. Exportação dos dados filtrados.
-4. Deploy (provedores a definir). **Antes de expor na internet**, reveja o
+4. Teor de ar incorporado, depois que a versão mais nova da planilha estiver
+   disponível e a coluna puder ser mapeada sem suposição.
+5. Deploy (provedores a definir). **Antes de expor na internet**, reveja o
    auto-registro aberto: hoje qualquer visitante cria conta.
 
 ### Dívidas técnicas conhecidas

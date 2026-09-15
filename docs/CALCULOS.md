@@ -149,6 +149,11 @@ convenção, muda em `classificar()` e nos testes de `normas.spec.ts`.
 A norma define, por peneira, os limites de **% retida acumulada** da zona ótima e
 da zona utilizável. O gráfico desenha as duas faixas atrás das curvas.
 
+O painel também mostra a **frequência retida** por peneira. Essa segunda curva
+usa os mesmos pontos da planilha, mas sem acumular: serve para enxergar onde a
+distribuição de partículas se concentra. Ela não substitui a curva acumulada,
+que continua sendo a leitura comparável com a NBR 7211.
+
 Duas observações:
 
 - A peneira de 9,5 mm tem os quatro limites em zero e por isso não entra — não
@@ -174,13 +179,14 @@ Soma das % retidas acumuladas nas peneiras da **série normal**, dividida por 10
 
 ### 5.4 Correlações entre ensaios
 
-Reta de mínimos quadrados com R², sobre dois pares que a literatura da área usa
-para conferir a coerência de um conjunto:
+Reta de mínimos quadrados com R², sobre pares que ajudam a conferir a coerência
+de um conjunto:
 
 | Correlação | Leitura |
 |---|---|
 | Flexão × compressão aos 28 dias | Costuma ser forte; R² baixo sugere problema de moldagem ou de ensaio. |
 | Módulo de elasticidade × compressão | O módulo vem de ultrassom, ensaio não destrutivo. |
+| Módulo de elasticidade × densidade endurecida | Cruza dois resultados dos corpos de prova aos 28 dias: densidade média e módulo dinâmico. |
 
 A reta só é traçada com **três pares ou mais**, e nunca quando todos os x são
 iguais — nos dois casos ela não diria nada.
@@ -202,7 +208,24 @@ Fica anotado como possibilidade, não como pendência: é decisão do laboratór
 
 ---
 
-## 7. Onde mexer
+## 7. Teor de ar incorporado
+
+A versão da planilha presente neste projeto **não traz o teor de ar incorporado**
+que o laboratório planejava adicionar na versão seguinte. Por isso o sistema não
+calcula nem estima esse indicador hoje. Usar densidade, retenção ou squeeze-flow
+como aproximação misturaria grandezas diferentes e produziria um gráfico com cara
+de medição sem dado medido.
+
+Quando a planilha atualizada estiver disponível, o caminho correto é:
+
+1. mapear a nova coluna em `apps/api/src/importacao/layout-planilha.ts`;
+2. persistir o valor bruto no modelo de dados;
+3. expor o campo na API;
+4. só então criar o indicador, gráfico ou filtro.
+
+---
+
+## 8. Onde mexer
 
 - Fórmulas de ensaio: `apps/api/src/calculos/calculos.ts` (puras, sem banco).
 - Classes e zonas normativas: `apps/api/src/calculos/normas.ts`.

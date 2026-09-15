@@ -10,6 +10,7 @@ export function montarQuery(params: ParametrosBusca): string {
   const permitidos = [
     'ids',
     'busca',
+    'campoBusca',
     'tipoProjeto',
     'origem',
     'desenvolvedor',
@@ -203,6 +204,7 @@ export interface Correlacao {
 export interface Correlacoes {
   flexaoCompressao: Correlacao;
   moduloCompressao: Correlacao;
+  moduloDensidadeEndurecida: Correlacao;
 }
 
 export interface PontoSqueeze {

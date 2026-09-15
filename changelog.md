@@ -2,6 +2,14 @@
 
 Formato: **data** — tipo — descrição.
 
+## 2026-09-15
+
+- **2026-09-15** — docs — Criado `docs/PLANO_IMPLEMENTACAO.md` com o plano para histórico de importação e coluna "Data de importação" na listagem de formulações.
+- **2026-09-15** — fix — Importação de planilha deixou de chamar a API direto do navegador sem token; agora o upload passa por uma rota do Next que acrescenta o `Authorization`, evitando erro 401/Unauthorized.
+- **2026-09-15** — feature — Visão geral ganhou dois gráficos: frequência retida por peneira (distribuição granulométrica sem acumular) e módulo de elasticidade × densidade média endurecida aos 28 dias, além do cruzamento já existente com compressão.
+- **2026-09-15** — feature — Busca ganhou o seletor **Buscar em**, permitindo restringir o termo a tudo, nomenclatura, número, desenvolvedor ou comentários; o parâmetro fica na URL como `campoBusca`.
+- **2026-09-15** — docs — Documentado que o teor de ar incorporado não foi implementado porque a planilha atual do projeto ainda não contém esse campo; a implementação fica condicionada à versão nova da planilha.
+
 ## 2026-09-14
 
 - **2026-09-14** — fix — Tabela comparativa do ciclo de ensaios: linhas horizontais contínuas atravessando a coluna do ensaio e as colunas das formulações (antes a borda só existia nos `td`, e o nome da propriedade ficava sem separação).

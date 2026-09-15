@@ -41,20 +41,37 @@ export class FormulacoesService {
     }
 
     if (filtros.busca?.trim()) {
-      const termo = `%${filtros.busca.trim()}%`;
-      const alternativas: SQL[] = [
-        ilike(formulacoes.nomenclatura, termo),
-        ilike(formulacoes.comentarios, termo),
-        ilike(formulacoes.desenvolvedor, termo),
-      ];
+      const texto = filtros.busca.trim();
+      const termo = `%${texto}%`;
+      const numero = Number(texto);
+      const campo = filtros.campoBusca ?? 'todos';
 
-      const numero = Number(filtros.busca.trim());
-      if (Number.isInteger(numero)) {
-        alternativas.push(eq(formulacoes.numeracao, numero));
+      if (campo === 'nomenclatura') {
+        condicoes.push(ilike(formulacoes.nomenclatura, termo));
+      } else if (campo === 'comentarios') {
+        condicoes.push(ilike(formulacoes.comentarios, termo));
+      } else if (campo === 'desenvolvedor') {
+        condicoes.push(ilike(formulacoes.desenvolvedor, termo));
+      } else if (campo === 'numeracao') {
+        condicoes.push(
+          Number.isInteger(numero)
+            ? eq(formulacoes.numeracao, numero)
+            : sql`false`,
+        );
+      } else {
+        const alternativas: SQL[] = [
+          ilike(formulacoes.nomenclatura, termo),
+          ilike(formulacoes.comentarios, termo),
+          ilike(formulacoes.desenvolvedor, termo),
+        ];
+
+        if (Number.isInteger(numero)) {
+          alternativas.push(eq(formulacoes.numeracao, numero));
+        }
+
+        const combinado = or(...alternativas);
+        if (combinado) condicoes.push(combinado);
       }
-
-      const combinado = or(...alternativas);
-      if (combinado) condicoes.push(combinado);
     }
 
     if (filtros.tipoProjeto?.length) {

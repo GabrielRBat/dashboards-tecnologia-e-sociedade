@@ -13,6 +13,13 @@ import {
 
 const TIPOS_PROJETO = ['NP', 'MT', 'AT', 'RC', 'PE'];
 const ORIGENS = ['PRODUCAO', 'LABORATORIO'];
+const CAMPOS_BUSCA = [
+  'todos',
+  'nomenclatura',
+  'numeracao',
+  'desenvolvedor',
+  'comentarios',
+];
 
 /** Aceita `?tipoProjeto=NP&tipoProjeto=MT` e `?tipoProjeto=NP,MT`. */
 const paraLista = ({ value }: { value: unknown }): string[] | undefined => {
@@ -39,6 +46,10 @@ export class ListarFormulacoesDto {
   @IsOptional()
   @IsString()
   busca?: string;
+
+  @IsOptional()
+  @IsIn(CAMPOS_BUSCA)
+  campoBusca?: string;
 
   @IsOptional()
   @Transform(paraLista)

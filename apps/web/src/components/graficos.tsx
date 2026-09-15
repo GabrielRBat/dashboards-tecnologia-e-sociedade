@@ -688,6 +688,120 @@ export function GraficoGranulometria({
   );
 }
 
+/* --- Frequência granulométrica por peneira --- */
+
+export function GraficoFrequenciaGranulometrica({
+  curvas,
+}: {
+  curvas: CurvaGranulometrica[];
+}) {
+  if (curvas.length === 0) {
+    return <SemDados>Nenhuma distribuição granulométrica no filtro atual.</SemDados>;
+  }
+
+  const peneiras = [
+    ...new Set(curvas.flatMap((c) => c.pontos.map((p) => p.peneiraMm))),
+  ].sort((a, b) => b - a);
+
+  const dados = peneiras.map((mm) => {
+    const linha: Record<string, number | string | null> = {
+      peneiraMm: mm,
+      rotulo: mm === 0 ? 'Fundo' : `${num(mm, 2)} mm`,
+    };
+    for (const c of curvas) {
+      linha[c.formulacaoId] =
+        c.pontos.find((p) => p.peneiraMm === mm)?.frequencia ?? null;
+    }
+    return linha;
+  });
+
+  return (
+    <>
+      <ResponsiveContainer width="100%" height={280}>
+        <LineChart data={dados} margin={{ top: 12, right: 44, bottom: 20, left: 2 }}>
+          <CartesianGrid stroke="var(--grade)" vertical={false} />
+          <XAxis
+            dataKey="rotulo"
+            {...EIXO}
+            interval={0}
+            tick={{ fill: 'var(--tinta-secundaria)', fontSize: 10.5 }}
+            label={{
+              value: 'Peneira / fundo',
+              position: 'insideBottom',
+              offset: -12,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+            }}
+          />
+          <YAxis
+            {...EIXO}
+            width={54}
+            domain={[0, 'dataMax + 5']}
+            label={{
+              value: 'Frequência retida (%)',
+              angle: -90,
+              position: 'insideLeft',
+              offset: 18,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+            }}
+          />
+          <Tooltip
+            cursor={{ stroke: 'var(--eixo)', strokeWidth: 1 }}
+            content={({ active, payload, label }) => {
+              if (!active || !payload?.length) return null;
+              const daCurva = payload.filter((p) =>
+                curvas.some((c) => c.formulacaoId === p.dataKey),
+              );
+              if (daCurva.length === 0) return null;
+              return (
+                <Tip
+                  titulo={String(label)}
+                  linhas={daCurva.map((p) => {
+                    const i = curvas.findIndex(
+                      (c) => c.formulacaoId === p.dataKey,
+                    );
+                    return {
+                      cor: CORES[i % CORES.length] as string,
+                      rotulo: curvas[i]?.nomenclatura ?? String(p.dataKey),
+                      valor:
+                        p.value === null || p.value === undefined
+                          ? '—'
+                          : `${num(Number(p.value), 1)} %`,
+                    };
+                  })}
+                />
+              );
+            }}
+          />
+          {curvas.map((c, i) => (
+            <Line
+              key={c.formulacaoId}
+              type="monotone"
+              dataKey={c.formulacaoId}
+              stroke={CORES[i % CORES.length]}
+              strokeWidth={2}
+              isAnimationActive={false}
+              connectNulls
+              dot={{ r: 3, strokeWidth: 2, fill: 'var(--superficie)' }}
+              activeDot={{ r: 5 }}
+            />
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
+      <Legenda
+        itens={curvas.map((c, i) => ({
+          cor: CORES[i % CORES.length] as string,
+          rotulo: c.nomenclatura,
+        }))}
+      />
+      <p className="nota-grafico">
+        Esta curva mostra a frequência retida em cada peneira. Ela complementa a
+        curva acumulada normativa, que é a usada para comparar com as zonas da
+        NBR 7211.
+      </p>
+    </>
+  );
+}
+
 /* --- Classificação NBR 13281 --- */
 
 const FAMILIAS = [
