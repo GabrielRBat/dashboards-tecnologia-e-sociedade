@@ -38,10 +38,10 @@ Versionado desde 2026-08-24 no branch `master` de
 > `*.tsbuildinfo`. Antes de adicionar qualquer arquivo com dado real, conferir
 > se ele pode ficar exposto.
 
-Funcionando: visão geral com indicadores e **doze gráficos**, **dashboards
-customizados** montados pela equipe, lista de formulações com filtros, página de
-detalhe, importação da planilha `.xlsx` e aba de configurações com escolha de
-tema.
+Funcionando: visão geral com indicadores e **doze gráficos** (com rótulos
+descritivos nos eixos X e Y), **dashboards customizados** montados pela equipe,
+lista de formulações com filtros, página de detalhe, importação da planilha
+`.xlsx` e aba de configurações com escolha de tema.
 
 Verificado: 46 testes unitários passando (25 de cálculos, 21 das normas), 14 verificações de
 comportamento do seletor de tema, typecheck e build limpos na API e no frontend,

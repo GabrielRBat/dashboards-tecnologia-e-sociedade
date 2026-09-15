@@ -6,8 +6,9 @@
  * Regras aplicadas: uma escala por eixo (nunca dois eixos y), cores de série em
  * ordem fixa, marcas finas com grade discreta, legenda sempre que há duas ou
  * mais séries, camada de hover em todos os gráficos e rótulos diretos no ponto
- * final das linhas. As cores vêm de variáveis CSS, então o modo escuro troca os
- * passos da paleta sem trocar de gráfico.
+ * final das linhas. Cada eixo traz o nome da grandeza medida (e a unidade), para
+ * o gráfico dizer sozinho a que ensaio se refere. As cores vêm de variáveis CSS,
+ * então o modo escuro troca os passos da paleta sem trocar de gráfico.
  */
 
 import {
@@ -112,26 +113,32 @@ export function GraficoEvolucao({ dados }: { dados: PontoEvolucao[] }) {
 
   return (
     <>
-      <ResponsiveContainer width="100%" height={260}>
+      <ResponsiveContainer width="100%" height={270}>
         <LineChart
           data={comValores}
-          margin={{ top: 12, right: 44, bottom: 4, left: -6 }}
+          margin={{ top: 12, right: 44, bottom: 20, left: 2 }}
         >
           <CartesianGrid stroke="var(--grade)" vertical={false} />
           <XAxis
             dataKey="idadeDias"
             {...EIXO}
             tickFormatter={(v: number) => `${v}d`}
+            label={{
+              value: 'Idade do ensaio (dias)',
+              position: 'insideBottom',
+              offset: -12,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+            }}
           />
           <YAxis
             {...EIXO}
-            width={52}
+            width={58}
             label={{
-              value: 'MPa',
+              value: 'Resistência (MPa)',
               angle: -90,
               position: 'insideLeft',
               offset: 16,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11.5 },
+              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
             }}
           />
           <Tooltip
@@ -252,14 +259,14 @@ export function GraficoComparativo({ dados }: { dados: ItemComparativo[] }) {
     rotuloEixo: estreita ? encurtar(d.nomenclatura, 14) : d.nomenclatura,
   }));
 
-  const altura = Math.max(240, dados.length * (estreita ? 30 : 26) + 40);
+  const altura = Math.max(250, dados.length * (estreita ? 30 : 26) + 48);
 
   return (
     <ResponsiveContainer width="100%" height={altura}>
       <BarChart
         data={comRotulo}
         layout="vertical"
-        margin={{ top: 4, right: estreita ? 34 : 46, bottom: 4, left: 8 }}
+        margin={{ top: 4, right: estreita ? 34 : 46, bottom: 20, left: 8 }}
         barCategoryGap={6}
       >
         <CartesianGrid stroke="var(--grade)" horizontal={false} />
@@ -267,10 +274,10 @@ export function GraficoComparativo({ dados }: { dados: ItemComparativo[] }) {
           type="number"
           {...EIXO}
           label={{
-            value: 'MPa',
-            position: 'insideBottomRight',
-            offset: -2,
-            style: { fill: 'var(--tinta-suave)', fontSize: 11.5 },
+            value: 'Resistência à compressão aos 28 dias (MPa)',
+            position: 'insideBottom',
+            offset: -12,
+            style: { fill: 'var(--tinta-suave)', fontSize: 11 },
           }}
         />
         <YAxis
@@ -347,7 +354,7 @@ export function GraficoDispersao({ dados }: { dados: PontoDispersao[] }) {
 
   return (
     <ResponsiveContainer width="100%" height={280}>
-      <ScatterChart margin={{ top: 12, right: 18, bottom: 16, left: -6 }}>
+      <ScatterChart margin={{ top: 12, right: 18, bottom: 20, left: 2 }}>
         <CartesianGrid stroke="var(--grade)" />
         <XAxis
           type="number"
@@ -357,10 +364,10 @@ export function GraficoDispersao({ dados }: { dados: PontoDispersao[] }) {
           domain={['dataMin - 0.05', 'dataMax + 0.05']}
           tickFormatter={(v: number) => num(v, 2)}
           label={{
-            value: 'Relação água/ligante',
+            value: 'Relação água/ligante (a/l)',
             position: 'insideBottom',
-            offset: -8,
-            style: { fill: 'var(--tinta-suave)', fontSize: 11.5 },
+            offset: -12,
+            style: { fill: 'var(--tinta-suave)', fontSize: 11 },
           }}
         />
         <YAxis
@@ -368,13 +375,13 @@ export function GraficoDispersao({ dados }: { dados: PontoDispersao[] }) {
           dataKey="compressao28d"
           name="Compressão 28d"
           {...EIXO}
-          width={52}
+          width={58}
           label={{
-            value: 'MPa',
+            value: 'Resistência à compressão (MPa)',
             angle: -90,
             position: 'insideLeft',
             offset: 16,
-            style: { fill: 'var(--tinta-suave)', fontSize: 11.5 },
+            style: { fill: 'var(--tinta-suave)', fontSize: 11 },
           }}
         />
         <ZAxis range={[70, 70]} />
@@ -440,10 +447,10 @@ export function GraficoDistribuicao({
 
   return (
     <>
-      <ResponsiveContainer width="100%" height={240}>
+      <ResponsiveContainer width="100%" height={260}>
         <BarChart
           data={comRotulo}
-          margin={{ top: 18, right: 10, bottom: 4, left: -18 }}
+          margin={{ top: 18, right: 10, bottom: 20, left: 2 }}
           barCategoryGap={14}
         >
           <CartesianGrid stroke="var(--grade)" vertical={false} />
@@ -452,8 +459,25 @@ export function GraficoDistribuicao({
             {...EIXO}
             interval={0}
             tick={{ fill: 'var(--tinta-secundaria)', fontSize: 12, fontWeight: 600 }}
+            label={{
+              value: 'Tipo de projeto',
+              position: 'insideBottom',
+              offset: -12,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+            }}
           />
-          <YAxis {...EIXO} width={44} allowDecimals={false} />
+          <YAxis
+            {...EIXO}
+            width={52}
+            allowDecimals={false}
+            label={{
+              value: 'Quantidade de formulações',
+              angle: -90,
+              position: 'insideLeft',
+              offset: 16,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+            }}
+          />
           <Tooltip
             cursor={{ fill: 'var(--grade)', fillOpacity: 0.5 }}
             content={({ active, payload }) => {
@@ -553,7 +577,7 @@ export function GraficoGranulometria({
   return (
     <>
       <ResponsiveContainer width="100%" height={280}>
-        <ComposedChart data={dados} margin={{ top: 12, right: 16, bottom: 18, left: -8 }}>
+        <ComposedChart data={dados} margin={{ top: 12, right: 16, bottom: 20, left: 2 }}>
           <CartesianGrid stroke="var(--grade)" vertical={false} />
           <XAxis
             dataKey="peneiraMm"
@@ -567,16 +591,16 @@ export function GraficoGranulometria({
             label={{
               value: 'Abertura da peneira (mm) — escala logarítmica',
               position: 'insideBottom',
-              offset: -10,
+              offset: -12,
               style: { fill: 'var(--tinta-suave)', fontSize: 11 },
             }}
           />
           <YAxis
             {...EIXO}
-            width={50}
+            width={54}
             domain={[0, 100]}
             label={{
-              value: '% retida acumulada',
+              value: 'Retida acumulada (%)',
               angle: -90,
               position: 'insideLeft',
               offset: 18,
@@ -670,13 +694,20 @@ const FAMILIAS = [
     chave: 'compressao' as const,
     rotulo: 'Resistência à compressão',
     unidade: 'MPa',
+    classe: 'P',
   },
   {
     chave: 'densidade' as const,
     rotulo: 'Densidade no estado fresco',
     unidade: 'kg/m³',
+    classe: 'D',
   },
-  { chave: 'retencao' as const, rotulo: 'Retenção de água', unidade: '%' },
+  {
+    chave: 'retencao' as const,
+    rotulo: 'Retenção de água',
+    unidade: '%',
+    classe: 'U',
+  },
 ];
 
 /** Texto da faixa de uma classe, como a norma a define. */
@@ -708,10 +739,10 @@ export function GraficoClassificacao({
 
   return (
     <>
-      <ResponsiveContainer width="100%" height={240}>
+      <ResponsiveContainer width="100%" height={260}>
         <BarChart
           data={bloco.classes}
-          margin={{ top: 18, right: 10, bottom: 4, left: -18 }}
+          margin={{ top: 18, right: 10, bottom: 20, left: 2 }}
           barCategoryGap={12}
         >
           <CartesianGrid stroke="var(--grade)" vertical={false} />
@@ -724,8 +755,27 @@ export function GraficoClassificacao({
               fontSize: 12,
               fontWeight: 600,
             }}
+            label={{
+              value: info
+                ? `Classe ${info.classe} — ${info.rotulo}`
+                : 'Classe (NBR 13281)',
+              position: 'insideBottom',
+              offset: -12,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+            }}
           />
-          <YAxis {...EIXO} width={44} allowDecimals={false} />
+          <YAxis
+            {...EIXO}
+            width={52}
+            allowDecimals={false}
+            label={{
+              value: 'Quantidade de formulações',
+              angle: -90,
+              position: 'insideLeft',
+              offset: 16,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+            }}
+          />
           <Tooltip
             cursor={{ fill: 'var(--grade)', fillOpacity: 0.5 }}
             content={({ active, payload }) => {
@@ -823,7 +873,7 @@ export function GraficoCorrelacao({
   return (
     <>
       <ResponsiveContainer width="100%" height={280}>
-        <ScatterChart margin={{ top: 12, right: 18, bottom: 18, left: -6 }}>
+        <ScatterChart margin={{ top: 12, right: 18, bottom: 20, left: 4 }}>
           <CartesianGrid stroke="var(--grade)" />
           <XAxis
             type="number"
@@ -834,7 +884,7 @@ export function GraficoCorrelacao({
             label={{
               value: `${rotuloX} (${unidadeX})`,
               position: 'insideBottom',
-              offset: -10,
+              offset: -12,
               style: { fill: 'var(--tinta-suave)', fontSize: 11 },
             }}
           />
@@ -842,13 +892,13 @@ export function GraficoCorrelacao({
             type="number"
             dataKey="y"
             {...EIXO}
-            width={58}
+            width={62}
             tickFormatter={(v: number) => num(v, casasY === 0 ? 0 : 1)}
             label={{
-              value: unidadeY,
+              value: `${rotuloY} (${unidadeY})`,
               angle: -90,
               position: 'insideLeft',
-              offset: 20,
+              offset: 18,
               style: { fill: 'var(--tinta-suave)', fontSize: 11 },
             }}
           />
@@ -933,7 +983,7 @@ export function GraficoSqueezeFlow({ dados }: { dados: PontoSqueeze[] }) {
   return (
     <>
       <ResponsiveContainer width="100%" height={280}>
-        <ScatterChart margin={{ top: 12, right: 18, bottom: 18, left: -6 }}>
+        <ScatterChart margin={{ top: 12, right: 18, bottom: 20, left: 2 }}>
           <CartesianGrid stroke="var(--grade)" />
           <XAxis
             type="number"
@@ -942,9 +992,9 @@ export function GraficoSqueezeFlow({ dados }: { dados: PontoSqueeze[] }) {
             domain={['dataMin - 0.5', 'dataMax + 0.5']}
             tickFormatter={(v: number) => num(v, 1)}
             label={{
-              value: 'Deslocamento (mm)',
+              value: 'Deslocamento máximo (mm)',
               position: 'insideBottom',
-              offset: -10,
+              offset: -12,
               style: { fill: 'var(--tinta-suave)', fontSize: 11 },
             }}
           />
@@ -952,9 +1002,9 @@ export function GraficoSqueezeFlow({ dados }: { dados: PontoSqueeze[] }) {
             type="number"
             dataKey="carga"
             {...EIXO}
-            width={54}
+            width={56}
             label={{
-              value: 'Carga (N)',
+              value: 'Carga máxima (N)',
               angle: -90,
               position: 'insideLeft',
               offset: 18,
@@ -1025,10 +1075,10 @@ export function GraficoDispersaoIdade({ dados }: { dados: DispersaoIdade[] }) {
 
   return (
     <>
-      <ResponsiveContainer width="100%" height={260}>
+      <ResponsiveContainer width="100%" height={270}>
         <BarChart
           data={comValores}
-          margin={{ top: 16, right: 12, bottom: 4, left: -16 }}
+          margin={{ top: 16, right: 12, bottom: 20, left: 2 }}
           barCategoryGap={18}
         >
           <CartesianGrid stroke="var(--grade)" vertical={false} />
@@ -1037,16 +1087,22 @@ export function GraficoDispersaoIdade({ dados }: { dados: DispersaoIdade[] }) {
             {...EIXO}
             tickFormatter={(v: number) => `${v}d`}
             tick={{ fill: 'var(--tinta-secundaria)', fontSize: 12, fontWeight: 600 }}
+            label={{
+              value: 'Idade do ensaio (dias)',
+              position: 'insideBottom',
+              offset: -12,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+            }}
           />
           <YAxis
             {...EIXO}
-            width={50}
+            width={58}
             label={{
-              value: 'MPa',
+              value: 'Resistência (MPa)',
               angle: -90,
               position: 'insideLeft',
-              offset: 18,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11.5 },
+              offset: 16,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
             }}
           />
           <Tooltip
@@ -1110,8 +1166,8 @@ export function GraficoDispersaoIdade({ dados }: { dados: DispersaoIdade[] }) {
       </ResponsiveContainer>
       <Legenda
         itens={[
-          { cor: CORES[0] as string, rotulo: 'Compressão' },
-          { cor: CORES[1] as string, rotulo: 'Tração na flexão' },
+          { cor: CORES[0] as string, rotulo: 'Resistência à compressão' },
+          { cor: CORES[1] as string, rotulo: 'Resistência à tração na flexão' },
         ]}
       />
       <p className="nota-grafico">

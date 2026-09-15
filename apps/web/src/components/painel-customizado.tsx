@@ -115,7 +115,10 @@ export function PainelCustomizado({ painel }: { painel: PainelCalculado }) {
               width={62}
               tickFormatter={(v: number) => num(v, painel.eixoY?.casas === 0 ? 0 : 1)}
               label={{
-                value: painel.eixoY?.unidade || painel.eixoY?.rotulo,
+                value: comUnidade(
+                  painel.eixoY?.rotulo ?? '',
+                  painel.eixoY?.unidade ?? '',
+                ),
                 angle: -90,
                 position: 'insideLeft',
                 offset: 20,
@@ -230,7 +233,12 @@ export function PainelCustomizado({ painel }: { painel: PainelCalculado }) {
             width={56}
             allowDecimals={!contagem}
             label={{
-              value: contagem ? 'Formulações' : unidade,
+              value: contagem
+                ? 'Quantidade de formulações'
+                : comUnidade(
+                    painel.eixoY?.rotulo ?? '',
+                    painel.eixoY?.unidade ?? '',
+                  ),
               angle: -90,
               position: 'insideLeft',
               offset: 18,

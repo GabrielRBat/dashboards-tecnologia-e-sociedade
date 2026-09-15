@@ -2,6 +2,10 @@
 
 Formato: **data** — tipo — descrição.
 
+## 2026-09-14
+
+- **2026-09-14** — feature — Rótulos descritivos nos eixos X e Y de todos os gráficos da visão geral e dos painéis customizados (idade do ensaio, resistência em MPa, relação água/ligante, abertura de peneira, classes NBR 13281, carga/deslocamento do squeeze-flow, etc.), em vez de só a unidade abreviada.
+
 ## 2026-08-24
 
 - **2026-08-24** — docs — Criação inicial do projeto: `AGENT.md` (instruções do agente), `context.md` (contexto do projeto) e `changelog.md` (este arquivo).

@@ -39,8 +39,10 @@ módulo de elasticidade dinâmico e relação água/ligante.
 
   Os gráficos normativos seguem o que a literatura da área publica — curva
   granulométrica em escala logarítmica com as faixas da norma atrás, média com
-  barra de erro, correlações com R². As convenções adotadas (e o que os dados de
-  hoje **não** permitem desenhar) estão em [`docs/CALCULOS.md`](docs/CALCULOS.md).
+  barra de erro, correlações com R². Os eixos trazem o nome da grandeza medida
+  (e a unidade), para cada gráfico dizer sozinho a que ensaio se refere. As
+  convenções adotadas (e o que os dados de hoje **não** permitem desenhar) estão
+  em [`docs/CALCULOS.md`](docs/CALCULOS.md).
   Os cartões são **reposicionáveis**: arraste pela alça e a grade se reorganiza
   ao vivo, mostrando onde o cartão vai cair. A ordem fica salva no navegador de
   cada pessoa. Funciona também pelo teclado (setas, com a alça em foco) e por
