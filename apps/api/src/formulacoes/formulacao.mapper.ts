@@ -82,6 +82,16 @@ type FormulacaoComRelacoes = {
     v2: number | null;
     v3: number | null;
   }[];
+  importacoes: {
+    numeracao: number;
+    acao: string;
+    importacao: {
+      id: string;
+      arquivoNome: string;
+      criadoEm: Date;
+      usuario: { id: string; nome: string; email: string };
+    };
+  }[];
 };
 
 /**
@@ -186,6 +196,13 @@ export function mapFormulacao(f: FormulacaoComRelacoes) {
     completude: calcularCompletude(f, resistencias, endurecidos),
   };
 
+  const ultimaImportacao = [...f.importacoes]
+    .sort(
+      (a, b) =>
+        b.importacao.criadoEm.getTime() - a.importacao.criadoEm.getTime(),
+    )
+    .at(0);
+
   return {
     id: f.id,
     numeracao: f.numeracao,
@@ -222,6 +239,15 @@ export function mapFormulacao(f: FormulacaoComRelacoes) {
     squeezeCarga3: f.squeezeCarga3,
     resistencias,
     endurecidos,
+    ultimaImportacao: ultimaImportacao
+      ? {
+          id: ultimaImportacao.importacao.id,
+          arquivo: ultimaImportacao.importacao.arquivoNome,
+          usuario: ultimaImportacao.importacao.usuario,
+          acao: ultimaImportacao.acao,
+          criadoEm: ultimaImportacao.importacao.criadoEm.toISOString(),
+        }
+      : null,
     calculados,
   };
 }

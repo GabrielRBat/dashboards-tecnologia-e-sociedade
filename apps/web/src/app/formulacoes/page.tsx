@@ -77,6 +77,7 @@ export default async function PaginaFormulacoes({
                     <th>Tipo</th>
                     <th>Origem</th>
                     <th>Data</th>
+                    <th>Data de importação</th>
                     <th>Desenvolvedor</th>
                     <th className="numerico">Água/lig.</th>
                     <th className="numerico">Ret. água (%)</th>
@@ -118,6 +119,7 @@ export default async function PaginaFormulacoes({
                       </td>
                       <td>{origem(f.origem)}</td>
                       <td>{data(f.data)}</td>
+                      <td>{data(f.ultimaImportacao?.criadoEm ?? null)}</td>
                       <td>
                         {f.desenvolvedor ?? <span className="vazio">—</span>}
                       </td>

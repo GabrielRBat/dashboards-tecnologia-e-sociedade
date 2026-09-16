@@ -45,7 +45,7 @@ lista de formulações com filtros, busca com escolha do campo pesquisado e
 granulometria), página de detalhe, importação da planilha `.xlsx` e aba de
 configurações com escolha de tema.
 
-Verificado: 98 testes unitários passando e build completo limpo na API e no
+Verificado: 104 testes unitários passando e build completo limpo na API e no
 frontend. Antes desta rodada, também havia 14 verificações de comportamento do
 seletor de tema,
 API respondendo em todos os endpoints, as cinco telas conferidas em modo claro e
@@ -199,6 +199,27 @@ texto acima de 4,5:1 nos dois temas.
   endurecido (método diferente entre 14 e 28 dias). Além disso, as colunas de
   relação água/ligante e teor de finos exibem `#NAME?` em todas as linhas —
   nunca calcularam. Tudo registrado em `docs/CALCULOS.md`.
+- **O mapa de importação acompanha a versão atual da planilha, com três colunas
+  calculadas a mais antes da granulometria.** Em 2026-09-16 foi corrigido um bug
+  em que o importador ainda lia o layout antigo: relação água/ligante e teor de
+  finos caíam como pontos granulométricos, densidade aparente virava retenção,
+  retenção virava densidade fresca, e assim por diante. O teste
+  `importacao/layout-planilha.spec.ts` protege os índices atuais. Bancos que
+  receberam importação com o mapa antigo precisam reimportar a planilha original
+  depois da correção, porque nem todos os valores deslocados ficam recuperáveis
+  só a partir do banco.
+- **Importação agora é pré-validada antes de gravar.** A tela primeiro envia a
+  planilha para uma análise sem escrita, mostra contagens e avisos, e só grava
+  depois da confirmação. Linhas com número/nome mas sem dados de ensaio ou
+  composição são tratadas como template e ignoradas, para não apagar relações já
+  existentes. Valores fora de faixas plausíveis bloqueiam a importação, porque
+  normalmente significam layout deslocado. Há também template oficial `.xlsx`
+  gerado pelo sistema, com metadado `AR_LAYOUT_V2`.
+- **Histórico de importação implementado.** As tabelas `importacoes` e
+  `importacoes_formulacoes` registram usuário, arquivo, linhas lidas/importadas/
+  ignoradas, avisos e quais formulações foram criadas ou atualizadas. A lista de
+  formulações mostra a data da última importação, e o detalhe mostra arquivo e
+  usuário.
 
 ## Sobre os dados
 
@@ -212,19 +233,14 @@ preencher a planilha, a importação já funciona.
 
 ## Pendências / próximos passos
 
-1. **Histórico de importação** ("quem importou, quando, quantas linhas"), que a
-   especificação pede e agora é possível, com usuário identificado.
-2. Cadastro e edição de formulações pela interface.
-3. Exportação dos dados filtrados.
-4. Teor de ar incorporado, depois que a versão mais nova da planilha estiver
+1. Cadastro e edição de formulações pela interface.
+2. Exportação dos dados filtrados.
+3. Teor de ar incorporado, depois que a versão mais nova da planilha estiver
    disponível e a coluna puder ser mapeada sem suposição.
-5. Deploy (provedores a definir). **Antes de expor na internet**, reveja o
+4. Deploy (provedores a definir). **Antes de expor na internet**, reveja o
    auto-registro aberto: hoje qualquer visitante cria conta.
 
 ### Dívidas técnicas conhecidas
-
-- **Sem histórico de importação.** A especificação pede "quem importou, quando,
-  quantas linhas" — agora que há usuário identificado, dá para registrar.
 
 - **`packages/shared` é código morto.** Nada o importa desde a troca para o
   Drizzle; os tipos do domínio estão duplicados em `apps/web/src/lib/api.ts`.

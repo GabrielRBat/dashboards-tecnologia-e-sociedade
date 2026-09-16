@@ -70,6 +70,14 @@ export default async function PaginaFormulacao({
             <dd>{f.avaliador ?? '—'}</dd>
             <dt>Preenchimento dos ensaios</dt>
             <dd>{f.calculados.completude}%</dd>
+            <dt>Última importação</dt>
+            <dd>
+              {f.ultimaImportacao
+                ? `${data(f.ultimaImportacao.criadoEm)} · ${f.ultimaImportacao.arquivo}`
+                : '—'}
+            </dd>
+            <dt>Importado por</dt>
+            <dd>{f.ultimaImportacao?.usuario.nome ?? '—'}</dd>
           </dl>
           {f.comentarios ? (
             <p style={{ marginTop: 14, fontSize: 13, color: 'var(--tinta-secundaria)' }}>

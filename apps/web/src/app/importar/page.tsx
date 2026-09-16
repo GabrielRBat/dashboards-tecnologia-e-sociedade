@@ -1,58 +1,110 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface ErroImportacao {
   linha: number;
   coluna: string | null;
   mensagem: string;
+  bloqueante?: boolean;
 }
 
 interface Resultado {
+  importacaoId?: string;
   arquivo: string;
   linhasLidas: number;
   linhasImportadas: number;
   linhasIgnoradas: number;
   erros: ErroImportacao[];
+  bloqueios?: ErroImportacao[];
+  prontoParaImportar?: boolean;
+  formulacoesAfetadas?: {
+    id: string;
+    numeracao: number;
+    acao: 'CRIADA' | 'ATUALIZADA';
+  }[];
+}
+
+interface HistoricoImportacao {
+  id: string;
+  arquivo: string;
+  usuario: { id: string; nome: string; email: string };
+  linhasLidas: number;
+  linhasImportadas: number;
+  linhasIgnoradas: number;
+  avisos: ErroImportacao[];
+  formulacoes: { formulacaoId: string; numeracao: number; acao: string }[];
+  criadoEm: string;
 }
 
 export default function PaginaImportar() {
   const [arquivo, setArquivo] = useState<File | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const [validando, setValidando] = useState(false);
+  const [preview, setPreview] = useState<Resultado | null>(null);
   const [resultado, setResultado] = useState<Resultado | null>(null);
+  const [historico, setHistorico] = useState<HistoricoImportacao[]>([]);
   const [erro, setErro] = useState<string | null>(null);
 
-  async function enviar(evento: React.FormEvent): Promise<void> {
-    evento.preventDefault();
+  async function carregarHistorico(): Promise<void> {
+    const resposta = await fetch('/api/importacao/planilha', {
+      method: 'GET',
+      cache: 'no-store',
+    });
+    if (resposta.ok) {
+      setHistorico((await resposta.json()) as HistoricoImportacao[]);
+    }
+  }
+
+  useEffect(() => {
+    void carregarHistorico();
+  }, []);
+
+  async function enviar(acao: 'validar' | 'importar'): Promise<void> {
     if (!arquivo) return;
 
-    setEnviando(true);
+    if (acao === 'validar') setValidando(true);
+    else setEnviando(true);
     setErro(null);
-    setResultado(null);
+    if (acao === 'validar') {
+      setPreview(null);
+      setResultado(null);
+    }
 
     try {
       const corpo = new FormData();
       corpo.append('arquivo', arquivo);
 
-      const resposta = await fetch('/api/importacao/planilha', {
+      const resposta = await fetch(
+        `/api/importacao/planilha${acao === 'validar' ? '?acao=validar' : ''}`,
+        {
         method: 'POST',
         body: corpo,
-      });
+        },
+      );
 
       const dados = await resposta.json();
 
       if (!resposta.ok) {
-        setErro(dados?.message ?? `A API respondeu ${resposta.status}.`);
+        setErro(
+          dados?.mensagem ?? dados?.message ?? `A API respondeu ${resposta.status}.`,
+        );
         return;
       }
 
-      setResultado(dados as Resultado);
+      if (acao === 'validar') setPreview(dados as Resultado);
+      else {
+        setResultado(dados as Resultado);
+        setPreview(null);
+        await carregarHistorico();
+      }
     } catch {
       setErro(
         'Não foi possível enviar a planilha. Confira se a API está rodando.',
       );
     } finally {
-      setEnviando(false);
+      if (acao === 'validar') setValidando(false);
+      else setEnviando(false);
     }
   }
 
@@ -64,7 +116,12 @@ export default function PaginaImportar() {
         lida é a &quot;planilha de alimentação&quot;, a partir da linha 11.
       </p>
 
-      <form onSubmit={enviar}>
+      <form
+        onSubmit={(evento) => {
+          evento.preventDefault();
+          void enviar('validar');
+        }}
+      >
         <div className="area-upload">
           <p style={{ margin: 0, fontWeight: 550 }}>
             Selecione o arquivo .xlsx
@@ -79,22 +136,44 @@ export default function PaginaImportar() {
             Linhas sem numeração ou sem nomenclatura são ignoradas. Reimportar a
             mesma planilha atualiza as formulações já cadastradas, pela numeração.
           </p>
+          <p style={{ margin: '10px 0 0', fontSize: 13 }}>
+            <a
+              href="/api/importacao/planilha?acao=template"
+              style={{ color: 'var(--primaria)', fontWeight: 600 }}
+            >
+              Baixar template oficial
+            </a>
+          </p>
           <input
             type="file"
             accept=".xlsx"
             onChange={(e) => {
               setArquivo(e.target.files?.[0] ?? null);
+              setPreview(null);
               setResultado(null);
               setErro(null);
             }}
           />
-          <div style={{ marginTop: 18 }}>
+          <div style={{ display: 'flex', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>
             <button
               type="submit"
               className="botao botao-primario"
-              disabled={!arquivo || enviando}
+              disabled={!arquivo || validando || enviando}
             >
-              {enviando ? 'Importando…' : 'Importar'}
+              {validando ? 'Validando…' : 'Validar planilha'}
+            </button>
+            <button
+              type="button"
+              className="botao"
+              disabled={
+                !arquivo ||
+                !preview?.prontoParaImportar ||
+                validando ||
+                enviando
+              }
+              onClick={() => void enviar('importar')}
+            >
+              {enviando ? 'Importando…' : 'Confirmar importação'}
             </button>
           </div>
         </div>
@@ -106,10 +185,82 @@ export default function PaginaImportar() {
         </div>
       ) : null}
 
+      {preview ? (
+        <ResultadoImportacao
+          titulo="Pré-validação"
+          resultado={preview}
+          sucesso={
+            preview.prontoParaImportar
+              ? 'Planilha pronta para importação. Confira os números e confirme.'
+              : null
+          }
+        />
+      ) : null}
+
       {resultado ? (
-        <section className="cartao" style={{ marginTop: 16 }}>
-          <h2 className="cartao-titulo">Resultado da importação</h2>
-          <p className="cartao-legenda">{resultado.arquivo}</p>
+        <ResultadoImportacao
+          titulo="Resultado da importação"
+          resultado={resultado}
+          sucesso="Importação gravada e registrada no histórico."
+        />
+      ) : null}
+
+      <section className="cartao" style={{ marginTop: 16 }}>
+        <h2 className="cartao-titulo">Histórico de importações</h2>
+        {historico.length === 0 ? (
+          <p className="vazio" style={{ fontSize: 13 }}>
+            Nenhuma importação registrada ainda.
+          </p>
+        ) : (
+          <div className="tabela-envolucro">
+            <table className="tabela">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Arquivo</th>
+                  <th>Usuário</th>
+                  <th className="numerico">Lidas</th>
+                  <th className="numerico">Importadas</th>
+                  <th className="numerico">Ignoradas</th>
+                  <th className="numerico">Avisos</th>
+                </tr>
+              </thead>
+              <tbody>
+                {historico.map((h) => (
+                  <tr key={h.id}>
+                    <td>{new Date(h.criadoEm).toLocaleString('pt-BR')}</td>
+                    <td>{h.arquivo}</td>
+                    <td>{h.usuario.nome}</td>
+                    <td className="numerico">{h.linhasLidas}</td>
+                    <td className="numerico">{h.linhasImportadas}</td>
+                    <td className="numerico">{h.linhasIgnoradas}</td>
+                    <td className="numerico">{h.avisos.length}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+    </>
+  );
+}
+
+function ResultadoImportacao({
+  titulo,
+  resultado,
+  sucesso,
+}: {
+  titulo: string;
+  resultado: Resultado;
+  sucesso: string | null;
+}) {
+  const bloqueios = resultado.erros.filter((e) => e.bloqueante);
+
+  return (
+    <section className="cartao" style={{ marginTop: 16 }}>
+      <h2 className="cartao-titulo">{titulo}</h2>
+      <p className="cartao-legenda">{resultado.arquivo}</p>
 
           <div className="grade-kpis" style={{ marginBottom: 0 }}>
             <div className="cartao">
@@ -127,6 +278,13 @@ export default function PaginaImportar() {
               <p className="kpi-valor">{resultado.linhasIgnoradas}</p>
             </div>
           </div>
+
+          {bloqueios.length > 0 ? (
+            <div className="aviso aviso-erro" style={{ marginTop: 16 }}>
+              A importação está bloqueada. Corrija o layout ou use o template
+              atual antes de gravar.
+            </div>
+          ) : null}
 
           {resultado.erros.length > 0 ? (
             <>
@@ -179,11 +337,9 @@ export default function PaginaImportar() {
                 color: 'var(--sucesso-texto)',
               }}
             >
-              Nenhum aviso — todas as linhas válidas foram importadas.
+              {sucesso ?? 'Nenhum aviso encontrado.'}
             </p>
           )}
-        </section>
-      ) : null}
-    </>
+    </section>
   );
 }

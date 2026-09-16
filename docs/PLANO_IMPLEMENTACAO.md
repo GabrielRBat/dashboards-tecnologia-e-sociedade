@@ -5,6 +5,13 @@ preferido para implementá-las sem quebrar os fluxos já existentes.
 
 ## Próxima feature: histórico de importação
 
+**Status:** implementado em 2026-09-16.
+
+Além do histórico descrito abaixo, a implementação final incluiu pré-validação
+sem gravação, bloqueio por faixas plausíveis, template oficial `.xlsx` com
+metadado de versão e ignorar linhas template sem dados para não sobrescrever
+relações existentes.
+
 ### Objetivo
 
 Registrar cada importação de planilha com rastreabilidade mínima:

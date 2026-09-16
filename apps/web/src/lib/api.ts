@@ -294,6 +294,13 @@ export interface Formulacao {
   squeezeCarga3: number | null;
   resistencias: Resistencia[];
   endurecidos: BlocoEndurecido[];
+  ultimaImportacao: {
+    id: string;
+    arquivo: string;
+    usuario: { id: string; nome: string; email: string };
+    acao: 'CRIADA' | 'ATUALIZADA';
+    criadoEm: string;
+  } | null;
   calculados: {
     relacaoAguaLigante: number | null;
     teorFinos: number | null;

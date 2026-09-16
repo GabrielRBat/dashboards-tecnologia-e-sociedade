@@ -9,6 +9,7 @@
 
 export const ABA_ALIMENTACAO = 'planilha de alimentação';
 export const PRIMEIRA_LINHA_DADOS = 11;
+export const VERSAO_LAYOUT_PLANILHA = 'AR_LAYOUT_V2';
 
 export const COL = {
   numeracao: 1,
@@ -19,18 +20,18 @@ export const COL = {
   avaliador: 6,
   data: 7,
   origem: 8,
-  teorAgua: 46,
-  massaAgua: 47,
-  comentarios: 48,
-  densAparenteMassa: 59,
-  densAparenteVolume: 60,
-  retencaoM0: 62,
-  retencaoM1: 63,
-  retencaoM2: 64,
-  densFrescoMassa: 66,
-  densFrescoVolume: 67,
-  squeezeDeslocamento: [69, 70, 71],
-  squeezeCarga: [73, 74, 75],
+  teorAgua: 49,
+  massaAgua: 50,
+  comentarios: 51,
+  densAparenteMassa: 62,
+  densAparenteVolume: 63,
+  retencaoM0: 65,
+  retencaoM1: 66,
+  retencaoM2: 67,
+  densFrescoMassa: 69,
+  densFrescoVolume: 70,
+  squeezeDeslocamento: [72, 73, 74],
+  squeezeCarga: [76, 77, 78],
 } as const;
 
 /** Materiais nas colunas 10 a 45, na ordem em que aparecem na planilha. */
@@ -77,32 +78,32 @@ export const MATERIAIS_PLANILHA: {
   { coluna: 45, nome: 'Superplastificante 5', categoria: 'SUPERPLASTIFICANTE' },
 ];
 
-/** Distribuição granulométrica: colunas 51 a 58 (`0` = fundo). */
+/** Distribuição granulométrica: colunas 54 a 61 (`0` = fundo). */
 export const GRANULOMETRIA_PLANILHA: { coluna: number; peneiraMm: number }[] = [
-  { coluna: 51, peneiraMm: 1.7 },
-  { coluna: 52, peneiraMm: 1.4 },
-  { coluna: 53, peneiraMm: 1.18 },
-  { coluna: 54, peneiraMm: 0.6 },
-  { coluna: 55, peneiraMm: 0.3 },
-  { coluna: 56, peneiraMm: 0.15 },
-  { coluna: 57, peneiraMm: 0.09 },
-  { coluna: 58, peneiraMm: 0 },
+  { coluna: 54, peneiraMm: 1.7 },
+  { coluna: 55, peneiraMm: 1.4 },
+  { coluna: 56, peneiraMm: 1.18 },
+  { coluna: 57, peneiraMm: 0.6 },
+  { coluna: 58, peneiraMm: 0.3 },
+  { coluna: 59, peneiraMm: 0.15 },
+  { coluna: 60, peneiraMm: 0.09 },
+  { coluna: 61, peneiraMm: 0 },
 ];
 
 /** Resistência à tração na flexão: 3 CPs por idade. */
 export const FLEXAO_PLANILHA: { idadeDias: number; colunas: number[] }[] = [
-  { idadeDias: 3, colunas: [77, 78, 79] },
-  { idadeDias: 7, colunas: [81, 82, 83] },
-  { idadeDias: 14, colunas: [85, 86, 87] },
-  { idadeDias: 28, colunas: [89, 90, 91] },
+  { idadeDias: 3, colunas: [80, 81, 82] },
+  { idadeDias: 7, colunas: [84, 85, 86] },
+  { idadeDias: 14, colunas: [88, 89, 90] },
+  { idadeDias: 28, colunas: [92, 93, 94] },
 ];
 
 /** Resistência à compressão: 6 CPs por idade. */
 export const COMPRESSAO_PLANILHA: { idadeDias: number; colunas: number[] }[] = [
-  { idadeDias: 3, colunas: [93, 94, 95, 96, 97, 98] },
-  { idadeDias: 7, colunas: [100, 101, 102, 103, 104, 105] },
-  { idadeDias: 14, colunas: [107, 108, 109, 110, 111, 112] },
-  { idadeDias: 28, colunas: [114, 115, 116, 117, 118, 119] },
+  { idadeDias: 3, colunas: [96, 97, 98, 99, 100, 101] },
+  { idadeDias: 7, colunas: [103, 104, 105, 106, 107, 108] },
+  { idadeDias: 14, colunas: [110, 111, 112, 113, 114, 115] },
+  { idadeDias: 28, colunas: [117, 118, 119, 120, 121, 122] },
 ];
 
 export interface LayoutCorpoDeProva {
@@ -120,17 +121,17 @@ export const ENDURECIDO_PLANILHA: {
   {
     idadeDias: 14,
     corpos: [
-      { indice: 1, dimensoes: [121, 122, 123, 124, 125, 126], massa: 142, velocidades: [149, 150, 151] },
-      { indice: 2, dimensoes: [127, 128, 129, 130, 131, 132], massa: 143, velocidades: [152, 153, 154] },
-      { indice: 3, dimensoes: [133, 134, 135, 136, 137, 138], massa: 144, velocidades: [155, 156, 157] },
+      { indice: 1, dimensoes: [124, 125, 126, 127, 128, 129], massa: 145, velocidades: [152, 153, 154] },
+      { indice: 2, dimensoes: [130, 131, 132, 133, 134, 135], massa: 146, velocidades: [155, 156, 157] },
+      { indice: 3, dimensoes: [136, 137, 138, 139, 140, 141], massa: 147, velocidades: [158, 159, 160] },
     ],
   },
   {
     idadeDias: 28,
     corpos: [
-      { indice: 1, dimensoes: [162, 163, 164, 165, 166, 167], massa: 183, velocidades: [190, 191, 192] },
-      { indice: 2, dimensoes: [168, 169, 170, 171, 172, 173], massa: 184, velocidades: [193, 194, 195] },
-      { indice: 3, dimensoes: [174, 175, 176, 177, 178, 179], massa: 185, velocidades: [196, 197, 198] },
+      { indice: 1, dimensoes: [165, 166, 167, 168, 169, 170], massa: 186, velocidades: [193, 194, 195] },
+      { indice: 2, dimensoes: [171, 172, 173, 174, 175, 176], massa: 187, velocidades: [196, 197, 198] },
+      { indice: 3, dimensoes: [177, 178, 179, 180, 181, 182], massa: 188, velocidades: [199, 200, 201] },
     ],
   },
 ];

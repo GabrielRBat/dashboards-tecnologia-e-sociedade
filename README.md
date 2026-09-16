@@ -542,15 +542,34 @@ para todo o histórico, sem migração de dados.
 ## Importação da planilha
 
 O importador lê a aba **"planilha de alimentação"** a partir da **linha 11**.
+A tela de importação trabalha em duas etapas: primeiro faz uma **pré-validação**
+sem gravar nada; depois, se não houver bloqueios, o usuário confirma a gravação.
 
 - Linhas sem numeração ou sem nomenclatura são ignoradas (são o template vazio).
+- Linhas com numeração e nomenclatura, mas sem dados de ensaio ou composição,
+  também são ignoradas — isso evita apagar uma formulação existente ao importar
+  uma linha de template.
 - Células de erro do Excel (`#DIV/0!`, `#NAME?`) entram como vazias.
 - As colunas calculadas da planilha são ignoradas — a API recalcula tudo.
 - A gravação é por número da formulação, então **reimportar a mesma planilha
   atualiza** os registros em vez de duplicar.
+- Valores fora de faixas plausíveis bloqueiam a importação antes de tocar no
+  banco. É a defesa contra layout deslocado: por exemplo, um squeeze-flow de
+  678,9 mm ou massa de densidade aparente de 19,8 g indica que a coluna lida não
+  é a coluna esperada.
+- A página oferece um **template oficial `.xlsx`**, gerado com a versão atual do
+  layout (`AR_LAYOUT_V2`).
+- Cada importação confirmada fica no **histórico**, com usuário, data, arquivo,
+  linhas lidas/importadas/ignoradas, avisos e formulações criadas/atualizadas.
+  A lista de formulações mostra a data da última importação.
 
 O mapa de colunas está em `apps/api/src/importacao/layout-planilha.ts`. Se a
 planilha mudar de layout, é o único arquivo a ajustar.
+
+> Se uma planilha foi importada antes da correção de **2026-09-16**, reimporte o
+> arquivo original. A versão atual da planilha tem colunas calculadas extras
+> antes da granulometria; com o mapa antigo, parte dos ensaios era gravada em
+> campos deslocados e os gráficos recebiam dados errados.
 
 ---
 

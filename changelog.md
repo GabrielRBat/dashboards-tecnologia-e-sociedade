@@ -2,6 +2,11 @@
 
 Formato: **data** — tipo — descrição.
 
+## 2026-09-16
+
+- **2026-09-16** — feature — Importação de Excel passou a ter fluxo em duas etapas: pré-validação sem gravação e confirmação explícita. O importador ignora linhas template sem dados, bloqueia valores fora de faixa plausível que indicam layout deslocado, gera template oficial `.xlsx` com metadado de versão e registra histórico com usuário, arquivo, contagens, avisos e formulações criadas/atualizadas.
+- **2026-09-16** — fix — Corrigido o mapa de colunas da importação para a versão atual da planilha: do teor de água em diante os blocos estavam três colunas adiantados, misturando relação água/ligante, teor de finos, médias calculadas e resultados brutos; os gráficos passavam a receber densidades, granulometria, squeeze-flow, resistências e corpos de prova em campos errados. Adicionado teste de regressão do layout.
+
 ## 2026-09-15
 
 - **2026-09-15** — docs — Criado `docs/PLANO_IMPLEMENTACAO.md` com o plano para histórico de importação e coluna "Data de importação" na listagem de formulações.

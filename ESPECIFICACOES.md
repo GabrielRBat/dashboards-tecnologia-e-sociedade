@@ -68,8 +68,11 @@ Dashboard/
 
 ### 4.2 Importação de dados
 - Upload de planilhas Excel/CSV com os resultados dos ensaios.
-- Validação na importação: colunas esperadas, tipos numéricos, datas; relatório de erros por linha (linhas inválidas são apontadas, não importadas silenciosamente).
-- Histórico de importações (quem importou, quando, quantas linhas).
+- Validação na importação: colunas esperadas, tipos numéricos, datas e faixas
+  plausíveis; relatório de erros por linha. A tela faz pré-validação sem gravar
+  e só confirma a importação depois que o usuário revisa as contagens e avisos.
+- Histórico de importações (quem importou, quando, arquivo, quantas linhas e
+  quais formulações foram criadas/atualizadas). ✅ Implementado.
 
 ### 4.3 Dashboards
 - Página principal com visão geral dos ensaios (indicadores e gráficos).

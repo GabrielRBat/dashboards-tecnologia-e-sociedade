@@ -26,6 +26,7 @@ const COM_RELACOES = {
   granulometria: true,
   resistencias: true,
   corpos: true,
+  importacoes: { with: { importacao: { with: { usuario: true } } } },
 } as const;
 
 @Injectable()

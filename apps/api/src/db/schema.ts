@@ -73,6 +73,11 @@ export const tipoResistenciaEnum = pgEnum('tipo_resistencia', [
   'COMPRESSAO',
 ]);
 
+export const acaoImportacaoEnum = pgEnum('acao_importacao', [
+  'CRIADA',
+  'ATUALIZADA',
+]);
+
 /** Insumos disponíveis para compor uma formulação (cadastro extensível). */
 export const materiais = pgTable(
   'materiais',
@@ -283,6 +288,50 @@ export const usuarios = pgTable(
   }),
 );
 
+/** Evento de importação de planilha, para rastrear origem dos dados gravados. */
+export const importacoes = pgTable(
+  'importacoes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    arquivoNome: text('arquivo_nome').notNull(),
+    usuarioId: uuid('usuario_id')
+      .notNull()
+      .references(() => usuarios.id, { onDelete: 'restrict' }),
+    linhasLidas: integer('linhas_lidas').notNull(),
+    linhasImportadas: integer('linhas_importadas').notNull(),
+    linhasIgnoradas: integer('linhas_ignoradas').notNull(),
+    avisos: jsonb('avisos').notNull().default([]),
+    criadoEm: timestamp('criado_em', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => ({
+    porUsuario: index('importacoes_usuario_idx').on(t.usuarioId),
+    porCriacao: index('importacoes_criado_em_idx').on(t.criadoEm),
+  }),
+);
+
+/** Quais formulações foram criadas ou atualizadas por cada importação. */
+export const importacoesFormulacoes = pgTable(
+  'importacoes_formulacoes',
+  {
+    importacaoId: uuid('importacao_id')
+      .notNull()
+      .references(() => importacoes.id, { onDelete: 'cascade' }),
+    formulacaoId: uuid('formulacao_id')
+      .notNull()
+      .references(() => formulacoes.id, { onDelete: 'cascade' }),
+    numeracao: integer('numeracao').notNull(),
+    acao: acaoImportacaoEnum('acao').notNull(),
+  },
+  (t) => ({
+    chave: primaryKey({ columns: [t.importacaoId, t.formulacaoId] }),
+    porFormulacao: index('importacoes_formulacoes_formulacao_idx').on(
+      t.formulacaoId,
+    ),
+  }),
+);
+
 /**
  * Grupo de pessoas — uma equipe dentro da equipe.
  *
@@ -387,6 +436,7 @@ export const formulacoesRelations = relations(formulacoes, ({ many }) => ({
   granulometria: many(pontosGranulometricos),
   resistencias: many(ensaiosResistencia),
   corpos: many(corposDeProvaEndurecidos),
+  importacoes: many(importacoesFormulacoes),
 }));
 
 export const materiaisRelations = relations(materiais, ({ many }) => ({
@@ -432,6 +482,28 @@ export const corposRelations = relations(
   ({ one }) => ({
     formulacao: one(formulacoes, {
       fields: [corposDeProvaEndurecidos.formulacaoId],
+      references: [formulacoes.id],
+    }),
+  }),
+);
+
+export const importacoesRelations = relations(importacoes, ({ one, many }) => ({
+  usuario: one(usuarios, {
+    fields: [importacoes.usuarioId],
+    references: [usuarios.id],
+  }),
+  formulacoes: many(importacoesFormulacoes),
+}));
+
+export const importacoesFormulacoesRelations = relations(
+  importacoesFormulacoes,
+  ({ one }) => ({
+    importacao: one(importacoes, {
+      fields: [importacoesFormulacoes.importacaoId],
+      references: [importacoes.id],
+    }),
+    formulacao: one(formulacoes, {
+      fields: [importacoesFormulacoes.formulacaoId],
       references: [formulacoes.id],
     }),
   }),
