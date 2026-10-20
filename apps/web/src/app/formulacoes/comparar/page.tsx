@@ -2,8 +2,10 @@ import Link from 'next/link';
 import { Fragment } from 'react';
 import { Cartao, ApiForaDoAr } from '@/components/estado';
 import {
+  GraficoComparacaoProdutos,
   GraficoEvolucaoComparativo,
   GraficoGranulometria,
+  GraficoVariacaoComparativo,
 } from '@/components/graficos';
 import {
   ApiIndisponivel,
@@ -19,9 +21,9 @@ import { data, num, origem, tipoProjeto } from '@/lib/formato';
 
 export const dynamic = 'force-dynamic';
 
-const MAXIMO = 3;
+const MAXIMO = 5;
 
-/** Extrai até 3 ids únicos da query (`ids=a,b` ou `ids=a&ids=b`). */
+/** Extrai até 5 ids únicos da query (`ids=a,b` ou `ids=a&ids=b`). */
 function lerIds(params: ParametrosBusca): string[] {
   const bruto = params.ids;
   if (!bruto) return [];
@@ -220,6 +222,30 @@ export default async function PaginaCompararFormulacoes({
             ),
         ),
       },
+      ...([1, 7, 28] as const).flatMap((idade) => [
+        {
+          grupo: 'Variação dimensional e de massa',
+          rotulo: `Variação dimensional ${idade}d (mm/m)`,
+          valores: formulacoes.map((f) =>
+            num(
+              f.variacoes.find((v) => v.idadeDias === idade)
+                ?.dimensionalMedia ?? null,
+              3,
+            ),
+          ),
+        },
+        {
+          grupo: 'Variação dimensional e de massa',
+          rotulo: `Variação de massa ${idade}d (%)`,
+          valores: formulacoes.map((f) =>
+            num(
+              f.variacoes.find((v) => v.idadeDias === idade)?.massaMedia ??
+                null,
+              3,
+            ),
+          ),
+        },
+      ]),
     ];
 
     let grupoAtual = '';
@@ -320,6 +346,32 @@ export default async function PaginaCompararFormulacoes({
           </div>
         </Cartao>
 
+        <h2 className="titulo-secao">Comparação técnica aos 28 dias</h2>
+        <p className="subtitulo-pagina">
+          Os seis gráficos reproduzem os recortes comparativos do dashboard da
+          planilha para os produtos selecionados.
+        </p>
+        <div className="grade-graficos">
+          <Cartao titulo="Retenção de água" legenda="Comparação entre produtos selecionados">
+            <GraficoComparacaoProdutos formulacoes={formulacoes} metrica="retencaoAgua" />
+          </Cartao>
+          <Cartao titulo="Squeeze-flow — deslocamento" legenda="Média das três repetições">
+            <GraficoComparacaoProdutos formulacoes={formulacoes} metrica="squeezeDeslocamento" />
+          </Cartao>
+          <Cartao titulo="Squeeze-flow — carga" legenda="Média das três repetições">
+            <GraficoComparacaoProdutos formulacoes={formulacoes} metrica="squeezeCarga" />
+          </Cartao>
+          <Cartao titulo="Tração na flexão aos 28 dias" legenda="Média dos corpos de prova">
+            <GraficoComparacaoProdutos formulacoes={formulacoes} metrica="flexao28" />
+          </Cartao>
+          <Cartao titulo="Módulo dinâmico aos 28 dias" legenda="Resultado por ultrassom">
+            <GraficoComparacaoProdutos formulacoes={formulacoes} metrica="modulo28" />
+          </Cartao>
+          <Cartao titulo="Variação dimensional aos 28 dias" legenda="Média dos corpos de prova">
+            <GraficoComparacaoProdutos formulacoes={formulacoes} metrica="variacaoDimensional28" />
+          </Cartao>
+        </div>
+
         <div className="grade-graficos" style={{ marginTop: 18 }}>
           <Cartao
             titulo="Curvas granulométricas"
@@ -333,6 +385,24 @@ export default async function PaginaCompararFormulacoes({
                 )
                 .filter((c): c is NonNullable<typeof c> => Boolean(c))}
               zonas={granulometria.zonas}
+            />
+          </Cartao>
+          <Cartao
+            titulo="Variação dimensional no tempo"
+            legenda="Média dos corpos de prova de cada formulação"
+          >
+            <GraficoVariacaoComparativo
+              formulacoes={formulacoes}
+              metrica="dimensionalMedia"
+            />
+          </Cartao>
+          <Cartao
+            titulo="Variação de massa no tempo"
+            legenda="Perda de massa aparece com sinal negativo"
+          >
+            <GraficoVariacaoComparativo
+              formulacoes={formulacoes}
+              metrica="massaMedia"
             />
           </Cartao>
         </div>

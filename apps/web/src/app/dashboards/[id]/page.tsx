@@ -70,7 +70,11 @@ export default async function PaginaDashboard({
       </div>
 
       <Suspense fallback={null}>
-        <BarraFiltros desenvolvedores={opcoes.desenvolvedores} />
+        <BarraFiltros
+          desenvolvedores={opcoes.desenvolvedores}
+          alimentadores={opcoes.alimentadores}
+          avaliadores={opcoes.avaliadores}
+        />
       </Suspense>
 
       {itens.length === 0 ? (

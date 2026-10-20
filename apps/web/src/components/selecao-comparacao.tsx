@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Seleção de até 3 formulações na lista, para abrir a comparação lado a lado.
+ * Seleção de até 5 formulações na lista, para abrir a comparação lado a lado.
  *
  * O estado vive neste provedor (sessão da página): sobrevive a filtros e
  * paginação enquanto a pessoa permanece em /formulacoes; ao sair, limpa.
@@ -17,7 +17,7 @@ import {
   type ReactNode,
 } from 'react';
 
-const MAXIMO = 3;
+const MAXIMO = 5;
 
 interface ItemSelecionado {
   id: string;

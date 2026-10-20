@@ -9,7 +9,7 @@
 
 export const ABA_ALIMENTACAO = 'planilha de alimentação';
 export const PRIMEIRA_LINHA_DADOS = 11;
-export const VERSAO_LAYOUT_PLANILHA = 'AR_LAYOUT_V2';
+export const VERSAO_LAYOUT_PLANILHA = 'AR_LAYOUT_V3';
 
 export const COL = {
   numeracao: 1,
@@ -34,48 +34,52 @@ export const COL = {
   squeezeCarga: [76, 77, 78],
 } as const;
 
-/** Materiais nas colunas 10 a 45, na ordem em que aparecem na planilha. */
+/** Materiais nas colunas 9 a 48, na ordem em que aparecem na planilha. */
 export const MATERIAIS_PLANILHA: {
   coluna: number;
   nome: string;
   categoria: string;
 }[] = [
-  { coluna: 10, nome: 'Cimento X', categoria: 'CIMENTO' },
-  { coluna: 11, nome: 'Cimento Y', categoria: 'CIMENTO' },
-  { coluna: 12, nome: 'Cimento Z', categoria: 'CIMENTO' },
-  { coluna: 13, nome: 'Cimento W', categoria: 'CIMENTO' },
-  { coluna: 14, nome: 'Cal 1', categoria: 'CAL' },
-  { coluna: 15, nome: 'Cal 2', categoria: 'CAL' },
-  { coluna: 16, nome: 'Fíler 1', categoria: 'FILER' },
-  { coluna: 17, nome: 'Fíler 2', categoria: 'FILER' },
-  { coluna: 18, nome: 'Areia fina X', categoria: 'AREIA_FINA' },
-  { coluna: 19, nome: 'Areia fina Y', categoria: 'AREIA_FINA' },
-  { coluna: 20, nome: 'Areia fina Z', categoria: 'AREIA_FINA' },
-  { coluna: 21, nome: 'Areia fina W', categoria: 'AREIA_FINA' },
-  { coluna: 22, nome: 'Areia média X', categoria: 'AREIA_MEDIA' },
-  { coluna: 23, nome: 'Areia média Y', categoria: 'AREIA_MEDIA' },
-  { coluna: 24, nome: 'Areia média Z', categoria: 'AREIA_MEDIA' },
-  { coluna: 25, nome: 'Areia média W', categoria: 'AREIA_MEDIA' },
-  { coluna: 26, nome: 'Retentor de água 1', categoria: 'ADITIVO_RETENTOR_AGUA' },
-  { coluna: 27, nome: 'Retentor de água 2', categoria: 'ADITIVO_RETENTOR_AGUA' },
-  { coluna: 28, nome: 'Retentor de água 3', categoria: 'ADITIVO_RETENTOR_AGUA' },
-  { coluna: 29, nome: 'Retentor de água 4', categoria: 'ADITIVO_RETENTOR_AGUA' },
-  { coluna: 30, nome: 'Retentor de água 5', categoria: 'ADITIVO_RETENTOR_AGUA' },
-  { coluna: 31, nome: 'Incorporador de ar 1', categoria: 'ADITIVO_INCORPORADOR_AR' },
-  { coluna: 32, nome: 'Incorporador de ar 2', categoria: 'ADITIVO_INCORPORADOR_AR' },
-  { coluna: 33, nome: 'Incorporador de ar 3', categoria: 'ADITIVO_INCORPORADOR_AR' },
-  { coluna: 34, nome: 'Incorporador de ar 4', categoria: 'ADITIVO_INCORPORADOR_AR' },
-  { coluna: 35, nome: 'Incorporador de ar 5', categoria: 'ADITIVO_INCORPORADOR_AR' },
-  { coluna: 36, nome: 'Fibra 1', categoria: 'FIBRA' },
-  { coluna: 37, nome: 'Fibra 2', categoria: 'FIBRA' },
-  { coluna: 38, nome: 'Fibra 3', categoria: 'FIBRA' },
-  { coluna: 39, nome: 'Fibra 4', categoria: 'FIBRA' },
-  { coluna: 40, nome: 'Fibra 5', categoria: 'FIBRA' },
-  { coluna: 41, nome: 'Superplastificante 1', categoria: 'SUPERPLASTIFICANTE' },
-  { coluna: 42, nome: 'Superplastificante 2', categoria: 'SUPERPLASTIFICANTE' },
-  { coluna: 43, nome: 'Superplastificante 3', categoria: 'SUPERPLASTIFICANTE' },
-  { coluna: 44, nome: 'Superplastificante 4', categoria: 'SUPERPLASTIFICANTE' },
-  { coluna: 45, nome: 'Superplastificante 5', categoria: 'SUPERPLASTIFICANTE' },
+  { coluna: 9, nome: 'Cimento X', categoria: 'CIMENTO' },
+  { coluna: 10, nome: 'Cimento Y', categoria: 'CIMENTO' },
+  { coluna: 11, nome: 'Cimento Z', categoria: 'CIMENTO' },
+  { coluna: 12, nome: 'Cimento W', categoria: 'CIMENTO' },
+  { coluna: 13, nome: 'Cal 1', categoria: 'CAL' },
+  { coluna: 14, nome: 'Cal 2', categoria: 'CAL' },
+  { coluna: 15, nome: 'Fíler 1', categoria: 'FILER' },
+  { coluna: 16, nome: 'Fíler 2', categoria: 'FILER' },
+  { coluna: 17, nome: 'Areia fina X', categoria: 'AREIA_FINA' },
+  { coluna: 18, nome: 'Areia fina Y', categoria: 'AREIA_FINA' },
+  { coluna: 19, nome: 'Areia fina Z', categoria: 'AREIA_FINA' },
+  { coluna: 20, nome: 'Areia fina W', categoria: 'AREIA_FINA' },
+  { coluna: 21, nome: 'Areia média X', categoria: 'AREIA_MEDIA' },
+  { coluna: 22, nome: 'Areia média Y', categoria: 'AREIA_MEDIA' },
+  { coluna: 23, nome: 'Areia média Z', categoria: 'AREIA_MEDIA' },
+  { coluna: 24, nome: 'Areia média W', categoria: 'AREIA_MEDIA' },
+  { coluna: 25, nome: 'Retentor de água 1', categoria: 'ADITIVO_RETENTOR_AGUA' },
+  { coluna: 26, nome: 'Retentor de água 2', categoria: 'ADITIVO_RETENTOR_AGUA' },
+  { coluna: 27, nome: 'Retentor de água 3', categoria: 'ADITIVO_RETENTOR_AGUA' },
+  { coluna: 28, nome: 'Retentor de água 4', categoria: 'ADITIVO_RETENTOR_AGUA' },
+  { coluna: 29, nome: 'Retentor de água 5', categoria: 'ADITIVO_RETENTOR_AGUA' },
+  { coluna: 30, nome: 'Incorporador de ar 1', categoria: 'ADITIVO_INCORPORADOR_AR' },
+  { coluna: 31, nome: 'Incorporador de ar 2', categoria: 'ADITIVO_INCORPORADOR_AR' },
+  { coluna: 32, nome: 'Incorporador de ar 3', categoria: 'ADITIVO_INCORPORADOR_AR' },
+  { coluna: 33, nome: 'Incorporador de ar 4', categoria: 'ADITIVO_INCORPORADOR_AR' },
+  { coluna: 34, nome: 'Incorporador de ar 5', categoria: 'ADITIVO_INCORPORADOR_AR' },
+  { coluna: 35, nome: 'Fibra 1', categoria: 'FIBRA' },
+  { coluna: 36, nome: 'Fibra 2', categoria: 'FIBRA' },
+  { coluna: 37, nome: 'Fibra 3', categoria: 'FIBRA' },
+  { coluna: 38, nome: 'Fibra 4', categoria: 'FIBRA' },
+  { coluna: 39, nome: 'Fibra 5', categoria: 'FIBRA' },
+  { coluna: 40, nome: 'Compensador de retração 1', categoria: 'COMPENSADOR_RETRACAO' },
+  { coluna: 41, nome: 'Compensador de retração 2', categoria: 'COMPENSADOR_RETRACAO' },
+  { coluna: 42, nome: 'Compensador de retração 3', categoria: 'COMPENSADOR_RETRACAO' },
+  { coluna: 43, nome: 'Compensador de retração 4', categoria: 'COMPENSADOR_RETRACAO' },
+  { coluna: 44, nome: 'Superplastificante 1', categoria: 'SUPERPLASTIFICANTE' },
+  { coluna: 45, nome: 'Superplastificante 2', categoria: 'SUPERPLASTIFICANTE' },
+  { coluna: 46, nome: 'Superplastificante 3', categoria: 'SUPERPLASTIFICANTE' },
+  { coluna: 47, nome: 'Superplastificante 4', categoria: 'SUPERPLASTIFICANTE' },
+  { coluna: 48, nome: 'Superplastificante 5', categoria: 'SUPERPLASTIFICANTE' },
 ];
 
 /** Distribuição granulométrica: colunas 54 a 61 (`0` = fundo). */
@@ -134,6 +138,26 @@ export const ENDURECIDO_PLANILHA: {
       { indice: 3, dimensoes: [177, 178, 179, 180, 181, 182], massa: 188, velocidades: [199, 200, 201] },
     ],
   },
+];
+
+export interface LayoutVariacao {
+  idadeDias: 0 | 1 | 7 | 28;
+  barraReferencia: number;
+  comprimentos: [number, number, number];
+  massas: [number, number, number];
+}
+
+/**
+ * Leituras brutas de variação dimensional e de massa (GX:HY).
+ *
+ * HZ:IW contém resultados calculados pela planilha e não é importado: o sistema
+ * deriva as variações das leituras brutas para manter as fórmulas centralizadas.
+ */
+export const VARIACAO_PLANILHA: LayoutVariacao[] = [
+  { idadeDias: 0, barraReferencia: 206, comprimentos: [207, 208, 209], massas: [210, 211, 212] },
+  { idadeDias: 1, barraReferencia: 213, comprimentos: [214, 215, 216], massas: [217, 218, 219] },
+  { idadeDias: 7, barraReferencia: 220, comprimentos: [221, 222, 223], massas: [224, 225, 226] },
+  { idadeDias: 28, barraReferencia: 227, comprimentos: [228, 229, 230], massas: [231, 232, 233] },
 ];
 
 /** Códigos de tipo de projeto aceitos, conforme a aba "Listas". */

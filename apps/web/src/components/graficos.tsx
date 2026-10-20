@@ -36,14 +36,17 @@ import {
   Correlacao,
   CurvaEvolucao,
   CurvaGranulometrica,
+  DensidadeProduto,
   DispersaoIdade,
   FamiliaClasses,
+  Formulacao,
   ItemComparativo,
   LimiteZona,
   PontoCorrelacao,
   PontoDispersao,
   PontoEvolucao,
   PontoSqueeze,
+  VariacaoTemporal,
 } from '@/lib/api';
 import { num, tipoProjeto } from '@/lib/formato';
 import { useTelaEstreita } from '@/lib/tela';
@@ -527,6 +530,587 @@ export function GraficoDistribuicao({
   );
 }
 
+/* --- Gestão: produtos por responsável --- */
+
+export function GraficoResponsaveis({
+  dados,
+}: {
+  dados: {
+    responsavel: string;
+    desenvolvidas: number;
+    alimentadas: number;
+    avaliadas: number;
+  }[];
+}) {
+  const estreita = useTelaEstreita();
+  if (dados.length === 0) {
+    return <SemDados>Nenhum responsável no filtro atual.</SemDados>;
+  }
+
+  return (
+    <>
+      <ResponsiveContainer
+        width="100%"
+        height={Math.max(270, dados.length * 34 + 54)}
+      >
+        <BarChart
+          data={dados}
+          layout="vertical"
+          margin={{ top: 6, right: 18, bottom: 20, left: 4 }}
+          barCategoryGap={6}
+        >
+          <CartesianGrid stroke="var(--grade)" horizontal={false} />
+          <XAxis
+            type="number"
+            {...EIXO}
+            allowDecimals={false}
+            label={{
+              value: 'Quantidade de produtos',
+              position: 'insideBottom',
+              offset: -12,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+            }}
+          />
+          <YAxis
+            type="category"
+            dataKey="responsavel"
+            {...EIXO}
+            width={estreita ? 78 : 112}
+            tick={{ fill: 'var(--tinta-secundaria)', fontSize: 11 }}
+          />
+          <Tooltip
+            cursor={{ fill: 'var(--grade)', fillOpacity: 0.5 }}
+            content={({ active, payload, label }) =>
+              active && payload?.length ? (
+                <Tip
+                  titulo={String(label)}
+                  linhas={payload.map((p, i) => ({
+                    cor: CORES[i] as string,
+                    rotulo:
+                      p.dataKey === 'desenvolvidas'
+                        ? 'Desenvolveu'
+                        : p.dataKey === 'alimentadas'
+                          ? 'Alimentou a planilha'
+                          : 'Avaliou',
+                    valor: String(p.value ?? 0),
+                  }))}
+                />
+              ) : null
+            }
+          />
+          <Bar dataKey="desenvolvidas" fill={CORES[0]} isAnimationActive={false} />
+          <Bar dataKey="alimentadas" fill={CORES[1]} isAnimationActive={false} />
+          <Bar dataKey="avaliadas" fill={CORES[2]} isAnimationActive={false} />
+        </BarChart>
+      </ResponsiveContainer>
+      <Legenda
+        itens={[
+          { cor: CORES[0] as string, rotulo: 'Desenvolvedor' },
+          { cor: CORES[1] as string, rotulo: 'Alimentador da planilha' },
+          { cor: CORES[2] as string, rotulo: 'Avaliador' },
+        ]}
+      />
+    </>
+  );
+}
+
+/* --- Gestão: registros por mês --- */
+
+export function GraficoRegistrosPorMes({
+  dados,
+}: {
+  dados: { mes: string; total: number }[];
+}) {
+  if (dados.length === 0) {
+    return <SemDados>Nenhum registro com data no filtro atual.</SemDados>;
+  }
+
+  const formatarMes = (mes: string) => {
+    const [ano, numeroMes] = mes.split('-').map(Number);
+    return new Intl.DateTimeFormat('pt-BR', {
+      month: 'short',
+      year: '2-digit',
+      timeZone: 'UTC',
+    })
+      .format(new Date(Date.UTC(ano as number, (numeroMes as number) - 1, 1)))
+      .replace('.', '');
+  };
+
+  return (
+    <ResponsiveContainer width="100%" height={270}>
+      <BarChart data={dados} margin={{ top: 18, right: 10, bottom: 24, left: 2 }}>
+        <CartesianGrid stroke="var(--grade)" vertical={false} />
+        <XAxis
+          dataKey="mes"
+          {...EIXO}
+          tickFormatter={formatarMes}
+          interval="preserveStartEnd"
+          angle={-30}
+          textAnchor="end"
+          height={52}
+          label={{
+            value: 'Mês de cadastro',
+            position: 'insideBottom',
+            offset: -18,
+            style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+          }}
+        />
+        <YAxis
+          {...EIXO}
+          width={52}
+          allowDecimals={false}
+          label={{
+            value: 'Registros',
+            angle: -90,
+            position: 'insideLeft',
+            offset: 16,
+            style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+          }}
+        />
+        <Tooltip
+          cursor={{ fill: 'var(--grade)', fillOpacity: 0.5 }}
+          content={({ active, payload }) => {
+            if (!active || !payload?.length) return null;
+            const ponto = payload[0]?.payload as { mes: string; total: number };
+            return (
+              <Tip
+                titulo={formatarMes(ponto.mes)}
+                linhas={[
+                  {
+                    cor: CORES[0] as string,
+                    rotulo: 'Produtos cadastrados',
+                    valor: String(ponto.total),
+                  },
+                ]}
+              />
+            );
+          }}
+        />
+        <Bar
+          dataKey="total"
+          fill={CORES[0]}
+          radius={[4, 4, 0, 0]}
+          isAnimationActive={false}
+        />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+/* --- Análise técnica: densidades por produto --- */
+
+export function GraficoDensidadesProduto({
+  dados,
+}: {
+  dados: DensidadeProduto[];
+}) {
+  const estreita = useTelaEstreita();
+  if (dados.length === 0) {
+    return <SemDados>Nenhuma densidade no filtro atual.</SemDados>;
+  }
+  const comRotulo = dados.map((d) => ({
+    ...d,
+    rotulo: estreita ? encurtar(d.nomenclatura, 14) : d.nomenclatura,
+  }));
+
+  return (
+    <>
+      <ResponsiveContainer
+        width="100%"
+        height={Math.max(310, dados.length * 48 + 56)}
+      >
+        <BarChart
+          data={comRotulo}
+          layout="vertical"
+          margin={{ top: 6, right: 18, bottom: 20, left: 6 }}
+          barCategoryGap={5}
+        >
+          <CartesianGrid stroke="var(--grade)" horizontal={false} />
+          <XAxis
+            type="number"
+            {...EIXO}
+            domain={['dataMin - 100', 'dataMax + 100']}
+            label={{
+              value: 'Densidade (kg/m³)',
+              position: 'insideBottom',
+              offset: -12,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+            }}
+          />
+          <YAxis
+            type="category"
+            dataKey="rotulo"
+            {...EIXO}
+            width={estreita ? 104 : 190}
+            tick={{ fill: 'var(--tinta-secundaria)', fontSize: 11 }}
+          />
+          <Tooltip
+            cursor={{ fill: 'var(--grade)', fillOpacity: 0.5 }}
+            content={({ active, payload }) => {
+              if (!active || !payload?.length) return null;
+              const ponto = payload[0]?.payload as DensidadeProduto;
+              return (
+                <Tip
+                  titulo={ponto.nomenclatura}
+                  linhas={[
+                    { cor: CORES[0] as string, rotulo: 'Aparente', valor: `${num(ponto.aparente, 0)} kg/m³` },
+                    { cor: CORES[1] as string, rotulo: 'Fresca', valor: `${num(ponto.fresca, 0)} kg/m³` },
+                    { cor: CORES[2] as string, rotulo: 'Endurecida 14d', valor: `${num(ponto.endurecida14, 0)} kg/m³` },
+                    { cor: CORES[3] as string, rotulo: 'Endurecida 28d', valor: `${num(ponto.endurecida28, 0)} kg/m³` },
+                  ]}
+                />
+              );
+            }}
+          />
+          <Bar dataKey="aparente" fill={CORES[0]} isAnimationActive={false} />
+          <Bar dataKey="fresca" fill={CORES[1]} isAnimationActive={false} />
+          <Bar dataKey="endurecida14" fill={CORES[2]} isAnimationActive={false} />
+          <Bar dataKey="endurecida28" fill={CORES[3]} isAnimationActive={false} />
+        </BarChart>
+      </ResponsiveContainer>
+      <Legenda
+        itens={[
+          { cor: CORES[0] as string, rotulo: 'Aparente' },
+          { cor: CORES[1] as string, rotulo: 'Estado fresco' },
+          { cor: CORES[2] as string, rotulo: 'Endurecida aos 14 dias' },
+          { cor: CORES[3] as string, rotulo: 'Endurecida aos 28 dias' },
+        ]}
+      />
+    </>
+  );
+}
+
+/* --- Análise técnica: variação dimensional ou de massa --- */
+
+export function GraficoVariacaoTemporal({
+  dados,
+  metrica,
+}: {
+  dados: VariacaoTemporal[];
+  metrica: 'dimensional' | 'massa';
+}) {
+  const chaveDesvio =
+    metrica === 'dimensional' ? 'dimensionalDesvio' : 'massaDesvio';
+  const comValores = dados.filter((d) => d[metrica] !== null);
+  if (comValores.length === 0) {
+    return <SemDados>Nenhum ensaio de variação no filtro atual.</SemDados>;
+  }
+  const unidade = metrica === 'dimensional' ? 'mm/m' : '%';
+  const rotulo = metrica === 'dimensional' ? 'Variação dimensional' : 'Variação de massa';
+
+  return (
+    <ResponsiveContainer width="100%" height={270}>
+      <BarChart data={comValores} margin={{ top: 18, right: 12, bottom: 20, left: 4 }}>
+        <CartesianGrid stroke="var(--grade)" vertical={false} />
+        <XAxis
+          dataKey="idadeDias"
+          {...EIXO}
+          tickFormatter={(v: number) => `${v}d`}
+          label={{
+            value: 'Idade do ensaio (dias)',
+            position: 'insideBottom',
+            offset: -12,
+            style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+          }}
+        />
+        <YAxis
+          {...EIXO}
+          width={60}
+          label={{
+            value: `${rotulo} (${unidade})`,
+            angle: -90,
+            position: 'insideLeft',
+            offset: 18,
+            style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+          }}
+        />
+        <Tooltip
+          cursor={{ fill: 'var(--grade)', fillOpacity: 0.5 }}
+          content={({ active, payload }) => {
+            if (!active || !payload?.length) return null;
+            const ponto = payload[0]?.payload as VariacaoTemporal;
+            const desvio = ponto[chaveDesvio];
+            return (
+              <Tip
+                titulo={`${ponto.idadeDias} dias`}
+                linhas={[
+                  {
+                    cor: CORES[0] as string,
+                    rotulo,
+                    valor: `${num(ponto[metrica], 3)} ± ${num(desvio, 3)} ${unidade}`,
+                  },
+                  {
+                    cor: 'var(--tinta-suave)',
+                    rotulo: 'Corpos de prova',
+                    valor: String(
+                      metrica === 'dimensional'
+                        ? ponto.corposDimensionais
+                        : ponto.corposMassa,
+                    ),
+                  },
+                ]}
+              />
+            );
+          }}
+        />
+        <Bar
+          dataKey={metrica}
+          fill={CORES[0]}
+          radius={[4, 4, 0, 0]}
+          maxBarSize={54}
+          isAnimationActive={false}
+        >
+          <ErrorBar
+            dataKey={chaveDesvio}
+            width={6}
+            strokeWidth={1.5}
+            stroke="var(--tinta-secundaria)"
+          />
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+/** Curvas de variação das formulações escolhidas na comparação. */
+export function GraficoVariacaoComparativo({
+  formulacoes,
+  metrica,
+}: {
+  formulacoes: Formulacao[];
+  metrica: 'dimensionalMedia' | 'massaMedia';
+}) {
+  const idades = [1, 7, 28];
+  const dados = idades.map((idadeDias) => {
+    const linha: Record<string, number | null> = { idadeDias };
+    for (const f of formulacoes) {
+      linha[f.id] =
+        f.variacoes.find((v) => v.idadeDias === idadeDias)?.[metrica] ?? null;
+    }
+    return linha;
+  });
+  if (!formulacoes.some((f) => f.variacoes.some((v) => v[metrica] !== null))) {
+    return <SemDados>Nenhum ensaio de variação nas formulações escolhidas.</SemDados>;
+  }
+  const ehDimensional = metrica === 'dimensionalMedia';
+  const unidade = ehDimensional ? 'mm/m' : '%';
+
+  return (
+    <>
+      <ResponsiveContainer width="100%" height={280}>
+        <LineChart data={dados} margin={{ top: 12, right: 24, bottom: 20, left: 4 }}>
+          <CartesianGrid stroke="var(--grade)" vertical={false} />
+          <XAxis
+            dataKey="idadeDias"
+            {...EIXO}
+            tickFormatter={(v: number) => `${v}d`}
+            label={{
+              value: 'Idade do ensaio (dias)',
+              position: 'insideBottom',
+              offset: -12,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+            }}
+          />
+          <YAxis
+            {...EIXO}
+            width={60}
+            label={{
+              value: `${ehDimensional ? 'Variação dimensional' : 'Variação de massa'} (${unidade})`,
+              angle: -90,
+              position: 'insideLeft',
+              offset: 18,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+            }}
+          />
+          <Tooltip
+            cursor={{ stroke: 'var(--eixo)', strokeWidth: 1 }}
+            content={({ active, payload, label }) =>
+              active && payload?.length ? (
+                <Tip
+                  titulo={`${label} dias`}
+                  linhas={payload.map((p, i) => ({
+                    cor: CORES[i % CORES.length] as string,
+                    rotulo:
+                      formulacoes.find((f) => f.id === p.dataKey)?.nomenclatura ??
+                      String(p.dataKey),
+                    valor: `${num(p.value as number, 3)} ${unidade}`,
+                  }))}
+                />
+              ) : null
+            }
+          />
+          {formulacoes.map((f, i) => (
+            <Line
+              key={f.id}
+              type="monotone"
+              dataKey={f.id}
+              stroke={CORES[i % CORES.length]}
+              strokeWidth={2}
+              isAnimationActive={false}
+              connectNulls
+              dot={{ r: 4, strokeWidth: 2, fill: 'var(--superficie)' }}
+            />
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
+      <Legenda
+        itens={formulacoes.map((f, i) => ({
+          cor: CORES[i % CORES.length] as string,
+          rotulo: f.nomenclatura,
+        }))}
+      />
+    </>
+  );
+}
+
+/* --- Comparação técnica de 2 a 5 produtos, como no dashboard da planilha --- */
+
+type MetricaComparacaoProdutos =
+  | 'retencaoAgua'
+  | 'squeezeDeslocamento'
+  | 'squeezeCarga'
+  | 'flexao28'
+  | 'modulo28'
+  | 'variacaoDimensional28';
+
+export function GraficoComparacaoProdutos({
+  formulacoes,
+  metrica,
+}: {
+  formulacoes: Formulacao[];
+  metrica: MetricaComparacaoProdutos;
+}) {
+  const configuracao: Record<
+    MetricaComparacaoProdutos,
+    {
+      rotulo: string;
+      unidade: string;
+      casas: number;
+      valor: (formulacao: Formulacao) => number | null;
+    }
+  > = {
+    retencaoAgua: {
+      rotulo: 'Retenção de água',
+      unidade: '%',
+      casas: 2,
+      valor: (f) => f.calculados.retencaoAgua,
+    },
+    squeezeDeslocamento: {
+      rotulo: 'Deslocamento máximo médio',
+      unidade: 'mm',
+      casas: 2,
+      valor: (f) => f.calculados.squeezeDeslocamentoMedio,
+    },
+    squeezeCarga: {
+      rotulo: 'Carga máxima média',
+      unidade: 'N',
+      casas: 2,
+      valor: (f) => f.calculados.squeezeCargaMedia,
+    },
+    flexao28: {
+      rotulo: 'Tração na flexão aos 28 dias',
+      unidade: 'MPa',
+      casas: 2,
+      valor: (f) =>
+        f.resistencias.find(
+          (r) => r.tipo === 'FLEXAO' && r.idadeDias === 28,
+        )?.media ?? null,
+    },
+    modulo28: {
+      rotulo: 'Módulo dinâmico aos 28 dias',
+      unidade: 'MPa',
+      casas: 0,
+      valor: (f) =>
+        f.endurecidos.find((e) => e.idadeDias === 28)?.moduloMedio ?? null,
+    },
+    variacaoDimensional28: {
+      rotulo: 'Variação dimensional aos 28 dias',
+      unidade: 'mm/m',
+      casas: 3,
+      valor: (f) =>
+        f.variacoes.find((v) => v.idadeDias === 28)?.dimensionalMedia ?? null,
+    },
+  };
+  const config = configuracao[metrica];
+  const dados = formulacoes
+    .map((f, indice) => ({
+      formulacaoId: f.id,
+      nomenclatura: f.nomenclatura,
+      rotulo: encurtar(f.nomenclatura.replace('Argamassa de Revestimento_', 'Prod. '), 18),
+      valor: config.valor(f),
+      cor: CORES[indice % CORES.length] as string,
+    }))
+    .filter((item) => item.valor !== null);
+
+  if (dados.length === 0) {
+    return <SemDados>Nenhum produto escolhido tem esse ensaio preenchido.</SemDados>;
+  }
+
+  return (
+    <ResponsiveContainer width="100%" height={270}>
+      <BarChart data={dados} margin={{ top: 24, right: 10, bottom: 28, left: 4 }}>
+        <CartesianGrid stroke="var(--grade)" vertical={false} />
+        <XAxis
+          dataKey="rotulo"
+          {...EIXO}
+          interval={0}
+          angle={-20}
+          textAnchor="end"
+          height={54}
+          label={{
+            value: 'Produto selecionado',
+            position: 'insideBottom',
+            offset: -22,
+            style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+          }}
+        />
+        <YAxis
+          {...EIXO}
+          width={64}
+          tickFormatter={(v: number) => num(v, config.casas === 0 ? 0 : 1)}
+          label={{
+            value: `${config.rotulo} (${config.unidade})`,
+            angle: -90,
+            position: 'insideLeft',
+            offset: 18,
+            style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+          }}
+        />
+        <Tooltip
+          cursor={{ fill: 'var(--grade)', fillOpacity: 0.5 }}
+          content={({ active, payload }) => {
+            if (!active || !payload?.length) return null;
+            const ponto = payload[0]?.payload as (typeof dados)[number];
+            return (
+              <Tip
+                titulo={ponto.nomenclatura}
+                linhas={[
+                  {
+                    cor: ponto.cor,
+                    rotulo: config.rotulo,
+                    valor: `${num(ponto.valor, config.casas)} ${config.unidade}`,
+                  },
+                ]}
+              />
+            );
+          }}
+        />
+        <Bar dataKey="valor" radius={[4, 4, 0, 0]} isAnimationActive={false}>
+          {dados.map((item) => (
+            <Cell key={item.formulacaoId} fill={item.cor} />
+          ))}
+          <LabelList
+            dataKey="valor"
+            position="top"
+            formatter={(valor: number) => num(valor, config.casas)}
+            style={{ fill: 'var(--tinta-secundaria)', fontSize: 10 }}
+          />
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
 /* --- Curvas granulométricas --- */
 
 export function GraficoGranulometria({
@@ -960,6 +1544,7 @@ export function GraficoCorrelacao({
   rotuloY,
   unidadeX,
   unidadeY,
+  casasX = 2,
   casasY = 2,
 }: {
   dados: Correlacao;
@@ -967,6 +1552,7 @@ export function GraficoCorrelacao({
   rotuloY: string;
   unidadeX: string;
   unidadeY: string;
+  casasX?: number;
   casasY?: number;
 }) {
   if (dados.pontos.length === 0) {
@@ -995,7 +1581,7 @@ export function GraficoCorrelacao({
             dataKey="x"
             {...EIXO}
             domain={['dataMin - 0.4', 'dataMax + 0.4']}
-            tickFormatter={(v: number) => num(v, 1)}
+            tickFormatter={(v: number) => num(v, casasX === 0 ? 0 : 1)}
             label={{
               value: `${rotuloX} (${unidadeX})`,
               position: 'insideBottom',
@@ -1031,7 +1617,7 @@ export function GraficoCorrelacao({
                     {
                       cor: CORES[0] as string,
                       rotulo: rotuloX,
-                      valor: `${num(p.x, 2)} ${unidadeX}`,
+                      valor: `${num(p.x, casasX)} ${unidadeX}`,
                     },
                     {
                       cor: CORES[1] as string,

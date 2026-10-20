@@ -63,6 +63,8 @@ export class IndicadoresService {
       correlacoes: this.correlacoesDe(itens),
       squeezeFlow: this.squeezeFlowDe(itens),
       dispersaoIdade: this.dispersaoPorIdadeDe(itens),
+      densidades: this.densidadesPorProdutoDe(itens),
+      variacaoTemporal: this.variacaoTemporalDe(itens),
     };
   }
 
@@ -130,10 +132,55 @@ export class IndicadoresService {
       origem,
       total,
     }));
+    const responsaveis = new Map<
+      string,
+      {
+        responsavel: string;
+        desenvolvidas: number;
+        alimentadas: number;
+        avaliadas: number;
+        total: number;
+      }
+    >();
+    const somarResponsavel = (
+      nome: string | null,
+      papel: 'desenvolvidas' | 'alimentadas' | 'avaliadas',
+    ) => {
+      if (!nome) return;
+      const atual = responsaveis.get(nome) ?? {
+        responsavel: nome,
+        desenvolvidas: 0,
+        alimentadas: 0,
+        avaliadas: 0,
+        total: 0,
+      };
+      atual[papel] += 1;
+      atual.total += 1;
+      responsaveis.set(nome, atual);
+    };
+    for (const item of itens) {
+      somarResponsavel(item.desenvolvedor, 'desenvolvidas');
+      somarResponsavel(item.alimentador, 'alimentadas');
+      somarResponsavel(item.avaliador, 'avaliadas');
+    }
+    const porResponsavel = [...responsaveis.values()].sort(
+      (a, b) => b.total - a.total || a.responsavel.localeCompare(b.responsavel),
+    );
+
+    const meses = new Map<string, number>();
+    for (const item of itens) {
+      if (!item.data) continue;
+      const mes = item.data.slice(0, 7);
+      meses.set(mes, (meses.get(mes) ?? 0) + 1);
+    }
+    const porMes = [...meses.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([mes, total]) => ({ mes, total }));
 
     return {
       totalFormulacoes: itens.length,
       totalComEnsaios: itens.filter((f) => f.calculados.completude > 0).length,
+      totalCompletos: itens.filter((f) => f.calculados.completude === 100).length,
       compressao28dMedia: arredondar(
         media(itens.map((f) => f.calculados.compressao28d)),
         2,
@@ -155,6 +202,8 @@ export class IndicadoresService {
       ),
       porTipoProjeto,
       porOrigem,
+      porResponsavel,
+      porMes,
     };
   }
 
@@ -323,6 +372,10 @@ export class IndicadoresService {
       endurecido28De(f)?.moduloMedio ?? null;
     const densidadeEndurecidaDe = (f: FormulacaoDetalhada): number | null =>
       endurecido28De(f)?.densidadeMedia ?? null;
+    const variacaoDimensional28De = (
+      f: FormulacaoDetalhada,
+    ): number | null =>
+      f.variacoes.find((v) => v.idadeDias === 28)?.dimensionalMedia ?? null;
 
     const montar = (
       x: (f: FormulacaoDetalhada) => number | null,
@@ -359,7 +412,13 @@ export class IndicadoresService {
         (f) => f.calculados.flexao28d,
       ),
       moduloCompressao: montar((f) => f.calculados.compressao28d, moduloDe),
+      moduloFlexao: montar((f) => f.calculados.flexao28d, moduloDe),
+      moduloVariacaoDimensional: montar(moduloDe, variacaoDimensional28De),
       moduloDensidadeEndurecida: montar(densidadeEndurecidaDe, moduloDe),
+      retencaoSqueeze: montar(
+        (f) => f.calculados.retencaoAgua,
+        (f) => f.calculados.squeezeDeslocamentoMedio,
+      ),
     };
   }
 
@@ -421,6 +480,56 @@ export class IndicadoresService {
         flexaoDesvio: arredondar(desvioPadrao(flexoes), 3),
         corposCompressao: compressoes.length,
         corposFlexao: flexoes.length,
+      };
+    });
+  }
+
+  /** Densidades dos diferentes estados, por formulação. */
+  private densidadesPorProdutoDe(itens: Itens, limite = 12) {
+    return itens
+      .map((f) => ({
+        formulacaoId: f.id,
+        nomenclatura: f.nomenclatura,
+        numeracao: f.numeracao,
+        aparente: f.calculados.densidadeAparente,
+        fresca: f.calculados.densidadeFresco,
+        endurecida14:
+          f.endurecidos.find((e) => e.idadeDias === 14)?.densidadeMedia ?? null,
+        endurecida28:
+          f.endurecidos.find((e) => e.idadeDias === 28)?.densidadeMedia ?? null,
+      }))
+      .filter((f) =>
+        [f.aparente, f.fresca, f.endurecida14, f.endurecida28].some(
+          (v) => v !== null,
+        ),
+      )
+      .slice(0, limite);
+  }
+
+  /** Média e dispersão das variações entre os corpos de prova do filtro. */
+  private variacaoTemporalDe(itens: Itens) {
+    return [1, 7, 28].map((idadeDias) => {
+      const dimensional = itens.flatMap(
+        (f) =>
+          f.variacoes
+            .find((v) => v.idadeDias === idadeDias)
+            ?.dimensionalValores.filter((v): v is number => v !== null) ?? [],
+      );
+      const massa = itens.flatMap(
+        (f) =>
+          f.variacoes
+            .find((v) => v.idadeDias === idadeDias)
+            ?.massaValores.filter((v): v is number => v !== null) ?? [],
+      );
+
+      return {
+        idadeDias,
+        dimensional: arredondar(media(dimensional), 3),
+        dimensionalDesvio: arredondar(desvioPadrao(dimensional), 3),
+        massa: arredondar(media(massa), 3),
+        massaDesvio: arredondar(desvioPadrao(massa), 3),
+        corposDimensionais: dimensional.length,
+        corposMassa: massa.length,
       };
     });
   }

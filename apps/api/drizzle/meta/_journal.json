@@ -36,6 +36,13 @@
       "when": 1789582860685,
       "tag": "0004_orange_the_santerians",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792514734753,
+      "tag": "0005_public_shriek",
+      "breakpoints": true
     }
   ]
 }

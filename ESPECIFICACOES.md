@@ -76,7 +76,7 @@ Dashboard/
 
 ### 4.3 Dashboards
 - Página principal com visão geral dos ensaios (indicadores e gráficos).
-- Filtros por período, obra/cliente, tipo de argamassa/traço.
+- Filtros por período, tipo de projeto, origem e responsáveis.
 - Gráficos de evolução das propriedades ao longo do tempo e comparação entre traços.
 - Tabela detalhada dos ensaios com busca e exportação.
 
@@ -90,14 +90,15 @@ registro é uma formulação desenvolvida pelo laboratório:
   (Produção ou Laboratório).
 - **Composição:** teor (% da massa seca) de cimentos, cales, fíleres, areias fina
   e média, aditivos retentores de água e incorporadores de ar, fibras e
-  superplastificantes, além do teor e da massa de água.
+  compensadores de retração e superplastificantes, além do teor e da massa de água.
 - **Estado anidro:** distribuição granulométrica (8 peneiras), densidade
   aparente, relação água/ligante, teor de finos.
 - **Estado fresco:** retenção de água (NBR 13277), densidade, squeeze-flow
   (deslocamento máximo e carga máxima, 3 curvas).
 - **Estado endurecido:** resistência à tração na flexão (3 CPs) e à compressão
   (6 CPs) aos 3, 7, 14 e 28 dias; densidade e módulo de elasticidade dinâmico
-  por ultrassom aos 14 e 28 dias.
+  por ultrassom aos 14 e 28 dias; variações dimensional e de massa dos 3 CPs na
+  desforma e aos 1, 7 e 28 dias.
 
 As fórmulas aplicadas e as divergências em relação à planilha estão em
 [`docs/CALCULOS.md`](docs/CALCULOS.md).

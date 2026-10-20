@@ -52,11 +52,15 @@ export default async function PaginaFormulacoes({
         <h1 className="titulo-pagina">Formulações</h1>
         <p className="subtitulo-pagina">
           Todos os registros da planilha de alimentação, com os valores já
-          calculados. Marque até 3 para comparar o ciclo de ensaios.
+          calculados. Marque até 5 para comparar o ciclo de ensaios.
         </p>
 
         <Suspense fallback={null}>
-          <BarraFiltros desenvolvedores={opcoes.desenvolvedores} />
+          <BarraFiltros
+            desenvolvedores={opcoes.desenvolvedores}
+            alimentadores={opcoes.alimentadores}
+            avaliadores={opcoes.avaliadores}
+          />
         </Suspense>
 
         {pagina.total === 0 ? (

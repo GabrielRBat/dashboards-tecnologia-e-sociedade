@@ -4,8 +4,8 @@ Este documento registra **todas as fórmulas** que o sistema aplica, de onde ela
 vieram e onde a implementação diverge da planilha original.
 
 As fórmulas foram extraídas lendo diretamente as células da
-"Planilha de Registro e cálculo" (aba *planilha de alimentação*, linha 11 —
-a única linha com todos os ensaios preenchidos). Cada uma tem teste automatizado
+"Planilha de Registro e cálculo" (aba *planilha de alimentação*, linha 11).
+Cada uma tem teste automatizado
 em `apps/api/src/calculos/calculos.spec.ts`, conferido contra os números reais
 daquela linha.
 
@@ -24,6 +24,7 @@ Nestes casos a planilha está correta e o sistema reproduz o mesmo resultado.
 | Massa específica do CP | `(massa ÷ volume) × 1000` | 402 g ÷ 265,52 cm³ → **1.513,99 kg/m³** ✓ |
 | Médias de resistência | média aritmética dos CPs (3 na flexão, 6 na compressão) | ✓ |
 | Squeeze-flow | média das 3 curvas (deslocamento e carga) | 8,5 / 8,4 / 8,3 → **8,40 mm** ✓ |
+| Variação dimensional | `[(Lidade − Bidade) − (L0 − B0)] ÷ 0,25 m` | 5,111 / 4,967 / 4,893 / 4,934 mm → **−0,740 mm/m** ✓ |
 
 > O valor **2500 g** na retenção de água é a massa de argamassa seca do ensaio,
 > fixa na fórmula da planilha. Está exposta como `MASSA_SECA_PADRAO_G` em
@@ -33,8 +34,9 @@ Nestes casos a planilha está correta e o sistema reproduz o mesmo resultado.
 
 ## 2. Divergências: onde a planilha está errada
 
-Três fórmulas da planilha têm erro. O sistema aplica a versão correta e o
-motivo está registrado aqui. **Isso significa que alguns números do dashboard
+Três fórmulas da planilha têm erro e a variação de massa usa na planilha uma
+convenção de sinal diferente da apresentada no material da aula. O sistema
+aplica as versões descritas abaixo. **Isso significa que alguns números do dashboard
 não vão bater com os da planilha** — a diferença é intencional.
 
 ### 2.1 Módulo de elasticidade dinâmico — erro grave
@@ -80,7 +82,8 @@ laboratório usar outro.
 
 ### 2.2 Relação água/ligante — invertida
 
-**Na planilha** (coluna 49): `=Soma(J:O) ÷ AT` — ou seja, soma dos ligantes
+**Na planilha** (coluna 52/AZ): soma dos ligantes ÷ teor de água — ou seja,
+soma dos ligantes
 dividida pelo teor de água. Isso é **ligante/água**, o inverso do rótulo da
 coluna.
 
@@ -101,11 +104,27 @@ diferentes (1.521,985 vs 1.522,040 na linha 11).
 que é o correto — pondera pelo volume de cada CP em vez de tratar os três CPs
 como se tivessem o mesmo tamanho.
 
+### 2.4 Variação de massa — convenção de sinal
+
+O material da aula define:
+
+```
+Δm (%) = (massa_idade − massa_inicial) ÷ massa_inicial × 100
+```
+
+Assim, perda de massa é negativa e ganho é positivo. Para 314,2 g na desforma e
+310,8 g na idade medida, o sistema mostra **−1,082 %**.
+
+A fórmula calculada no arquivo `.xlsx` multiplica o resultado por `−1`, fazendo
+a perda aparecer positiva. O dashboard segue a convenção do slide e deixa o
+sinal explícito nas legendas dos gráficos. As massas brutas são armazenadas; o
+valor percentual é sempre recalculado pela API.
+
 ---
 
 ## 3. Fórmulas quebradas na planilha (`#NAME?`)
 
-As colunas 49 (relação água/ligante) e 50 (teor de finos) usam `=Soma(...)`.
+As colunas 52/AZ (relação água/ligante) e 53/BA (teor de finos) usam `=Soma(...)`.
 `Soma` não é um nome de função válido no arquivo — por isso a planilha exibe
 `#NAME?` em **todas as linhas**. Esses dois campos nunca chegaram a calcular.
 
@@ -119,7 +138,7 @@ No sistema ambos funcionam, a partir do cadastro de materiais de cada formulaç�
 |---|---|
 | Desvio padrão dos CPs | Mostra a dispersão entre corpos de prova de um mesmo ensaio — uma média de 6 CPs com desvio alto merece desconfiança. |
 | Coeficiente de variação | Mesma ideia, em % da média (disponível em `calculos.ts`). |
-| Preenchimento (%) | Quantos dos 15 ensaios previstos aquela formulação já tem — mede o quanto o registro está completo. |
+| Preenchimento (%) | Quantos dos 16 ensaios previstos aquela formulação já tem — mede o quanto o registro está completo. |
 
 ---
 
@@ -186,6 +205,7 @@ de um conjunto:
 |---|---|
 | Flexão × compressão aos 28 dias | Costuma ser forte; R² baixo sugere problema de moldagem ou de ensaio. |
 | Módulo de elasticidade × compressão | O módulo vem de ultrassom, ensaio não destrutivo. |
+| Módulo de elasticidade × variação dimensional | Cruza os dois resultados aos 28 dias, conforme o dashboard de referência do Excel. |
 | Módulo de elasticidade × densidade endurecida | Cruza dois resultados dos corpos de prova aos 28 dias: densidade média e módulo dinâmico. |
 
 A reta só é traçada com **três pares ou mais**, e nunca quando todos os x são

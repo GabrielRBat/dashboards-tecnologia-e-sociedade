@@ -16,8 +16,12 @@ const CAMPOS_BUSCA = [
 
 export function BarraFiltros({
   desenvolvedores,
+  alimentadores,
+  avaliadores,
 }: {
   desenvolvedores: string[];
+  alimentadores: string[];
+  avaliadores: string[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -75,6 +79,9 @@ export function BarraFiltros({
     'tipoProjeto',
     'origem',
     'desenvolvedor',
+    'alimentador',
+    'avaliador',
+    'ensaioRegistrado',
     'dataInicio',
     'dataFim',
   ].some((c) => params.get(c));
@@ -153,6 +160,48 @@ export function BarraFiltros({
               {d}
             </option>
           ))}
+        </select>
+      </label>
+
+      <label className="campo">
+        <span className="campo-rotulo">Alimentador</span>
+        <select
+          value={valor('alimentador')}
+          onChange={(e) => atualizar('alimentador', e.target.value)}
+        >
+          <option value="">Todos</option>
+          {alimentadores.map((a) => (
+            <option key={a} value={a}>
+              {a}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="campo">
+        <span className="campo-rotulo">Avaliador</span>
+        <select
+          value={valor('avaliador')}
+          onChange={(e) => atualizar('avaliador', e.target.value)}
+        >
+          <option value="">Todos</option>
+          {avaliadores.map((a) => (
+            <option key={a} value={a}>
+              {a}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="campo">
+        <span className="campo-rotulo">Ensaio registrado</span>
+        <select
+          value={valor('ensaioRegistrado')}
+          onChange={(e) => atualizar('ensaioRegistrado', e.target.value)}
+        >
+          <option value="">Todos</option>
+          <option value="sim">Com ensaio</option>
+          <option value="nao">Sem ensaio</option>
         </select>
       </label>
 

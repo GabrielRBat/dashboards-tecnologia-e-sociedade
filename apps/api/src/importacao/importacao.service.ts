@@ -6,6 +6,7 @@ import {
   componentesFormulacao,
   corposDeProvaEndurecidos,
   ensaiosResistencia,
+  ensaiosVariacao,
   formulacoes,
   importacoes,
   importacoesFormulacoes,
@@ -21,6 +22,7 @@ import {
   GRANULOMETRIA_PLANILHA,
   MATERIAIS_PLANILHA,
   PRIMEIRA_LINHA_DADOS,
+  VARIACAO_PLANILHA,
   VERSAO_LAYOUT_PLANILHA,
   normalizarOrigem,
   normalizarTipoProjeto,
@@ -211,6 +213,8 @@ export class ImportacaoService {
     aba.getRow(8).getCell(COL.retencaoM0).value = 'Estado fresco';
     aba.getRow(8).getCell(FLEXAO_PLANILHA[0]?.colunas[0] ?? 80).value =
       'Estado endurecido';
+    aba.getRow(8).getCell(VARIACAO_PLANILHA[0]?.barraReferencia ?? 206).value =
+      'Variação dimensional e de massa';
 
     const cabecalhos = new Map<number, string>([
       [COL.numeracao, 'Numeração'],
@@ -275,6 +279,19 @@ export class ImportacaoService {
           cabecalhos.set(coluna, `${prefixo} velocidade ${i + 1} (km/s)`),
         );
       }
+    }
+    for (const bloco of VARIACAO_PLANILHA) {
+      const idade = bloco.idadeDias === 0 ? 'Desforma' : `${bloco.idadeDias}d`;
+      cabecalhos.set(
+        bloco.barraReferencia,
+        `Variação ${idade} — barra de referência (mm)`,
+      );
+      bloco.comprimentos.forEach((coluna, i) =>
+        cabecalhos.set(coluna, `Variação ${idade} — CP${i + 1} (mm)`),
+      );
+      bloco.massas.forEach((coluna, i) =>
+        cabecalhos.set(coluna, `Variação ${idade} — massa CP${i + 1} (g)`),
+      );
     }
 
     for (const [coluna, rotulo] of cabecalhos.entries()) {
@@ -415,7 +432,10 @@ export class ImportacaoService {
         })
         .onConflictDoUpdate({
           target: materiais.nome,
-          set: { ordem: i },
+          set: {
+            categoria: m.categoria as (typeof materiais.categoria.enumValues)[number],
+            ordem: i,
+          },
         })
         .returning({ id: materiais.id });
 
@@ -513,6 +533,9 @@ export class ImportacaoService {
     await tx
       .delete(corposDeProvaEndurecidos)
       .where(eq(corposDeProvaEndurecidos.formulacaoId, formulacaoId));
+    await tx
+      .delete(ensaiosVariacao)
+      .where(eq(ensaiosVariacao.formulacaoId, formulacaoId));
 
     const componentes = MATERIAIS_PLANILHA.map((m) => ({
       formulacaoId,
@@ -586,6 +609,39 @@ export class ImportacaoService {
       await tx.insert(corposDeProvaEndurecidos).values(corpos);
     }
 
+    const variacoes = VARIACAO_PLANILHA.map((bloco) => {
+      const [comprimento1, comprimento2, comprimento3] =
+        bloco.comprimentos.map((coluna) => this.numero(aba, linha, coluna));
+      const [massa1, massa2, massa3] = bloco.massas.map((coluna) =>
+        this.numero(aba, linha, coluna),
+      );
+      return {
+        formulacaoId,
+        idadeDias: bloco.idadeDias,
+        barraReferencia: this.numero(aba, linha, bloco.barraReferencia),
+        comprimento1: comprimento1 ?? null,
+        comprimento2: comprimento2 ?? null,
+        comprimento3: comprimento3 ?? null,
+        massa1: massa1 ?? null,
+        massa2: massa2 ?? null,
+        massa3: massa3 ?? null,
+      };
+    }).filter(
+      (v) =>
+        [
+          v.barraReferencia,
+          v.comprimento1,
+          v.comprimento2,
+          v.comprimento3,
+          v.massa1,
+          v.massa2,
+          v.massa3,
+        ].some((valor) => valor !== null),
+    );
+    if (variacoes.length > 0) {
+      await tx.insert(ensaiosVariacao).values(variacoes);
+    }
+
     return {
       id: formulacaoId,
       numeracao,
@@ -625,6 +681,11 @@ export class ImportacaoService {
           ...cp.velocidades,
         ]),
       ),
+      ...VARIACAO_PLANILHA.flatMap((bloco) => [
+        bloco.barraReferencia,
+        ...bloco.comprimentos,
+        ...bloco.massas,
+      ]),
     ];
 
     return colunas.some((coluna) => this.numero(aba, linha, coluna) !== null);
@@ -784,6 +845,34 @@ export class ImportacaoService {
           0,
           100,
           'MPa',
+        );
+      }
+    }
+
+    for (const bloco of VARIACAO_PLANILHA) {
+      intervalo(
+        `Variação ${bloco.idadeDias}d — barra`,
+        this.numero(aba, linha, bloco.barraReferencia),
+        0,
+        100,
+        'mm',
+      );
+      for (const coluna of bloco.comprimentos) {
+        intervalo(
+          `Variação ${bloco.idadeDias}d — comprimento`,
+          this.numero(aba, linha, coluna),
+          0,
+          100,
+          'mm',
+        );
+      }
+      for (const coluna of bloco.massas) {
+        intervalo(
+          `Variação ${bloco.idadeDias}d — massa`,
+          this.numero(aba, linha, coluna),
+          1,
+          5000,
+          'g',
         );
       }
     }

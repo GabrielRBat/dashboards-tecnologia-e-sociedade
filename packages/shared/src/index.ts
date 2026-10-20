@@ -33,6 +33,7 @@ export const CATEGORIAS_MATERIAL = [
   'ADITIVO_RETENTOR_AGUA',
   'ADITIVO_INCORPORADOR_AR',
   'FIBRA',
+  'COMPENSADOR_RETRACAO',
   'SUPERPLASTIFICANTE',
 ] as const;
 export type CategoriaMaterial = (typeof CATEGORIAS_MATERIAL)[number];
@@ -46,6 +47,7 @@ export const ROTULOS_CATEGORIA: Record<CategoriaMaterial, string> = {
   ADITIVO_RETENTOR_AGUA: 'Aditivo retentor de água',
   ADITIVO_INCORPORADOR_AR: 'Aditivo incorporador de ar',
   FIBRA: 'Fibra',
+  COMPENSADOR_RETRACAO: 'Compensador de retração',
   SUPERPLASTIFICANTE: 'Superplastificante',
 };
 

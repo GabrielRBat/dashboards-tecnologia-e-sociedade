@@ -18,7 +18,7 @@ import {
 import { DB, Database } from '../db/db.module';
 import { formulacoes } from '../db/schema';
 import { ListarFormulacoesDto } from './dto/listar-formulacoes.dto';
-import { mapFormulacao } from './formulacao.mapper';
+import { FormulacaoDetalhada, mapFormulacao } from './formulacao.mapper';
 
 /** Relações sempre carregadas junto da formulação. */
 const COM_RELACOES = {
@@ -26,6 +26,7 @@ const COM_RELACOES = {
   granulometria: true,
   resistencias: true,
   corpos: true,
+  variacoes: true,
   importacoes: { with: { importacao: { with: { usuario: true } } } },
 } as const;
 
@@ -97,6 +98,14 @@ export class FormulacoesService {
       condicoes.push(inArray(formulacoes.desenvolvedor, filtros.desenvolvedor));
     }
 
+    if (filtros.alimentador?.length) {
+      condicoes.push(inArray(formulacoes.alimentador, filtros.alimentador));
+    }
+
+    if (filtros.avaliador?.length) {
+      condicoes.push(inArray(formulacoes.avaliador, filtros.avaliador));
+    }
+
     if (filtros.dataInicio) {
       condicoes.push(gte(formulacoes.data, new Date(filtros.dataInicio)));
     }
@@ -111,6 +120,32 @@ export class FormulacoesService {
     const pagina = filtros.pagina ?? 1;
     const porPagina = filtros.porPagina ?? 25;
     const where = this.montarWhere(filtros);
+
+    // O ensaio pode estar tanto em colunas da formulação quanto em quatro
+    // relações diferentes. A consulta relacional do Drizzle renomeia tabelas
+    // internamente, então este recorte é aplicado sobre o objeto já mapeado.
+    // Isso também mantém exatamente a mesma definição usada pelo frontend.
+    if (filtros.ensaioRegistrado) {
+      const todos = await this.db.query.formulacoes.findMany({
+        where,
+        with: COM_RELACOES,
+        orderBy: [asc(formulacoes.numeracao)],
+      });
+      const filtrados = this.filtrarPorEnsaio(
+        todos.map(mapFormulacao),
+        filtros.ensaioRegistrado,
+      );
+
+      return {
+        itens: filtrados.slice(
+          (pagina - 1) * porPagina,
+          pagina * porPagina,
+        ),
+        total: filtrados.length,
+        pagina,
+        porPagina,
+      };
+    }
 
     const [itens, totalLinhas] = await Promise.all([
       this.db.query.formulacoes.findMany({
@@ -138,7 +173,21 @@ export class FormulacoesService {
       with: COM_RELACOES,
       orderBy: [asc(formulacoes.numeracao)],
     });
-    return itens.map(mapFormulacao);
+    return this.filtrarPorEnsaio(
+      itens.map(mapFormulacao),
+      filtros.ensaioRegistrado,
+    );
+  }
+
+  private filtrarPorEnsaio(
+    itens: FormulacaoDetalhada[],
+    filtro?: string,
+  ): FormulacaoDetalhada[] {
+    if (!filtro) return itens;
+    const esperado = filtro === 'sim';
+    return itens.filter(
+      (item) => item.calculados.temEnsaioRegistrado === esperado,
+    );
   }
 
   async buscarPorId(id: string) {
@@ -156,12 +205,18 @@ export class FormulacoesService {
 
   /** Valores distintos usados para popular os filtros da interface. */
   async opcoesDeFiltro() {
-    const [desenvolvedores, avaliadores, periodo] = await Promise.all([
+    const [desenvolvedores, alimentadores, avaliadores, periodo] =
+      await Promise.all([
       this.db
         .selectDistinct({ valor: formulacoes.desenvolvedor })
         .from(formulacoes)
         .where(isNotNull(formulacoes.desenvolvedor))
         .orderBy(asc(formulacoes.desenvolvedor)),
+      this.db
+        .selectDistinct({ valor: formulacoes.alimentador })
+        .from(formulacoes)
+        .where(isNotNull(formulacoes.alimentador))
+        .orderBy(asc(formulacoes.alimentador)),
       this.db
         .selectDistinct({ valor: formulacoes.avaliador })
         .from(formulacoes)
@@ -185,6 +240,9 @@ export class FormulacoesService {
       desenvolvedores: desenvolvedores
         .map((d) => d.valor)
         .filter((d): d is string => Boolean(d)),
+      alimentadores: alimentadores
+        .map((a) => a.valor)
+        .filter((a): a is string => Boolean(a)),
       avaliadores: avaliadores
         .map((a) => a.valor)
         .filter((a): a is string => Boolean(a)),

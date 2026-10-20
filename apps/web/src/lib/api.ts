@@ -14,6 +14,9 @@ export function montarQuery(params: ParametrosBusca): string {
     'tipoProjeto',
     'origem',
     'desenvolvedor',
+    'alimentador',
+    'avaliador',
+    'ensaioRegistrado',
     'dataInicio',
     'dataFim',
     'pagina',
@@ -97,6 +100,7 @@ async function buscar<T>(caminho: string): Promise<T> {
 export interface Resumo {
   totalFormulacoes: number;
   totalComEnsaios: number;
+  totalCompletos: number;
   compressao28dMedia: number | null;
   flexao28dMedia: number | null;
   retencaoAguaMedia: number | null;
@@ -104,6 +108,14 @@ export interface Resumo {
   completudeMedia: number;
   porTipoProjeto: { tipoProjeto: string; total: number }[];
   porOrigem: { origem: string; total: number }[];
+  porResponsavel: {
+    responsavel: string;
+    desenvolvidas: number;
+    alimentadas: number;
+    avaliadas: number;
+    total: number;
+  }[];
+  porMes: { mes: string; total: number }[];
 }
 
 export interface PontoEvolucao {
@@ -204,7 +216,10 @@ export interface Correlacao {
 export interface Correlacoes {
   flexaoCompressao: Correlacao;
   moduloCompressao: Correlacao;
+  moduloFlexao: Correlacao;
+  moduloVariacaoDimensional: Correlacao;
   moduloDensidadeEndurecida: Correlacao;
+  retencaoSqueeze: Correlacao;
 }
 
 export interface PontoSqueeze {
@@ -225,6 +240,36 @@ export interface DispersaoIdade {
   flexaoDesvio: number | null;
   corposCompressao: number;
   corposFlexao: number;
+}
+
+export interface DensidadeProduto {
+  formulacaoId: string;
+  nomenclatura: string;
+  numeracao: number;
+  aparente: number | null;
+  fresca: number | null;
+  endurecida14: number | null;
+  endurecida28: number | null;
+}
+
+export interface VariacaoTemporal {
+  idadeDias: number;
+  dimensional: number | null;
+  dimensionalDesvio: number | null;
+  massa: number | null;
+  massaDesvio: number | null;
+  corposDimensionais: number;
+  corposMassa: number;
+}
+
+export interface VariacaoFormulacao {
+  idadeDias: number;
+  dimensionalValores: (number | null)[];
+  dimensionalMedia: number | null;
+  dimensionalDesvio: number | null;
+  massaValores: (number | null)[];
+  massaMedia: number | null;
+  massaDesvio: number | null;
 }
 
 export interface Resistencia {
@@ -294,6 +339,7 @@ export interface Formulacao {
   squeezeCarga3: number | null;
   resistencias: Resistencia[];
   endurecidos: BlocoEndurecido[];
+  variacoes: VariacaoFormulacao[];
   ultimaImportacao: {
     id: string;
     arquivo: string;
@@ -325,6 +371,7 @@ export interface Paginado<T> {
 
 export interface OpcoesFiltro {
   desenvolvedores: string[];
+  alimentadores: string[];
   avaliadores: string[];
   dataMin: string | null;
   dataMax: string | null;
@@ -341,6 +388,8 @@ export interface Painel {
   correlacoes: Correlacoes;
   squeezeFlow: PontoSqueeze[];
   dispersaoIdade: DispersaoIdade[];
+  densidades: DensidadeProduto[];
+  variacaoTemporal: VariacaoTemporal[];
 }
 
 // --- Dashboards customizados ---

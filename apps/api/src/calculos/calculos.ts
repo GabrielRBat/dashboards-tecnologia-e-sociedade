@@ -16,6 +16,9 @@ export const MASSA_SECA_PADRAO_G = 2500;
 /** Coeficiente de Poisson adotado para o módulo de elasticidade dinâmico. */
 export const POISSON_PADRAO = 0.2;
 
+/** Base de medida dos prismas no ensaio de variação dimensional, em metros. */
+export const BASE_VARIACAO_DIMENSIONAL_M = 0.25;
+
 const isNum = (v: unknown): v is number =>
   typeof v === 'number' && Number.isFinite(v);
 
@@ -205,6 +208,53 @@ export function densidadeMediaEndurecida(
   const massaTotal = media(corpos.map((c) => c.massa));
   const volumeTotal = media(corpos.map((c) => c.volume));
   return densidade(massaTotal, volumeTotal);
+}
+
+/**
+ * Variação dimensional corrigida (mm/m).
+ *
+ * A leitura de cada corpo de prova é corrigida pela variação da barra de
+ * referência entre a desforma e a idade do ensaio. As leituras chegam em mm e
+ * a base de medida em m, portanto o quociente já resulta em mm/m.
+ */
+export function variacaoDimensional(
+  comprimentoInicialMm: number | null | undefined,
+  barraInicialMm: number | null | undefined,
+  comprimentoIdadeMm: number | null | undefined,
+  barraIdadeMm: number | null | undefined,
+  baseM: number = BASE_VARIACAO_DIMENSIONAL_M,
+): number | null {
+  if (
+    !isNum(comprimentoInicialMm) ||
+    !isNum(barraInicialMm) ||
+    !isNum(comprimentoIdadeMm) ||
+    !isNum(barraIdadeMm) ||
+    !isNum(baseM) ||
+    baseM === 0
+  ) {
+    return null;
+  }
+
+  const inicialCorrigido = comprimentoInicialMm - barraInicialMm;
+  const idadeCorrigida = comprimentoIdadeMm - barraIdadeMm;
+  return (idadeCorrigida - inicialCorrigido) / baseM;
+}
+
+/**
+ * Variação de massa (%), com sinal.
+ *
+ * Perda de massa fica negativa e ganho fica positivo, conforme a fórmula
+ * apresentada no material da disciplina: (massa_idade - massa_inicial) /
+ * massa_inicial × 100.
+ */
+export function variacaoMassa(
+  massaInicialG: number | null | undefined,
+  massaIdadeG: number | null | undefined,
+): number | null {
+  if (!isNum(massaInicialG) || !isNum(massaIdadeG) || massaInicialG === 0) {
+    return null;
+  }
+  return ((massaIdadeG - massaInicialG) / massaInicialG) * 100;
 }
 
 /** Arredonda para N casas decimais, preservando null. */

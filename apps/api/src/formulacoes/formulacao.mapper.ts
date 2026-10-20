@@ -8,6 +8,8 @@ import {
   relacaoAguaLigante,
   retencaoAgua,
   teorFinos,
+  variacaoDimensional,
+  variacaoMassa,
 } from '../calculos/calculos';
 import { moduloFinura, retidaAcumulada } from '../calculos/normas';
 
@@ -33,6 +35,7 @@ const ENSAIOS_PREVISTOS = [
   'compressao28',
   'endurecido14',
   'endurecido28',
+  'variacao',
 ] as const;
 
 type FormulacaoComRelacoes = {
@@ -81,6 +84,16 @@ type FormulacaoComRelacoes = {
     v1: number | null;
     v2: number | null;
     v3: number | null;
+  }[];
+  variacoes: {
+    idadeDias: number;
+    barraReferencia: number | null;
+    comprimento1: number | null;
+    comprimento2: number | null;
+    comprimento3: number | null;
+    massa1: number | null;
+    massa2: number | null;
+    massa3: number | null;
   }[];
   importacoes: {
     numeracao: number;
@@ -153,6 +166,48 @@ export function mapFormulacao(f: FormulacaoComRelacoes) {
     };
   });
 
+  const referenciaVariacao = f.variacoes.find((v) => v.idadeDias === 0);
+  const variacoes = f.variacoes
+    .filter((v) => v.idadeDias > 0)
+    .sort((a, b) => a.idadeDias - b.idadeDias)
+    .map((v) => {
+      const comprimentosIniciais = referenciaVariacao
+        ? [
+            referenciaVariacao.comprimento1,
+            referenciaVariacao.comprimento2,
+            referenciaVariacao.comprimento3,
+          ]
+        : [];
+      const massasIniciais = referenciaVariacao
+        ? [referenciaVariacao.massa1, referenciaVariacao.massa2, referenciaVariacao.massa3]
+        : [];
+      const comprimentos = [v.comprimento1, v.comprimento2, v.comprimento3];
+      const massas = [v.massa1, v.massa2, v.massa3];
+      const dimensionalValores = comprimentos.map((comprimento, indice) =>
+        variacaoDimensional(
+          comprimentosIniciais[indice],
+          referenciaVariacao?.barraReferencia,
+          comprimento,
+          v.barraReferencia,
+        ),
+      );
+      const massaValores = massas.map((massa, indice) =>
+        variacaoMassa(massasIniciais[indice], massa),
+      );
+
+      return {
+        idadeDias: v.idadeDias,
+        dimensionalValores: dimensionalValores.map((valor) =>
+          arredondar(valor, 3),
+        ),
+        dimensionalMedia: arredondar(media(dimensionalValores), 3),
+        dimensionalDesvio: arredondar(desvioPadrao(dimensionalValores), 3),
+        massaValores: massaValores.map((valor) => arredondar(valor, 3)),
+        massaMedia: arredondar(media(massaValores), 3),
+        massaDesvio: arredondar(desvioPadrao(massaValores), 3),
+      };
+    });
+
   const compressao28d =
     resistencias.find((r) => r.tipo === 'COMPRESSAO' && r.idadeDias === 28)
       ?.media ?? null;
@@ -161,6 +216,28 @@ export function mapFormulacao(f: FormulacaoComRelacoes) {
     null;
 
   const calculados = {
+    // Composição e teor de água descrevem a receita; só resultados brutos de
+    // ensaio contam para este indicador/filtro.
+    temEnsaioRegistrado:
+      [
+        f.densAparenteMassa,
+        f.densAparenteVolume,
+        f.retencaoM0,
+        f.retencaoM1,
+        f.retencaoM2,
+        f.densFrescoMassa,
+        f.densFrescoVolume,
+        f.squeezeDeslocamento1,
+        f.squeezeDeslocamento2,
+        f.squeezeDeslocamento3,
+        f.squeezeCarga1,
+        f.squeezeCarga2,
+        f.squeezeCarga3,
+      ].some((valor) => valor !== null) ||
+      f.granulometria.length > 0 ||
+      f.resistencias.length > 0 ||
+      f.corpos.length > 0 ||
+      f.variacoes.length > 0,
     relacaoAguaLigante: arredondar(
       relacaoAguaLigante(f.teorAgua, teorLigantes),
       3,
@@ -193,7 +270,7 @@ export function mapFormulacao(f: FormulacaoComRelacoes) {
     moduloFinura: arredondar(moduloFinura(f.granulometria), 2),
     compressao28d,
     flexao28d,
-    completude: calcularCompletude(f, resistencias, endurecidos),
+    completude: calcularCompletude(f, resistencias, endurecidos, variacoes),
   };
 
   const ultimaImportacao = [...f.importacoes]
@@ -239,6 +316,7 @@ export function mapFormulacao(f: FormulacaoComRelacoes) {
     squeezeCarga3: f.squeezeCarga3,
     resistencias,
     endurecidos,
+    variacoes,
     ultimaImportacao: ultimaImportacao
       ? {
           id: ultimaImportacao.importacao.id,
@@ -259,6 +337,11 @@ function calcularCompletude(
   f: FormulacaoComRelacoes,
   resistencias: { tipo: string; idadeDias: number; media: number | null }[],
   endurecidos: { idadeDias: number; densidadeMedia: number | null }[],
+  variacoes: {
+    idadeDias: number;
+    dimensionalMedia: number | null;
+    massaMedia: number | null;
+  }[],
 ): number {
   const temResistencia = (tipo: string, idade: number): boolean =>
     resistencias.some(
@@ -287,6 +370,14 @@ function calcularCompletude(
     ),
     endurecido28: endurecidos.some(
       (e) => e.idadeDias === 28 && e.densidadeMedia !== null,
+    ),
+    variacao: [1, 7, 28].every((idade) =>
+      variacoes.some(
+        (v) =>
+          v.idadeDias === idade &&
+          v.dimensionalMedia !== null &&
+          v.massaMedia !== null,
+      ),
     ),
   };
 

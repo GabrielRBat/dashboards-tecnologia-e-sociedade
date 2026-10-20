@@ -13,6 +13,7 @@ import {
 
 const TIPOS_PROJETO = ['NP', 'MT', 'AT', 'RC', 'PE'];
 const ORIGENS = ['PRODUCAO', 'LABORATORIO'];
+const ENSAIO_REGISTRADO = ['sim', 'nao'];
 const CAMPOS_BUSCA = [
   'todos',
   'nomenclatura',
@@ -33,12 +34,12 @@ const paraLista = ({ value }: { value: unknown }): string[] | undefined => {
 };
 
 export class ListarFormulacoesDto {
-  /** Até 3 ids — usado na comparação lado a lado de formulações. */
+  /** Até 5 ids — usado na comparação lado a lado de formulações. */
   @IsOptional()
   @Transform(paraLista)
   @IsArray()
-  @ArrayMaxSize(3, {
-    message: 'A comparação admite no máximo 3 formulações.',
+  @ArrayMaxSize(5, {
+    message: 'A comparação admite no máximo 5 formulações.',
   })
   @IsString({ each: true })
   ids?: string[];
@@ -68,6 +69,22 @@ export class ListarFormulacoesDto {
   @IsArray()
   @IsString({ each: true })
   desenvolvedor?: string[];
+
+  @IsOptional()
+  @Transform(paraLista)
+  @IsArray()
+  @IsString({ each: true })
+  alimentador?: string[];
+
+  @IsOptional()
+  @Transform(paraLista)
+  @IsArray()
+  @IsString({ each: true })
+  avaliador?: string[];
+
+  @IsOptional()
+  @IsIn(ENSAIO_REGISTRADO)
+  ensaioRegistrado?: string;
 
   @IsOptional()
   @IsDateString()

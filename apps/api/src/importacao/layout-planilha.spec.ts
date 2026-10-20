@@ -5,12 +5,14 @@ import {
   FLEXAO_PLANILHA,
   GRANULOMETRIA_PLANILHA,
   MATERIAIS_PLANILHA,
+  VARIACAO_PLANILHA,
 } from './layout-planilha';
 
 describe('layout da planilha de alimentação', () => {
   it('mantém a composição nas colunas originais e lê água a partir da versão atual', () => {
-    expect(MATERIAIS_PLANILHA[0]?.coluna).toBe(10);
-    expect(MATERIAIS_PLANILHA.at(-1)?.coluna).toBe(45);
+    expect(MATERIAIS_PLANILHA[0]?.coluna).toBe(9);
+    expect(MATERIAIS_PLANILHA.at(-1)?.coluna).toBe(48);
+    expect(MATERIAIS_PLANILHA).toHaveLength(40);
 
     expect(COL.teorAgua).toBe(49);
     expect(COL.massaAgua).toBe(50);
@@ -62,5 +64,14 @@ describe('layout da planilha de alimentação', () => {
       massa: 188,
       velocidades: [199, 200, 201],
     });
+  });
+
+  it('mapeia as leituras brutas de variação e ignora as colunas calculadas', () => {
+    expect(VARIACAO_PLANILHA).toEqual([
+      { idadeDias: 0, barraReferencia: 206, comprimentos: [207, 208, 209], massas: [210, 211, 212] },
+      { idadeDias: 1, barraReferencia: 213, comprimentos: [214, 215, 216], massas: [217, 218, 219] },
+      { idadeDias: 7, barraReferencia: 220, comprimentos: [221, 222, 223], massas: [224, 225, 226] },
+      { idadeDias: 28, barraReferencia: 227, comprimentos: [228, 229, 230], massas: [231, 232, 233] },
+    ]);
   });
 });

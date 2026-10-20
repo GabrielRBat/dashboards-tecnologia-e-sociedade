@@ -65,6 +65,7 @@ export const categoriaMaterialEnum = pgEnum('categoria_material', [
   'ADITIVO_RETENTOR_AGUA',
   'ADITIVO_INCORPORADOR_AR',
   'FIBRA',
+  'COMPENSADOR_RETRACAO',
   'SUPERPLASTIFICANTE',
 ]);
 
@@ -245,6 +246,37 @@ export const corposDeProvaEndurecidos = pgTable(
       t.formulacaoId,
       t.idadeDias,
       t.indice,
+    ),
+  }),
+);
+
+/**
+ * Leituras brutas do ensaio de variação dimensional e de massa.
+ *
+ * A idade zero é a referência da desforma. As variações ficam derivadas na
+ * leitura, como os demais cálculos do projeto, para uma correção de fórmula
+ * valer para todo o histórico sem migração de dados.
+ */
+export const ensaiosVariacao = pgTable(
+  'ensaios_variacao',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    formulacaoId: uuid('formulacao_id')
+      .notNull()
+      .references(() => formulacoes.id, { onDelete: 'cascade' }),
+    idadeDias: integer('idade_dias').notNull(),
+    barraReferencia: doublePrecision('barra_referencia'),
+    comprimento1: doublePrecision('comprimento_1'),
+    comprimento2: doublePrecision('comprimento_2'),
+    comprimento3: doublePrecision('comprimento_3'),
+    massa1: doublePrecision('massa_1'),
+    massa2: doublePrecision('massa_2'),
+    massa3: doublePrecision('massa_3'),
+  },
+  (t) => ({
+    unico: uniqueIndex('ensaios_variacao_unico').on(
+      t.formulacaoId,
+      t.idadeDias,
     ),
   }),
 );
@@ -436,6 +468,7 @@ export const formulacoesRelations = relations(formulacoes, ({ many }) => ({
   granulometria: many(pontosGranulometricos),
   resistencias: many(ensaiosResistencia),
   corpos: many(corposDeProvaEndurecidos),
+  variacoes: many(ensaiosVariacao),
   importacoes: many(importacoesFormulacoes),
 }));
 
@@ -486,6 +519,13 @@ export const corposRelations = relations(
     }),
   }),
 );
+
+export const variacoesRelations = relations(ensaiosVariacao, ({ one }) => ({
+  formulacao: one(formulacoes, {
+    fields: [ensaiosVariacao.formulacaoId],
+    references: [formulacoes.id],
+  }),
+}));
 
 export const importacoesRelations = relations(importacoes, ({ one, many }) => ({
   usuario: one(usuarios, {

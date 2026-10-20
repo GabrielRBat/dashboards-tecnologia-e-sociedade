@@ -1,10 +1,9 @@
 /**
  * Seed de desenvolvimento.
  *
- * A planilha real tem apenas uma linha totalmente preenchida
- * ("Argamassa de Revestimento_1"); as demais são nomes de template sem medições.
- * Este seed grava essa formulação com os valores originais e gera outras
- * plausíveis em torno dela, para desenvolver e testar os dashboards.
+ * A referência acompanha a primeira linha da base fictícia de 60 formulações.
+ * O restante é gerado de forma plausível para desenvolver e testar os painéis,
+ * inclusive quando se deseja simular registros incompletos.
  *
  * Os números são determinísticos (gerador linear congruente com semente fixa),
  * então rodar o seed duas vezes produz exatamente o mesmo banco.
@@ -20,6 +19,7 @@ import {
   componentesFormulacao,
   corposDeProvaEndurecidos,
   ensaiosResistencia,
+  ensaiosVariacao,
   formulacoes,
   materiais,
   pontosGranulometricos,
@@ -60,8 +60,8 @@ const arred = (v: number, casas = 2): number => {
 /** Valores reais da linha 11 da planilha, usados como formulação de referência. */
 const REFERENCIA = {
   nomenclatura: 'Argamassa de Revestimento_1',
-  teorAgua: 16,
-  massaAgua: 400,
+  teorAgua: 18,
+  massaAgua: 450,
   granulometria: [
     { peneiraMm: 1.7, frequencia: 0 },
     { peneiraMm: 1.4, frequencia: 1.5 },
@@ -81,6 +81,12 @@ const REFERENCIA = {
   densFrescoVolume: 400.1,
   squeezeDeslocamento: [8.5, 8.4, 8.3],
   squeezeCarga: [41.3, 43.5, 43.2],
+  variacoes: [
+    { idadeDias: 0, barra: 4.967, comprimentos: [5.111, 3.933, 4.579], massas: [314.2, 314.9, 318] },
+    { idadeDias: 1, barra: 4.934, comprimentos: [4.893, 3.663, 4.467], massas: [310.8, 310.7, 313] },
+    { idadeDias: 7, barra: 4.848, comprimentos: [4.825, 3.539, 4.413], massas: [307.5, 307.2, 311] },
+    { idadeDias: 28, barra: 4.868, comprimentos: [4.829, 3.523, 4.318], massas: [307.7, 307, 311.1] },
+  ],
   corpos14: [
     { indice: 1, l1: 16.1, l2: 16, h1: 4.02, h2: 4.05, c1: 4.12, c2: 4.08, massa: 402, v1: 4.59, v2: 4.96, v3: 4.95 },
     { indice: 2, l1: 16.1, l2: 16, h1: 4.02, h2: 4.02, c1: 4.06, c2: 4.01, massa: 398, v1: 4.92, v2: 4.82, v3: 4.86 },
@@ -96,7 +102,7 @@ const REFERENCIA = {
 /** Curva típica de ganho de resistência por idade, relativa aos 28 dias. */
 const FATOR_IDADE: Record<number, number> = { 3: 0.45, 7: 0.66, 14: 0.85, 28: 1 };
 
-const TOTAL_FORMULACOES = 64;
+const TOTAL_FORMULACOES = 60;
 /** Data de referência do seed — mantém os dados estáveis entre execuções. */
 const HOJE = new Date(Date.UTC(2026, 7, 24));
 
@@ -107,6 +113,7 @@ async function main(): Promise<void> {
   const db = drizzle(pool, { schema });
 
   console.log('Limpando dados existentes...');
+  await db.delete(ensaiosVariacao);
   await db.delete(corposDeProvaEndurecidos);
   await db.delete(ensaiosResistencia);
   await db.delete(pontosGranulometricos);
@@ -328,6 +335,68 @@ async function main(): Promise<void> {
       await db
         .insert(corposDeProvaEndurecidos)
         .values(corpos.map((c) => ({ ...c, formulacaoId })));
+
+      const leiturasVariacao = referencia
+        ? REFERENCIA.variacoes
+        : (() => {
+            const barraInicial = arred(entre(4.8, 5.1), 3);
+            const comprimentosIniciais = Array.from({ length: 3 }, () =>
+              arred(entre(3.7, 5.2), 3),
+            );
+            const massasIniciais = Array.from({ length: 3 }, () =>
+              arred(entre(300, 330), 1),
+            );
+            return [0, 1, 7, 28].map((idadeDias) => {
+              if (idadeDias === 0) {
+                return {
+                  idadeDias,
+                  barra: barraInicial,
+                  comprimentos: comprimentosIniciais,
+                  massas: massasIniciais,
+                };
+              }
+              const barra = arred(entre(4.8, 5.1), 3);
+              const dimensional =
+                idadeDias === 1
+                  ? entre(-0.45, -0.1)
+                  : idadeDias === 7
+                    ? entre(-0.8, -0.3)
+                    : entre(-1.3, -0.5);
+              const perdaMassa =
+                idadeDias === 1
+                  ? entre(-1.5, -0.3)
+                  : idadeDias === 7
+                    ? entre(-2.8, -1)
+                    : entre(-4, -1.5);
+              return {
+                idadeDias,
+                barra,
+                comprimentos: comprimentosIniciais.map((inicial) =>
+                  arred(
+                    barra + (inicial - barraInicial) + dimensional * 0.25,
+                    3,
+                  ),
+                ),
+                massas: massasIniciais.map((inicial) =>
+                  arred(inicial * (1 + perdaMassa / 100), 1),
+                ),
+              };
+            });
+          })();
+
+      await db.insert(ensaiosVariacao).values(
+        leiturasVariacao.map((v) => ({
+          formulacaoId,
+          idadeDias: v.idadeDias,
+          barraReferencia: v.barra,
+          comprimento1: v.comprimentos[0],
+          comprimento2: v.comprimentos[1],
+          comprimento3: v.comprimentos[2],
+          massa1: v.massas[0],
+          massa2: v.massas[1],
+          massa3: v.massas[2],
+        })),
+      );
     }
   }
 

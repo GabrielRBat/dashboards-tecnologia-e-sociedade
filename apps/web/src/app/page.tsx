@@ -4,13 +4,17 @@ import {
   GraficoClassificacao,
   GraficoComparativo,
   GraficoCorrelacao,
+  GraficoDensidadesProduto,
   GraficoDispersao,
   GraficoDispersaoIdade,
   GraficoDistribuicao,
   GraficoEvolucao,
   GraficoFrequenciaGranulometrica,
   GraficoGranulometria,
+  GraficoRegistrosPorMes,
+  GraficoResponsaveis,
   GraficoSqueezeFlow,
+  GraficoVariacaoTemporal,
 } from '@/components/graficos';
 import { ApiForaDoAr, Cartao, Kpi } from '@/components/estado';
 import { GradeGraficos, type ItemGrade } from '@/components/grade-graficos';
@@ -51,6 +55,8 @@ export default async function PaginaVisaoGeral({
       correlacoes,
       squeezeFlow: squeeze,
       dispersaoIdade,
+      densidades,
+      variacaoTemporal,
     } = painel;
 
     /*
@@ -80,6 +86,31 @@ export default async function PaginaVisaoGeral({
             legenda="Quantidade de formulações"
           >
             <GraficoDistribuicao dados={resumo.porTipoProjeto} />
+          </Cartao>
+        ),
+      },
+      {
+        id: 'responsaveis',
+        titulo: 'Produtos por responsável',
+        largura: 2,
+        node: (
+          <Cartao
+            titulo="Produtos por responsável"
+            legenda="Participação no desenvolvimento, alimentação da planilha e avaliação"
+          >
+            <GraficoResponsaveis dados={resumo.porResponsavel} />
+          </Cartao>
+        ),
+      },
+      {
+        id: 'registros-mes',
+        titulo: 'Registros por mês',
+        node: (
+          <Cartao
+            titulo="Registros por mês"
+            legenda="Data de cadastro das formulações filtradas"
+          >
+            <GraficoRegistrosPorMes dados={resumo.porMes} />
           </Cartao>
         ),
       },
@@ -185,6 +216,24 @@ export default async function PaginaVisaoGeral({
         ),
       },
       {
+        id: 'retencao-squeeze',
+        titulo: 'Retenção de água e squeeze-flow',
+        node: (
+          <Cartao
+            titulo="Retenção de água e squeeze-flow"
+            legenda="Retenção versus deslocamento médio no estado fresco"
+          >
+            <GraficoCorrelacao
+              dados={correlacoes.retencaoSqueeze}
+              rotuloX="Retenção de água"
+              rotuloY="Deslocamento no squeeze-flow"
+              unidadeX="%"
+              unidadeY="mm"
+            />
+          </Cartao>
+        ),
+      },
+      {
         id: 'flexao-compressao',
         titulo: 'Flexão e compressão aos 28 dias',
         node: (
@@ -222,6 +271,45 @@ export default async function PaginaVisaoGeral({
         ),
       },
       {
+        id: 'modulo-flexao',
+        titulo: 'Módulo de elasticidade e flexão',
+        node: (
+          <Cartao
+            titulo="Módulo de elasticidade e flexão"
+            legenda="Ensaios aos 28 dias, com produto e idade identificados"
+          >
+            <GraficoCorrelacao
+              dados={correlacoes.moduloFlexao}
+              rotuloX="Resistência à tração na flexão"
+              rotuloY="Módulo de elasticidade dinâmico"
+              unidadeX="MPa"
+              unidadeY="MPa"
+              casasY={0}
+            />
+          </Cartao>
+        ),
+      },
+      {
+        id: 'modulo-variacao-dimensional',
+        titulo: 'Módulo e variação dimensional',
+        node: (
+          <Cartao
+            titulo="Módulo e variação dimensional"
+            legenda="Resultados aos 28 dias, conforme o dashboard da planilha"
+          >
+            <GraficoCorrelacao
+              dados={correlacoes.moduloVariacaoDimensional}
+              rotuloX="Módulo de elasticidade dinâmico"
+              rotuloY="Variação dimensional"
+              unidadeX="MPa"
+              unidadeY="mm/m"
+              casasX={0}
+              casasY={3}
+            />
+          </Cartao>
+        ),
+      },
+      {
         id: 'modulo-densidade-endurecida',
         titulo: 'Módulo de elasticidade e densidade endurecida',
         node: (
@@ -253,6 +341,46 @@ export default async function PaginaVisaoGeral({
           </Cartao>
         ),
       },
+      {
+        id: 'densidades-produto',
+        titulo: 'Densidades por produto',
+        largura: 2,
+        node: (
+          <Cartao
+            titulo="Densidades por produto"
+            legenda="Estados anidro, fresco e endurecido; até 12 formulações do filtro"
+          >
+            <GraficoDensidadesProduto dados={densidades} />
+          </Cartao>
+        ),
+      },
+      {
+        id: 'variacao-dimensional',
+        titulo: 'Variação dimensional no tempo',
+        node: (
+          <Cartao
+            titulo="Variação dimensional no tempo"
+            legenda="Média dos corpos de prova, com desvio padrão"
+          >
+            <GraficoVariacaoTemporal
+              dados={variacaoTemporal}
+              metrica="dimensional"
+            />
+          </Cartao>
+        ),
+      },
+      {
+        id: 'variacao-massa',
+        titulo: 'Variação de massa no tempo',
+        node: (
+          <Cartao
+            titulo="Variação de massa no tempo"
+            legenda="Perdas aparecem com sinal negativo; média com desvio padrão"
+          >
+            <GraficoVariacaoTemporal dados={variacaoTemporal} metrica="massa" />
+          </Cartao>
+        ),
+      },
     ];
 
     return (
@@ -263,7 +391,11 @@ export default async function PaginaVisaoGeral({
         </p>
 
         <Suspense fallback={null}>
-          <BarraFiltros desenvolvedores={opcoes.desenvolvedores} />
+          <BarraFiltros
+            desenvolvedores={opcoes.desenvolvedores}
+            alimentadores={opcoes.alimentadores}
+            avaliadores={opcoes.avaliadores}
+          />
         </Suspense>
 
         <div className="grade-kpis">
@@ -271,6 +403,11 @@ export default async function PaginaVisaoGeral({
             rotulo="Formulações"
             valor={inteiro(resumo.totalFormulacoes)}
             nota={`${inteiro(resumo.totalComEnsaios)} com ensaios registrados`}
+          />
+          <Kpi
+            rotulo="Dados completos"
+            valor={inteiro(resumo.totalCompletos)}
+            nota="Formulações com todos os blocos previstos"
           />
           <Kpi
             rotulo="Compressão 28 dias"

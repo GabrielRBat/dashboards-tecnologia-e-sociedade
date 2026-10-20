@@ -116,4 +116,5 @@ No frontend, validar manualmente:
 - Comparar diferenças célula a célula entre duas importações.
 - Desfazer importação.
 - Agendar importações automáticas.
-- Teor de ar incorporado: depende da versão nova da planilha com a coluna real.
+- Teor de ar incorporado: depende de uma futura planilha que traga a medição
+  real; o layout V3 ainda não possui esse resultado.

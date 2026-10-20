@@ -2,19 +2,21 @@
 
 Aplicação web para dar visibilidade aos dados de ensaios e formulações de
 argamassa do laboratório — substituindo a leitura direta da
-"Planilha de Registro e cálculo", que tem 202 colunas e cujas abas de dashboard
+"Planilha de Registro e cálculo", que tem 257 colunas e cujas abas de dashboard
 nunca foram preenchidas.
 
 Cada formulação passa por caracterização nos três estados (anidro, fresco e
 endurecido) e o sistema calcula, a partir dos dados brutos, todos os valores
 derivados: densidades, retenção de água, médias e desvios de resistência,
-módulo de elasticidade dinâmico e relação água/ligante.
+módulo de elasticidade dinâmico, relação água/ligante e variações dimensional e
+de massa.
 
 > **Para entrar:** usuário `admin`, senha `admin` — credenciais de
 > desenvolvimento desta instalação. Ver [Contas e acesso](#contas-e-acesso).
 >
-> **Importante:** três fórmulas da planilha original têm erro, e o sistema aplica
-> a versão correta. Isso faz alguns números divergirem da planilha, de propósito.
+> **Importante:** três fórmulas da planilha original têm erro e a variação de
+> massa usa no Excel o sinal oposto ao material da aula. O sistema aplica as
+> convenções documentadas. Isso faz alguns números divergirem da planilha, de propósito.
 > O detalhe está em [`docs/CALCULOS.md`](docs/CALCULOS.md) — vale a leitura antes
 > de comparar resultados.
 
@@ -22,7 +24,7 @@ módulo de elasticidade dinâmico e relação água/ligante.
 
 ## O que já funciona
 
-- **Visão geral** — indicadores do conjunto filtrado e quatorze gráficos:
+- **Visão geral** — indicadores do conjunto filtrado e 22 gráficos:
 
   | Gráfico | O que mostra |
   |---|---|
@@ -37,6 +39,14 @@ módulo de elasticidade dinâmico e relação água/ligante.
   | Módulo de elasticidade × densidade endurecida | Relação entre densidade média e módulo dinâmico aos 28 dias |
   | Relação água/ligante × resistência | Cada ponto é uma formulação |
   | Distribuição por tipo de projeto | Quantidade de formulações |
+  | Produtos por responsável | Desenvolvimento, alimentação da planilha e avaliação |
+  | Registros por mês | Quantidade de formulações por mês |
+  | Retenção de água × squeeze-flow | Relação entre retenção e deslocamento médio |
+  | Módulo de elasticidade × flexão | Ensaios aos 28 dias, com produto identificado |
+  | Módulo de elasticidade × variação dimensional | Correlação dos resultados aos 28 dias |
+  | Densidades por produto | Estados anidro, fresco e endurecido aos 14/28 dias |
+  | Variação dimensional no tempo | Média e desvio dos CPs aos 1/7/28 dias |
+  | Variação de massa no tempo | Média e desvio dos CPs aos 1/7/28 dias |
   | Ranking aos 28 dias | Formulações mais resistentes |
 
   Os gráficos normativos seguem o que a literatura da área publica — curva
@@ -57,10 +67,10 @@ módulo de elasticidade dinâmico e relação água/ligante.
   quê (ver abaixo). Os dashboards ficam no banco e são compartilhados com a
   equipe.
 - **Formulações** — tabela com todos os registros e os valores já calculados,
-  com busca e filtros por tipo de projeto, origem, desenvolvedor e período.
-  Marque **até 3** na lista e use **Comparar** para ver o ciclo de ensaios lado
-  a lado (evolução da resistência, tabela anidro/fresco/endurecido e
-  granulometria).
+  com busca e filtros por tipo de projeto, origem, desenvolvedor, alimentador,
+  avaliador e período. Marque **até 5** na lista e use **Comparar** para ver o
+  ciclo de ensaios lado a lado (evolução da resistência, tabela
+  anidro/fresco/endurecido, granulometria e variações dimensional/de massa).
 - **Detalhe da formulação** — composição, os três estados, resistências por
   idade com desvio padrão, corpos de prova do estado endurecido e granulometria.
 - **Importar planilha** — sobe o arquivo `.xlsx` do laboratório e grava as
@@ -409,17 +419,22 @@ número, escolha **Nº** em **Buscar em**; nesse modo a busca só aceita número
 exato. O padrão **Tudo** mantém o comportamento antigo, procurando nos quatro
 campos de uma vez.
 
-A busca **filtra o painel inteiro**, não só a tabela — os quatorze gráficos passam a
+A busca **filtra o painel inteiro**, não só a tabela — os 22 gráficos passam a
 falar do subconjunto encontrado. Digitar não dispara uma consulta por tecla: o
 campo espera 350 ms de pausa antes de navegar, senão "Contrapiso" custaria dez
 recargas do painel, nove delas jogadas fora.
+
+O filtro **Ensaio registrado** separa formulações com pelo menos um resultado
+bruto de ensaio (anidro, fresco, granulometria, resistência, corpo endurecido ou
+variação) das que têm apenas identificação/composição. Ele também vale para o
+painel inteiro.
 
 Todos os filtros vivem na URL, então um recorte pode ser copiado e enviado a
 outra pessoa: `/?busca=Contrapiso&campoBusca=nomenclatura&tipoProjeto=RC`.
 
 ## Comparar formulações
 
-Em **Formulações**, marque até **3** linhas (checkbox à esquerda) e use
+Em **Formulações**, marque até **5** linhas (checkbox à esquerda) e use
 **Comparar** na barra inferior. A página `/formulacoes/comparar` mostra o ciclo
 completo das selecionadas:
 
@@ -429,9 +444,12 @@ completo das selecionadas:
 | Evolução da flexão | Idem, tração na flexão |
 | Tabela | Identificação, anidro, fresco e endurecido (resistências, densidade e módulo) |
 | Granulometria | Curvas sobrepostas com as zonas da NBR 7211 |
+| Seis barras técnicas | Retenção, squeeze-flow, flexão, módulo e variação dimensional aos 28 dias |
+| Variação dimensional | Linhas por formulação aos 1/7/28 dias |
+| Variação de massa | Linhas por formulação aos 1/7/28 dias; perdas negativas |
 
-Menos de 2 selecionadas não abre a comparação; a 4ª é bloqueada na lista e a API
-recusa `ids` com mais de 3.
+Menos de 2 selecionadas não abre a comparação; a 6ª é bloqueada na lista e a API
+recusa `ids` com mais de 5.
 
 ## Dashboards customizados
 
@@ -526,11 +544,12 @@ administrador" tiraria da equipe algo que hoje é dela.
 | Tabela | O que guarda |
 |---|---|
 | `formulacoes` | Uma linha da planilha: identificação, teor de água e os dados brutos dos estados anidro e fresco. |
-| `materiais` | Cadastro de insumos (cimentos, cales, fíleres, areias, aditivos, fibras). Substitui as 36 colunas fixas da planilha por um cadastro que o laboratório pode ampliar. |
+| `materiais` | Cadastro de insumos (cimentos, cales, fíleres, areias, aditivos, fibras e compensadores de retração). Substitui as 40 colunas fixas da planilha por um cadastro que o laboratório pode ampliar. |
 | `componentes_formulacao` | Teor de cada material numa formulação, em % da massa seca. |
 | `pontos_granulometricos` | Frequência (%) por diâmetro de peneira. |
 | `ensaios_resistencia` | Valores por CP de flexão (3 CPs) e compressão (6 CPs), por idade. |
 | `corpos_de_prova_endurecidos` | Dimensões, massa e leituras de ultrassom de cada CP aos 14 e 28 dias. |
+| `ensaios_variacao` | Leituras brutas da barra de referência, comprimentos e massas dos 3 CPs na desforma e aos 1/7/28 dias. |
 | `dashboards` | Painéis montados pela equipe. Os gráficos ficam em `jsonb` — é configuração de tela, e nenhuma consulta precisa filtrar por painel. |
 
 Valores calculados **não são gravados** — a API os deriva na leitura, a partir
@@ -558,13 +577,18 @@ sem gravar nada; depois, se não houver bloqueios, o usuário confirma a gravaç
   678,9 mm ou massa de densidade aparente de 19,8 g indica que a coluna lida não
   é a coluna esperada.
 - A página oferece um **template oficial `.xlsx`**, gerado com a versão atual do
-  layout (`AR_LAYOUT_V2`).
+  layout (`AR_LAYOUT_V3`).
 - Cada importação confirmada fica no **histórico**, com usuário, data, arquivo,
   linhas lidas/importadas/ignoradas, avisos e formulações criadas/atualizadas.
   A lista de formulações mostra a data da última importação.
 
 O mapa de colunas está em `apps/api/src/importacao/layout-planilha.ts`. Se a
 planilha mudar de layout, é o único arquivo a ajustar.
+
+A versão V3 cobre as 257 colunas do arquivo de 60 formulações, incluindo os 40
+materiais e as leituras brutas de variação dimensional e de massa. O arquivo
+recebido foi pré-validado pelo importador com **60/60 linhas prontas, sem avisos
+nem bloqueios**.
 
 > Se uma planilha foi importada antes da correção de **2026-09-16**, reimporte o
 > arquivo original. A versão atual da planilha tem colunas calculadas extras
@@ -603,14 +627,14 @@ planilha mudar de layout, é o único arquivo a ajustar.
 | `/api/indicadores/dispersao-idade` | Média por idade com desvio padrão dos CPs |
 | `/api/indicadores/granulometria` · `/zonas-granulometricas` | Curvas com retida acumulada; zonas da NBR 7211 |
 | `/api/indicadores/classificacao` | Distribuição nas classes P, D e U da NBR 13281 |
-| `/api/indicadores/correlacoes` | Flexão × compressão e módulo × compressão, com reta e R² |
+| `/api/indicadores/correlacoes` | Correlações mecânicas, incluindo módulo × flexão e módulo × variação dimensional, com reta e R² |
 | `/api/indicadores/squeeze-flow` | Carga × deslocamento por formulação |
 | `/api/indicadores/comparativo` · `/dispersao` | Ranking aos 28 dias; água/ligante × resistência |
 
 A visão geral mostra vários recortes **do mesmo conjunto filtrado**. Um endpoint
 por gráfico faria o banco devolver as mesmas formulações repetidas vezes, e esse
 custo cresce com o tamanho do laboratório — não com o número de gráficos. Por
-isso a página usa só o `/painel`: com as 64 formulações do seed, **32 ms contra
+isso a página usa só o `/painel`: com as 60 formulações do seed, **32 ms contra
 166 ms** das chamadas separadas medidas na implementação original.
 
 Os endpoints individuais continuam existindo, para quem precisar de um recorte
@@ -620,7 +644,7 @@ apenas as encadeia sobre uma leitura única.
 ### Dados de exemplo
 
 O seed grava a formulação real da planilha ("Argamassa de Revestimento_1", com
-os valores originais) e gera outras 63 plausíveis em torno dela. Os números são
+os valores originais) e gera outras 59 plausíveis em torno dela. Os números são
 determinísticos: rodar o seed duas vezes produz o mesmo banco.
 
 Os dados gerados respeitam a física dos ensaios — a resistência acompanha a

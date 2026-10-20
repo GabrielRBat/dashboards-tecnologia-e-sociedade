@@ -13,14 +13,16 @@ Cada registro é uma formulação desenvolvida pelo laboratório, com:
   desenvolvedor, alimentador da planilha, avaliador, data, origem
   (Produção ou Laboratório);
 - composição: cimentos, cales, fíleres, areias fina e média, aditivos retentores
-  de água e incorporadores de ar, fibras, superplastificantes, teor de água;
+  de água e incorporadores de ar, fibras, compensadores de retração,
+  superplastificantes e teor de água;
 - ensaios em três estados:
   - **anidro**: granulometria, densidade aparente, relação água/ligante, teor de finos;
   - **fresco**: retenção de água, densidade, squeeze-flow;
   - **endurecido**: resistência à tração na flexão e à compressão aos 3/7/14/28
-    dias, densidade e módulo de elasticidade dinâmico aos 14 e 28 dias.
+    dias, densidade e módulo de elasticidade dinâmico aos 14 e 28 dias, variação
+    dimensional e variação de massa aos 1/7/28 dias.
 
-A fonte é a "Planilha de Registro e cálculo" (202 colunas). As abas "Dhasboard" e
+A fonte é a "Planilha de Registro e cálculo" (257 colunas). As abas "Dhasboard" e
 "planilha resultados principais" dela estão vazias — é exatamente o que este
 projeto entrega.
 
@@ -38,22 +40,23 @@ Versionado desde 2026-08-24 no branch `master` de
 > `*.tsbuildinfo`. Antes de adicionar qualquer arquivo com dado real, conferir
 > se ele pode ficar exposto.
 
-Funcionando: visão geral com indicadores e **quatorze gráficos** (com rótulos
+Funcionando: visão geral com indicadores e **22 gráficos** (com rótulos
 descritivos nos eixos X e Y), **dashboards customizados** montados pela equipe,
 lista de formulações com filtros, busca com escolha do campo pesquisado e
-**comparação de até 3 formulações** (ciclo completo: evolução, tabela e
-granulometria), página de detalhe, importação da planilha `.xlsx` e aba de
+**comparação de até 5 formulações** (ciclo completo: evolução, tabela,
+granulometria e variações dimensional/de massa), página de detalhe, importação da planilha `.xlsx` e aba de
 configurações com escolha de tema.
 
-Verificado: 104 testes unitários passando e build completo limpo na API e no
-frontend. Antes desta rodada, também havia 14 verificações de comportamento do
+Verificado em 2026-10-20: **111 testes unitários passando**, build completo
+limpo na API e no frontend e a planilha recebida pré-validada com **60/60 linhas,
+sem avisos nem bloqueios**. Antes desta rodada, também havia 14 verificações de comportamento do
 seletor de tema,
 API respondendo em todos os endpoints, as cinco telas conferidas em modo claro e
 escuro sem erro de console nem overflow, importação da planilha real com 60/60
 linhas e nenhum erro.
 
 Conferido de novo em 2026-08-24 subindo o projeto do zero nesta máquina: banco na
-porta 5433, migrações e seed (64 formulações, 36 materiais), 46 testes passando,
+porta 5433, migrações e seed (60 formulações, 40 materiais), 46 testes passando,
 build da API e typecheck do frontend limpos, os treze endpoints de indicadores em
 HTTP 200, as cinco telas no navegador sem erro de console nem overflow, os
 gráficos então existentes renderizando em 1280px e em 375px, e contraste de
@@ -77,7 +80,7 @@ texto acima de 4,5:1 nos dois temas.
 - **Um único `.env` na raiz.** A API procura o arquivo subindo os diretórios,
   em vez de exigir cópias sincronizadas em raiz e `apps/api`.
 - **Materiais viraram cadastro** (tabela `materiais` + `componentes_formulacao`)
-  em vez das 36 colunas fixas da planilha, para o laboratório poder ampliar.
+  em vez das 40 colunas fixas da planilha, para o laboratório poder ampliar.
 - **Gráficos seguem o que a área publica**, não o que era fácil de fazer:
   curva granulométrica em escala log com as zonas da NBR 7211 atrás, classes da
   NBR 13281, média com barra de erro, correlações com reta e R². Pesquisado na
@@ -99,9 +102,9 @@ texto acima de 4,5:1 nos dois temas.
   declara é o fabricante). O sistema adota a **classe mais alta que o valor
   alcança**. Registrado em `docs/CALCULOS.md` — se o laboratório preferir outra,
   muda em `classificar()` e no teste.
-- **A visão geral usa um endpoint só (`/indicadores/painel`).** São dez recortes
-  do mesmo conjunto filtrado; um endpoint por gráfico faria o banco repetir a
-  leitura dez vezes. Cada indicador é função pura sobre a lista carregada e o
+- **A visão geral usa um endpoint só (`/indicadores/painel`).** Todos os recortes
+  partem do mesmo conjunto filtrado; um endpoint por gráfico faria o banco repetir a
+  leitura. Cada indicador é função pura sobre a lista carregada e o
   painel as encadeia. Medido: 32 ms contra 166 ms.
 - **Sessão em cookie `httpOnly`, gravado pelo Next.** Token no `localStorage`
   seria lido por qualquer script da página. E o cookie precisa ser gravado pelo
@@ -144,10 +147,11 @@ texto acima de 4,5:1 nos dois temas.
   a unidade: cruzar níveis diferentes alinha grandezas que não se correspondem.
   Também barra dispersão com eixo categórico, barras sem categoria e métrica
   contra ela mesma. Tudo em `metricas/catalogo.ts`, com 18 testes.
-- **Comparação de formulações: no máximo 3.** A lista permite marcar e abrir
-  `/formulacoes/comparar`; a API rejeita `ids` com mais de 3 (ArrayMaxSize). O
-  ciclo mostrado cobre evolução da resistência, tabela dos três estados e
-  granulometria — o recorte pedido para decidir qual formulação utilizar.
+- **Comparação de formulações: no máximo 5.** A lista permite marcar e abrir
+  `/formulacoes/comparar`; a API rejeita `ids` com mais de 5 (ArrayMaxSize). O
+  ciclo mostrado cobre evolução da resistência, tabela dos três estados, seis
+  gráficos técnicos aos 28 dias, granulometria e variações dimensional/de massa
+  — o recorte pedido para decidir qual formulação utilizar.
 - **A validação roda também na gravação, não só na tela.** A da interface é
   conveniência; a do servidor é a que vale. Sem ela bastaria uma requisição
   direta para gravar um gráfico enganoso, que passaria a existir para a equipe.
@@ -188,6 +192,10 @@ texto acima de 4,5:1 nos dois temas.
   exata quando o termo é número). O parâmetro `campoBusca` restringe a busca a
   nomenclatura, número, desenvolvedor ou comentários e fica na URL junto com os
   demais filtros.
+- **Filtro por ensaio registrado.** `ensaioRegistrado=sim|nao` separa
+  formulações com pelo menos um resultado bruto de ensaio das que contêm apenas
+  identificação/composição; como os demais filtros, afeta a lista e os 22
+  gráficos da visão geral.
 - **Vidro com moderação, por desempenho.** Só o cabeçalho tem `backdrop-filter`
   (elemento único e fixo); os cartões usam translucidez sem desfoque. O gradiente
   do fundo fica numa camada `fixed` atrás de tudo, para não repintar a cada
@@ -199,8 +207,12 @@ texto acima de 4,5:1 nos dois temas.
   endurecido (método diferente entre 14 e 28 dias). Além disso, as colunas de
   relação água/ligante e teor de finos exibem `#NAME?` em todas as linhas —
   nunca calcularam. Tudo registrado em `docs/CALCULOS.md`.
-- **O mapa de importação acompanha a versão atual da planilha, com três colunas
-  calculadas a mais antes da granulometria.** Em 2026-09-16 foi corrigido um bug
+- **Variação de massa segue o sinal do material da aula:** perda negativa e
+  ganho positivo. O `.xlsx` multiplica o percentual por `−1`; o dashboard não.
+  As leituras brutas ficam no banco e a API recalcula o resultado.
+- **O mapa de importação acompanha o layout V3 de 257 colunas.** Ele cobre os 40
+  materiais, incluindo compensadores de retração, e as leituras brutas de
+  variação dimensional/massa entre GX e HY. Em 2026-09-16 foi corrigido um bug
   em que o importador ainda lia o layout antigo: relação água/ligante e teor de
   finos caíam como pontos granulométricos, densidade aparente virava retenção,
   retenção virava densidade fresca, e assim por diante. O teste
@@ -214,7 +226,7 @@ texto acima de 4,5:1 nos dois temas.
   composição são tratadas como template e ignoradas, para não apagar relações já
   existentes. Valores fora de faixas plausíveis bloqueiam a importação, porque
   normalmente significam layout deslocado. Há também template oficial `.xlsx`
-  gerado pelo sistema, com metadado `AR_LAYOUT_V2`.
+  gerado pelo sistema, com metadado `AR_LAYOUT_V3`.
 - **Histórico de importação implementado.** As tabelas `importacoes` e
   `importacoes_formulacoes` registram usuário, arquivo, linhas lidas/importadas/
   ignoradas, avisos e quais formulações foram criadas ou atualizadas. A lista de
@@ -223,13 +235,14 @@ texto acima de 4,5:1 nos dois temas.
 
 ## Sobre os dados
 
-A planilha entregue tem 60 linhas com numeração e nomenclatura, mas **apenas a
-linha 11 ("Argamassa de Revestimento_1") tem os ensaios preenchidos** — as demais
-são nomes de template sem medições. Ela serviu como definição da estrutura.
+A planilha mais recente entregue em 2026-10-20 tem **60 formulações preenchidas
+nas 257 colunas** e usa dados fictícios para a atividade. A pré-validação do
+importador reconheceu as 60 linhas sem erros ou bloqueios; ela não foi gravada
+automaticamente no banco para não sobrescrever dados existentes sem confirmação.
 
-O seed grava essa formulação real com os valores originais e gera outras 63
-plausíveis (determinísticas) para desenvolver e testar. Quando o laboratório
-preencher a planilha, a importação já funciona.
+O seed grava a primeira formulação como referência e gera outras 59 plausíveis
+(determinísticas) para desenvolver e testar, agora também com as leituras brutas
+de variação dimensional e de massa.
 
 ## Pendências / próximos passos
 

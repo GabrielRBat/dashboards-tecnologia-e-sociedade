@@ -11,6 +11,8 @@ import {
   relacaoAguaLigante,
   retencaoAgua,
   teorFinos,
+  variacaoDimensional,
+  variacaoMassa,
   volumeCorpoDeProva,
 } from './calculos';
 
@@ -185,6 +187,28 @@ describe('cálculos de argamassa', () => {
 
     it('retorna null sem corpos de prova', () => {
       expect(densidadeMediaEndurecida([])).toBeNull();
+    });
+  });
+
+  describe('variações dimensional e de massa', () => {
+    it('reproduz a variação dimensional corrigida da nova planilha', () => {
+      // Linha 11, CP1 em 1 dia: ((4,893 - 4,934) - (5,111 - 4,967)) / 0,25
+      expect(variacaoDimensional(5.111, 4.967, 4.893, 4.934)).toBeCloseTo(
+        -0.74,
+        10,
+      );
+    });
+
+    it('mantém o sinal da variação de massa', () => {
+      // A massa caiu de 314,2 g para 310,8 g: perda deve ser negativa.
+      expect(variacaoMassa(314.2, 310.8)).toBeCloseTo(-1.0821133, 6);
+      expect(variacaoMassa(100, 102)).toBeCloseTo(2, 10);
+    });
+
+    it('retorna null com base ou massa inicial inválida', () => {
+      expect(variacaoDimensional(5, 4.9, 4.8, 4.9, 0)).toBeNull();
+      expect(variacaoMassa(0, 10)).toBeNull();
+      expect(variacaoMassa(null, 10)).toBeNull();
     });
   });
 

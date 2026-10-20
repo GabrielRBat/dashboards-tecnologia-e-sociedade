@@ -2,6 +2,17 @@
 
 Formato: **data** — tipo — descrição.
 
+## 2026-10-20
+
+- **2026-10-20** — feature — Novo filtro **Ensaio registrado** (`com ensaio`/`sem ensaio`) na lista e na visão geral, cobrindo resultados anidros, frescos, granulometria, resistência, corpos endurecidos e variação.
+- **2026-10-20** — feature — Visão geral passou de 14 para 22 gráficos com os recortes pedidos no material da aula e no dashboard do Excel: produtos por responsável, registros por mês, retenção × squeeze-flow, módulo × flexão, módulo × variação dimensional, densidades por produto e variações dimensional/de massa no tempo. Os filtros agora também cobrem alimentador e avaliador.
+- **2026-10-20** — feature — Importador atualizado para o layout `AR_LAYOUT_V3` de 257 colunas e 40 materiais, incluindo compensadores de retração e as leituras brutas de variação na desforma e aos 1/7/28 dias. Nova tabela `ensaios_variacao` e migração `0005`; arquivo recebido pré-validado com 60/60 linhas sem erros.
+- **2026-10-20** — feature — Comparação ampliada de 3 para 5 formulações e acrescida dos seis gráficos técnicos do Excel (retenção, squeeze-flow, flexão, módulo e variação dimensional), além dos gráficos e valores temporais de variação dimensional e de massa.
+- **2026-10-20** — fix — Variação dimensional passou a ser calculada com correção da barra de referência e base de 0,25 m. A variação de massa segue o sinal apresentado no slide (perda negativa), documentando a divergência intencional do `.xlsx`, que inverte o sinal.
+- **2026-10-20** — fix — Revisão final tornou a importação tolerante a linhas parciais que tenham apenas CP2/CP3 no ensaio de variação e passou a considerar esse bloco completo somente quando as médias dimensional **e** de massa existem em 1/7/28 dias.
+- **2026-10-20** — test — 111 testes da API e build completo de produção aprovados; filtro por ensaio conferido nos dois estados contra o banco local, e validação real do novo `.xlsx` aprovada sem avisos ou bloqueios.
+- **2026-10-20** — docs — README, `context.md`, `docs/CALCULOS.md` e changelog atualizados para o novo layout, fórmulas e gráficos.
+
 ## 2026-09-16
 
 - **2026-09-16** — feature — Importação de Excel passou a ter fluxo em duas etapas: pré-validação sem gravação e confirmação explícita. O importador ignora linhas template sem dados, bloqueia valores fora de faixa plausível que indicam layout deslocado, gera template oficial `.xlsx` com metadado de versão e registra histórico com usuário, arquivo, contagens, avisos e formulações criadas/atualizadas.
