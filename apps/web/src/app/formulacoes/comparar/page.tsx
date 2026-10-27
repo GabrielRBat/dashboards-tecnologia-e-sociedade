@@ -3,6 +3,7 @@ import { Fragment } from 'react';
 import { Cartao, ApiForaDoAr } from '@/components/estado';
 import {
   GraficoComparacaoProdutos,
+  GraficoCorrelacaoComparativa,
   GraficoEvolucaoComparativo,
   GraficoGranulometria,
   GraficoVariacaoComparativo,
@@ -348,8 +349,8 @@ export default async function PaginaCompararFormulacoes({
 
         <h2 className="titulo-secao">Comparação técnica aos 28 dias</h2>
         <p className="subtitulo-pagina">
-          Os seis gráficos reproduzem os recortes comparativos do dashboard da
-          planilha para os produtos selecionados.
+          Oito gráficos comparam os resultados e as relações entre as
+          propriedades dos produtos selecionados.
         </p>
         <div className="grade-graficos">
           <Cartao titulo="Retenção de água" legenda="Comparação entre produtos selecionados">
@@ -369,6 +370,24 @@ export default async function PaginaCompararFormulacoes({
           </Cartao>
           <Cartao titulo="Variação dimensional aos 28 dias" legenda="Média dos corpos de prova">
             <GraficoComparacaoProdutos formulacoes={formulacoes} metrica="variacaoDimensional28" />
+          </Cartao>
+          <Cartao
+            titulo="Compressão aos 28 dias × teor de água"
+            legenda="Cada ponto é uma formulação selecionada"
+          >
+            <GraficoCorrelacaoComparativa
+              formulacoes={formulacoes}
+              metricaX="teorAgua"
+            />
+          </Cartao>
+          <Cartao
+            titulo="Compressão aos 28 dias × densidade endurecida aos 28 dias"
+            legenda="Cada ponto é uma formulação selecionada"
+          >
+            <GraficoCorrelacaoComparativa
+              formulacoes={formulacoes}
+              metricaX="densidadeEndurecida28"
+            />
           </Cartao>
         </div>
 

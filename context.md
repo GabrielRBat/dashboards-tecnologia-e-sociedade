@@ -44,7 +44,9 @@ Funcionando: visão geral com indicadores e **22 gráficos** (com rótulos
 descritivos nos eixos X e Y), **dashboards customizados** montados pela equipe,
 lista de formulações com filtros, busca com escolha do campo pesquisado e
 **comparação de até 5 formulações** (ciclo completo: evolução, tabela,
-granulometria e variações dimensional/de massa), página de detalhe, importação da planilha `.xlsx` e aba de
+oito gráficos técnicos aos 28 dias — incluindo compressão × teor de água e
+compressão × densidade endurecida —, granulometria e variações
+dimensional/de massa), página de detalhe, importação da planilha `.xlsx` e aba de
 configurações com escolha de tema.
 
 Verificado em 2026-10-20: **111 testes unitários passando**, build completo
@@ -150,8 +152,10 @@ texto acima de 4,5:1 nos dois temas.
 - **Comparação de formulações: no máximo 5.** A lista permite marcar e abrir
   `/formulacoes/comparar`; a API rejeita `ids` com mais de 5 (ArrayMaxSize). O
   ciclo mostrado cobre evolução da resistência, tabela dos três estados, seis
-  gráficos técnicos aos 28 dias, granulometria e variações dimensional/de massa
-  — o recorte pedido para decidir qual formulação utilizar.
+  barras técnicas, duas dispersões aos 28 dias (compressão × teor de água da
+  formulação e compressão × densidade no estado endurecido), granulometria e
+  variações dimensional/de massa — o recorte pedido para decidir qual
+  formulação utilizar.
 - **A validação roda também na gravação, não só na tela.** A da interface é
   conveniência; a do servidor é a que vale. Sem ela bastaria uma requisição
   direta para gravar um gráfico enganoso, que passaria a existir para a equipe.

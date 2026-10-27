@@ -1111,6 +1111,166 @@ export function GraficoComparacaoProdutos({
   );
 }
 
+/* --- Correlações das formulações escolhidas, aos 28 dias --- */
+
+type MetricaCorrelacaoComparativa =
+  | 'teorAgua'
+  | 'densidadeEndurecida28';
+
+export function GraficoCorrelacaoComparativa({
+  formulacoes,
+  metricaX,
+}: {
+  formulacoes: Formulacao[];
+  metricaX: MetricaCorrelacaoComparativa;
+}) {
+  const configuracao: Record<
+    MetricaCorrelacaoComparativa,
+    {
+      rotulo: string;
+      rotuloEixo: string;
+      unidade: string;
+      casas: number;
+      margem: number;
+      valor: (formulacao: Formulacao) => number | null;
+    }
+  > = {
+    teorAgua: {
+      rotulo: 'Teor de água da formulação',
+      rotuloEixo: 'Teor de água',
+      unidade: '%',
+      casas: 1,
+      margem: 0.5,
+      valor: (f) => f.teorAgua,
+    },
+    densidadeEndurecida28: {
+      rotulo: 'Densidade no estado endurecido aos 28 dias',
+      rotuloEixo: 'Densidade endurecida 28d',
+      unidade: 'kg/m³',
+      casas: 0,
+      margem: 50,
+      valor: (f) =>
+        f.endurecidos.find((e) => e.idadeDias === 28)?.densidadeMedia ?? null,
+    },
+  };
+  const config = configuracao[metricaX];
+  const candidatos = formulacoes.map((f, indice) => ({
+    formulacaoId: f.id,
+    nomenclatura: f.nomenclatura,
+    x: config.valor(f),
+    y: f.calculados.compressao28d,
+    cor: CORES[indice % CORES.length] as string,
+  }));
+  type PontoCompleto = (typeof candidatos)[number] & {
+    x: number;
+    y: number;
+  };
+  const pontos = candidatos.filter(
+    (p): p is PontoCompleto => p.x !== null && p.y !== null,
+  );
+  const semParCompleto = candidatos.filter(
+    (p) => p.x === null || p.y === null,
+  );
+
+  if (pontos.length === 0) {
+    return (
+      <SemDados>
+        Nenhuma formulação escolhida tem {config.rotulo.toLocaleLowerCase()} e
+        resistência à compressão aos 28 dias preenchidos. Sem par completo:{' '}
+        {candidatos.map((ponto) => ponto.nomenclatura).join(', ')}.
+      </SemDados>
+    );
+  }
+
+  return (
+    <>
+      <ResponsiveContainer width="100%" height={280}>
+        <ScatterChart margin={{ top: 18, right: 18, bottom: 20, left: 4 }}>
+          <CartesianGrid stroke="var(--grade)" />
+          <XAxis
+            type="number"
+            dataKey="x"
+            name={config.rotulo}
+            {...EIXO}
+            domain={[
+              (minimo: number) => Math.max(0, minimo - config.margem),
+              (maximo: number) => maximo + config.margem,
+            ]}
+            tickFormatter={(v: number) => num(v, config.casas)}
+            label={{
+              value: `${config.rotuloEixo} (${config.unidade})`,
+              position: 'insideBottom',
+              offset: -12,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+            }}
+          />
+          <YAxis
+            type="number"
+            dataKey="y"
+            name="Resistência à compressão aos 28 dias"
+            {...EIXO}
+            width={58}
+            domain={[
+              (minimo: number) => Math.max(0, minimo - 0.5),
+              (maximo: number) => maximo + 0.5,
+            ]}
+            tickFormatter={(v: number) => num(v, 1)}
+            label={{
+              value: 'Compressão aos 28 dias (MPa)',
+              angle: -90,
+              position: 'insideLeft',
+              offset: 16,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+            }}
+          />
+          <ZAxis range={[90, 90]} />
+          <Tooltip
+            cursor={{ stroke: 'var(--eixo)', strokeDasharray: '3 3' }}
+            content={({ active, payload }) => {
+              if (!active || !payload?.length) return null;
+              const ponto = payload[0]?.payload as (typeof pontos)[number];
+              return (
+                <Tip
+                  titulo={ponto.nomenclatura}
+                  linhas={[
+                    {
+                      cor: ponto.cor,
+                      rotulo: config.rotulo,
+                      valor: `${num(ponto.x, config.casas)} ${config.unidade}`,
+                    },
+                    {
+                      cor: ponto.cor,
+                      rotulo: 'Compressão aos 28 dias',
+                      valor: `${num(ponto.y, 2)} MPa`,
+                    },
+                  ]}
+                />
+              );
+            }}
+          />
+          <Scatter data={pontos} isAnimationActive={false}>
+            {pontos.map((ponto) => (
+              <Cell key={ponto.formulacaoId} fill={ponto.cor} />
+            ))}
+          </Scatter>
+        </ScatterChart>
+      </ResponsiveContainer>
+      <Legenda
+        itens={pontos.map((ponto) => ({
+          cor: ponto.cor,
+          rotulo: ponto.nomenclatura,
+        }))}
+      />
+      {semParCompleto.length > 0 ? (
+        <p className="nota-grafico">
+          Sem o par completo e, por isso, fora do gráfico:{' '}
+          {semParCompleto.map((ponto) => ponto.nomenclatura).join(', ')}.
+        </p>
+      ) : null}
+    </>
+  );
+}
+
 /* --- Curvas granulométricas --- */
 
 export function GraficoGranulometria({

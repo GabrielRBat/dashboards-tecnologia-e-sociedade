@@ -70,7 +70,8 @@ de massa.
   com busca e filtros por tipo de projeto, origem, desenvolvedor, alimentador,
   avaliador e período. Marque **até 5** na lista e use **Comparar** para ver o
   ciclo de ensaios lado a lado (evolução da resistência, tabela
-  anidro/fresco/endurecido, granulometria e variações dimensional/de massa).
+  anidro/fresco/endurecido, relações da compressão aos 28 dias com teor de água
+  e densidade endurecida, granulometria e variações dimensional/de massa).
 - **Detalhe da formulação** — composição, os três estados, resistências por
   idade com desvio padrão, corpos de prova do estado endurecido e granulometria.
 - **Importar planilha** — sobe o arquivo `.xlsx` do laboratório e grava as
@@ -445,8 +446,12 @@ completo das selecionadas:
 | Tabela | Identificação, anidro, fresco e endurecido (resistências, densidade e módulo) |
 | Granulometria | Curvas sobrepostas com as zonas da NBR 7211 |
 | Seis barras técnicas | Retenção, squeeze-flow, flexão, módulo e variação dimensional aos 28 dias |
+| Duas relações aos 28 dias | Dispersões de compressão × teor de água da formulação e compressão × densidade no estado endurecido |
 | Variação dimensional | Linhas por formulação aos 1/7/28 dias |
 | Variação de massa | Linhas por formulação aos 1/7/28 dias; perdas negativas |
+
+Nos gráficos de relação, uma formulação sem uma das duas grandezas não gera um
+ponto; a própria tela lista quais selecionadas ficaram de fora por esse motivo.
 
 Menos de 2 selecionadas não abre a comparação; a 6ª é bloqueada na lista e a API
 recusa `ids` com mais de 5.

@@ -2,6 +2,12 @@
 
 Formato: **data** — tipo — descrição.
 
+## 2026-10-27
+
+- **2026-10-27** — feature — A comparação de formulações ganhou dois gráficos de dispersão aos 28 dias: resistência à compressão × teor de água da formulação e resistência à compressão × densidade no estado endurecido. Cada ponto preserva a cor do produto selecionado, o tooltip mostra as duas grandezas com suas unidades e a tela identifica formulações sem o par completo de dados.
+- **2026-10-27** — test — Checagem TypeScript, build de produção do frontend e 111/111 testes da API aprovados; a rota de comparação foi renderizada com três formulações do banco e respondeu HTTP 200 com os dois novos cartões.
+- **2026-10-27** — docs — README e `context.md` atualizados para registrar os oito gráficos técnicos da comparação aos 28 dias.
+
 ## 2026-10-20
 
 - **2026-10-20** — feature — Novo filtro **Ensaio registrado** (`com ensaio`/`sem ensaio`) na lista e na visão geral, cobrindo resultados anidros, frescos, granulometria, resistência, corpos endurecidos e variação.
