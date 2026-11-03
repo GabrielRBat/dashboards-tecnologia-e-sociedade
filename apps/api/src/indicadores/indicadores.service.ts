@@ -419,6 +419,14 @@ export class IndicadoresService {
         (f) => f.calculados.retencaoAgua,
         (f) => f.calculados.squeezeDeslocamentoMedio,
       ),
+      compressaoTeorAgua: montar(
+        (f) => f.teorAgua,
+        (f) => f.calculados.compressao28d,
+      ),
+      compressaoDensidadeEndurecida: montar(
+        densidadeEndurecidaDe,
+        (f) => f.calculados.compressao28d,
+      ),
     };
   }
 

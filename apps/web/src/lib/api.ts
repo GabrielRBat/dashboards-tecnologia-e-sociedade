@@ -220,6 +220,8 @@ export interface Correlacoes {
   moduloVariacaoDimensional: Correlacao;
   moduloDensidadeEndurecida: Correlacao;
   retencaoSqueeze: Correlacao;
+  compressaoTeorAgua: Correlacao;
+  compressaoDensidadeEndurecida: Correlacao;
 }
 
 export interface PontoSqueeze {

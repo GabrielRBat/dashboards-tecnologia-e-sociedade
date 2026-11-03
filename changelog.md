@@ -2,6 +2,12 @@
 
 Formato: **data** — tipo — descrição.
 
+## 2026-11-03
+
+- **2026-11-03** — feature — Visão geral ampliada para **24 gráficos**, com a adição de duas correlações fundamentais aos 28 dias: **Resistência à compressão × Teor de água** (avaliação do efeito da relação água no desempenho mecânico) e **Resistência à compressão × Densidade no estado endurecido** (relação entre compacidade e ganho de resistência). Ambos os cartões seguem o padrão visual `GraficoCorrelacao` com regressão linear por mínimos quadrados ($y = ax + b$), $R^2$, tooltip informativo e suporte completo a reposicionamento por arrasto na grade (`compressao-teor-agua` e `compressao-densidade-endurecida`).
+- **2026-11-03** — test — Suíte de testes `indicadores.service.spec.ts` cobrindo os cálculos lineares de ambas as correlações e a entrega no painel agregado; 114/114 testes unitários aprovados e typecheck do frontend e backend limpos.
+- **2026-11-03** — docs — Atualizados `README.md`, `context.md`, `docs/CALCULOS.md` e `changelog.md` registrando a inclusão dos dois novos gráficos.
+
 ## 2026-10-27
 
 - **2026-10-27** — feature — A comparação de formulações ganhou dois gráficos de dispersão aos 28 dias: resistência à compressão × teor de água da formulação e resistência à compressão × densidade no estado endurecido. Cada ponto preserva a cor do produto selecionado, o tooltip mostra as duas grandezas com suas unidades e a tela identifica formulações sem o par completo de dados.

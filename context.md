@@ -40,7 +40,7 @@ Versionado desde 2026-08-24 no branch `master` de
 > `*.tsbuildinfo`. Antes de adicionar qualquer arquivo com dado real, conferir
 > se ele pode ficar exposto.
 
-Funcionando: visão geral com indicadores e **22 gráficos** (com rótulos
+Funcionando: visão geral com indicadores e **24 gráficos** (com rótulos
 descritivos nos eixos X e Y), **dashboards customizados** montados pela equipe,
 lista de formulações com filtros, busca com escolha do campo pesquisado e
 **comparação de até 5 formulações** (ciclo completo: evolução, tabela,
@@ -49,7 +49,7 @@ compressão × densidade endurecida —, granulometria e variações
 dimensional/de massa), página de detalhe, importação da planilha `.xlsx` e aba de
 configurações com escolha de tema.
 
-Verificado em 2026-10-20: **111 testes unitários passando**, build completo
+Verificado em 2026-11-03: **114 testes unitários passando**, build completo
 limpo na API e no frontend e a planilha recebida pré-validada com **60/60 linhas,
 sem avisos nem bloqueios**. Antes desta rodada, também havia 14 verificações de comportamento do
 seletor de tema,
@@ -198,7 +198,7 @@ texto acima de 4,5:1 nos dois temas.
   demais filtros.
 - **Filtro por ensaio registrado.** `ensaioRegistrado=sim|nao` separa
   formulações com pelo menos um resultado bruto de ensaio das que contêm apenas
-  identificação/composição; como os demais filtros, afeta a lista e os 22
+  identificação/composição; como os demais filtros, afeta a lista e os 24
   gráficos da visão geral.
 - **Vidro com moderação, por desempenho.** Só o cabeçalho tem `backdrop-filter`
   (elemento único e fixo); os cartões usam translucidez sem desfoque. O gradiente

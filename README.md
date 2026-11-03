@@ -24,7 +24,7 @@ de massa.
 
 ## O que já funciona
 
-- **Visão geral** — indicadores do conjunto filtrado e 22 gráficos:
+- **Visão geral** — indicadores do conjunto filtrado e 24 gráficos:
 
   | Gráfico | O que mostra |
   |---|---|
@@ -44,6 +44,8 @@ de massa.
   | Retenção de água × squeeze-flow | Relação entre retenção e deslocamento médio |
   | Módulo de elasticidade × flexão | Ensaios aos 28 dias, com produto identificado |
   | Módulo de elasticidade × variação dimensional | Correlação dos resultados aos 28 dias |
+  | Compressão × teor de água | Relação entre o teor de água da mistura e a resistência aos 28 dias |
+  | Compressão × densidade endurecida | Relação entre densidade média e resistência à compressão aos 28 dias |
   | Densidades por produto | Estados anidro, fresco e endurecido aos 14/28 dias |
   | Variação dimensional no tempo | Média e desvio dos CPs aos 1/7/28 dias |
   | Variação de massa no tempo | Média e desvio dos CPs aos 1/7/28 dias |
@@ -420,7 +422,7 @@ número, escolha **Nº** em **Buscar em**; nesse modo a busca só aceita número
 exato. O padrão **Tudo** mantém o comportamento antigo, procurando nos quatro
 campos de uma vez.
 
-A busca **filtra o painel inteiro**, não só a tabela — os 22 gráficos passam a
+A busca **filtra o painel inteiro**, não só a tabela — os 24 gráficos passam a
 falar do subconjunto encontrado. Digitar não dispara uma consulta por tecla: o
 campo espera 350 ms de pausa antes de navegar, senão "Contrapiso" custaria dez
 recargas do painel, nove delas jogadas fora.
@@ -632,7 +634,7 @@ nem bloqueios**.
 | `/api/indicadores/dispersao-idade` | Média por idade com desvio padrão dos CPs |
 | `/api/indicadores/granulometria` · `/zonas-granulometricas` | Curvas com retida acumulada; zonas da NBR 7211 |
 | `/api/indicadores/classificacao` | Distribuição nas classes P, D e U da NBR 13281 |
-| `/api/indicadores/correlacoes` | Correlações mecânicas, incluindo módulo × flexão e módulo × variação dimensional, com reta e R² |
+| `/api/indicadores/correlacoes` | Correlações mecânicas, incluindo módulo × flexão, módulo × variação dimensional, compressão × teor de água e compressão × densidade endurecida, com reta e R² |
 | `/api/indicadores/squeeze-flow` | Carga × deslocamento por formulação |
 | `/api/indicadores/comparativo` · `/dispersao` | Ranking aos 28 dias; água/ligante × resistência |
 

@@ -207,6 +207,8 @@ de um conjunto:
 | Módulo de elasticidade × compressão | O módulo vem de ultrassom, ensaio não destrutivo. |
 | Módulo de elasticidade × variação dimensional | Cruza os dois resultados aos 28 dias, conforme o dashboard de referência do Excel. |
 | Módulo de elasticidade × densidade endurecida | Cruza dois resultados dos corpos de prova aos 28 dias: densidade média e módulo dinâmico. |
+| Resistência à compressão × teor de água aos 28 dias | Cruza o teor de água da formulação (% da massa seca) com a resistência à compressão aos 28 dias (MPa). Mostra a sensibilidade mecânica ao teor de água da mistura. |
+| Resistência à compressão × densidade endurecida aos 28 dias | Cruza a densidade média dos corpos de prova endurecidos (kg/m³) com a resistência à compressão aos 28 dias (MPa). Mostra a correlação entre compacidade e ganho de resistência mecânica. |
 
 A reta só é traçada com **três pares ou mais**, e nunca quando todos os x são
 iguais — nos dois casos ela não diria nada.

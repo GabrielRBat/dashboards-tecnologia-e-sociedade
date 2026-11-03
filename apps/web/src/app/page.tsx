@@ -329,6 +329,46 @@ export default async function PaginaVisaoGeral({
         ),
       },
       {
+        id: 'compressao-teor-agua',
+        titulo: 'Resistência à compressão e teor de água',
+        node: (
+          <Cartao
+            titulo="Resistência à compressão e teor de água"
+            legenda="Correlação aos 28 dias — teor de água (%) e resistência à compressão (MPa)"
+          >
+            <GraficoCorrelacao
+              dados={correlacoes.compressaoTeorAgua}
+              rotuloX="Teor de água"
+              rotuloY="Resistência à compressão"
+              unidadeX="%"
+              unidadeY="MPa"
+              casasX={1}
+              casasY={2}
+            />
+          </Cartao>
+        ),
+      },
+      {
+        id: 'compressao-densidade-endurecida',
+        titulo: 'Resistência à compressão e densidade endurecida',
+        node: (
+          <Cartao
+            titulo="Resistência à compressão e densidade endurecida"
+            legenda="Correlação aos 28 dias — densidade média endurecida (kg/m³) e resistência à compressão (MPa)"
+          >
+            <GraficoCorrelacao
+              dados={correlacoes.compressaoDensidadeEndurecida}
+              rotuloX="Densidade endurecida"
+              rotuloY="Resistência à compressão"
+              unidadeX="kg/m³"
+              unidadeY="MPa"
+              casasX={0}
+              casasY={2}
+            />
+          </Cartao>
+        ),
+      },
+      {
         id: 'ranking-28d',
         titulo: 'Formulações com maior resistência aos 28 dias',
         largura: 2,
