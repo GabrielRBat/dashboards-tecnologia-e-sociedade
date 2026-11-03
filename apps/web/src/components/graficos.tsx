@@ -120,7 +120,7 @@ export function GraficoEvolucao({ dados }: { dados: PontoEvolucao[] }) {
       <ResponsiveContainer width="100%" height={270}>
         <LineChart
           data={comValores}
-          margin={{ top: 12, right: 44, bottom: 20, left: 2 }}
+          margin={{ top: 12, right: 48, bottom: 30, left: 16 }}
         >
           <CartesianGrid stroke="var(--grade)" vertical={false} />
           <XAxis
@@ -130,19 +130,19 @@ export function GraficoEvolucao({ dados }: { dados: PontoEvolucao[] }) {
             label={{
               value: 'Idade do ensaio (dias)',
               position: 'insideBottom',
-              offset: -12,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: -14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <YAxis
             {...EIXO}
-            width={58}
+            width={64}
             label={{
               value: 'Resistência (MPa)',
               angle: -90,
               position: 'insideLeft',
-              offset: 16,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: 14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <Tooltip
@@ -225,6 +225,11 @@ export function GraficoEvolucao({ dados }: { dados: PontoEvolucao[] }) {
           { cor: CORES[1] as string, rotulo: 'Resistência à tração na flexão' },
         ]}
       />
+      <p className="nota-grafico">
+        Cinética de ganho de resistência mecânica ao longo do tempo. Cálculo
+        conforme NBR 13279: média de 6 corpos de prova para compressão (Rc = Fc
+        ÷ A) e 3 corpos de prova para tração na flexão (Rf = 1,5·Ff·L ÷ [b·d²]).
+      </p>
     </>
   );
 }
@@ -266,24 +271,25 @@ export function GraficoComparativo({ dados }: { dados: ItemComparativo[] }) {
   const altura = Math.max(250, dados.length * (estreita ? 30 : 26) + 48);
 
   return (
-    <ResponsiveContainer width="100%" height={altura}>
-      <BarChart
-        data={comRotulo}
-        layout="vertical"
-        margin={{ top: 4, right: estreita ? 34 : 46, bottom: 20, left: 8 }}
-        barCategoryGap={6}
-      >
-        <CartesianGrid stroke="var(--grade)" horizontal={false} />
-        <XAxis
-          type="number"
-          {...EIXO}
-          label={{
-            value: 'Resistência à compressão aos 28 dias (MPa)',
-            position: 'insideBottom',
-            offset: -12,
-            style: { fill: 'var(--tinta-suave)', fontSize: 11 },
-          }}
-        />
+    <>
+      <ResponsiveContainer width="100%" height={altura}>
+        <BarChart
+          data={comRotulo}
+          layout="vertical"
+          margin={{ top: 4, right: estreita ? 34 : 46, bottom: 30, left: 12 }}
+          barCategoryGap={6}
+        >
+          <CartesianGrid stroke="var(--grade)" horizontal={false} />
+          <XAxis
+            type="number"
+            {...EIXO}
+            label={{
+              value: 'Resistência à compressão aos 28 dias (MPa)',
+              position: 'insideBottom',
+              offset: -14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
+            }}
+          />
         <YAxis
           type="category"
           dataKey="rotuloEixo"
@@ -338,6 +344,12 @@ export function GraficoComparativo({ dados }: { dados: ItemComparativo[] }) {
         </Bar>
       </BarChart>
     </ResponsiveContainer>
+    <p className="nota-grafico">
+      Classificação comparativa das formulações pela resistência à compressão
+      na idade padrão de 28 dias. Cálculo conforme NBR 13279 (tensão média de
+      ruptura sob carga axial em 6 meios-prismas).
+    </p>
+  </>
   );
 }
 
@@ -357,37 +369,38 @@ export function GraficoDispersao({ dados }: { dados: PontoDispersao[] }) {
   }
 
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <ScatterChart margin={{ top: 12, right: 18, bottom: 20, left: 2 }}>
-        <CartesianGrid stroke="var(--grade)" />
-        <XAxis
-          type="number"
-          dataKey="relacaoAguaLigante"
-          name="Relação água/ligante"
-          {...EIXO}
-          domain={['dataMin - 0.05', 'dataMax + 0.05']}
-          tickFormatter={(v: number) => num(v, 2)}
-          label={{
-            value: 'Relação água/ligante (a/l)',
-            position: 'insideBottom',
-            offset: -12,
-            style: { fill: 'var(--tinta-suave)', fontSize: 11 },
-          }}
-        />
-        <YAxis
-          type="number"
-          dataKey="compressao28d"
-          name="Compressão 28d"
-          {...EIXO}
-          width={58}
-          label={{
-            value: 'Resistência à compressão (MPa)',
-            angle: -90,
-            position: 'insideLeft',
-            offset: 16,
-            style: { fill: 'var(--tinta-suave)', fontSize: 11 },
-          }}
-        />
+    <>
+      <ResponsiveContainer width="100%" height={280}>
+        <ScatterChart margin={{ top: 12, right: 20, bottom: 30, left: 16 }}>
+          <CartesianGrid stroke="var(--grade)" />
+          <XAxis
+            type="number"
+            dataKey="relacaoAguaLigante"
+            name="Relação água/ligante"
+            {...EIXO}
+            domain={['dataMin - 0.05', 'dataMax + 0.05']}
+            tickFormatter={(v: number) => num(v, 2)}
+            label={{
+              value: 'Relação água/ligante (a/l)',
+              position: 'insideBottom',
+              offset: -14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
+            }}
+          />
+          <YAxis
+            type="number"
+            dataKey="compressao28d"
+            name="Compressão 28d"
+            {...EIXO}
+            width={64}
+            label={{
+              value: 'Resistência à compressão (MPa)',
+              angle: -90,
+              position: 'insideLeft',
+              offset: 14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
+            }}
+          />
         <ZAxis range={[70, 70]} />
         <Tooltip
           cursor={{ stroke: 'var(--eixo)', strokeDasharray: '3 3' }}
@@ -428,6 +441,12 @@ export function GraficoDispersao({ dados }: { dados: PontoDispersao[] }) {
         />
       </ScatterChart>
     </ResponsiveContainer>
+    <p className="nota-grafico">
+      Avaliação da Lei de Abrams: dispersão do impacto da água de amassamento
+      na porosidade e resistência aos 28 dias. Cálculo: relação a/l = teor de
+      água ÷ soma das massas de cimento e cal; compressão média de 6 CPs (NBR 13279).
+    </p>
+  </>
   );
 }
 
@@ -454,7 +473,7 @@ export function GraficoDistribuicao({
       <ResponsiveContainer width="100%" height={260}>
         <BarChart
           data={comRotulo}
-          margin={{ top: 18, right: 10, bottom: 20, left: 2 }}
+          margin={{ top: 18, right: 12, bottom: 30, left: 16 }}
           barCategoryGap={14}
         >
           <CartesianGrid stroke="var(--grade)" vertical={false} />
@@ -466,20 +485,20 @@ export function GraficoDistribuicao({
             label={{
               value: 'Tipo de projeto',
               position: 'insideBottom',
-              offset: -12,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: -14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <YAxis
             {...EIXO}
-            width={52}
+            width={58}
             allowDecimals={false}
             label={{
               value: 'Quantidade de formulações',
               angle: -90,
               position: 'insideLeft',
-              offset: 16,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: 14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <Tooltip
@@ -526,6 +545,10 @@ export function GraficoDistribuicao({
           </span>
         ))}
       </div>
+      <p className="nota-grafico">
+        Distribuição do portfólio por finalidade técnica e estratégica do desenvolvimento.
+        Cálculo: contagem absoluta de formulações cadastradas agrupadas pelo código do projeto.
+      </p>
     </>
   );
 }
@@ -556,7 +579,7 @@ export function GraficoResponsaveis({
         <BarChart
           data={dados}
           layout="vertical"
-          margin={{ top: 6, right: 18, bottom: 20, left: 4 }}
+          margin={{ top: 6, right: 18, bottom: 30, left: 10 }}
           barCategoryGap={6}
         >
           <CartesianGrid stroke="var(--grade)" horizontal={false} />
@@ -567,8 +590,8 @@ export function GraficoResponsaveis({
             label={{
               value: 'Quantidade de produtos',
               position: 'insideBottom',
-              offset: -12,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: -14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <YAxis
@@ -610,6 +633,11 @@ export function GraficoResponsaveis({
           { cor: CORES[2] as string, rotulo: 'Avaliador' },
         ]}
       />
+      <p className="nota-grafico">
+        Mapeamento da atuação da equipe nas três etapas da esteira laboratorial:
+        desenvolvimento do traço, alimentação dos dados de ensaio e validação técnica.
+        Cálculo: contagem de formulações atribuídas a cada responsável.
+      </p>
     </>
   );
 }
@@ -637,36 +665,37 @@ export function GraficoRegistrosPorMes({
   };
 
   return (
-    <ResponsiveContainer width="100%" height={270}>
-      <BarChart data={dados} margin={{ top: 18, right: 10, bottom: 24, left: 2 }}>
-        <CartesianGrid stroke="var(--grade)" vertical={false} />
-        <XAxis
-          dataKey="mes"
-          {...EIXO}
-          tickFormatter={formatarMes}
-          interval="preserveStartEnd"
-          angle={-30}
-          textAnchor="end"
-          height={52}
-          label={{
-            value: 'Mês de cadastro',
-            position: 'insideBottom',
-            offset: -18,
-            style: { fill: 'var(--tinta-suave)', fontSize: 11 },
-          }}
-        />
-        <YAxis
-          {...EIXO}
-          width={52}
-          allowDecimals={false}
-          label={{
-            value: 'Registros',
-            angle: -90,
-            position: 'insideLeft',
-            offset: 16,
-            style: { fill: 'var(--tinta-suave)', fontSize: 11 },
-          }}
-        />
+    <>
+      <ResponsiveContainer width="100%" height={270}>
+        <BarChart data={dados} margin={{ top: 18, right: 12, bottom: 36, left: 16 }}>
+          <CartesianGrid stroke="var(--grade)" vertical={false} />
+          <XAxis
+            dataKey="mes"
+            {...EIXO}
+            tickFormatter={formatarMes}
+            interval="preserveStartEnd"
+            angle={-30}
+            textAnchor="end"
+            height={52}
+            label={{
+              value: 'Mês de cadastro',
+              position: 'insideBottom',
+              offset: -14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
+            }}
+          />
+          <YAxis
+            {...EIXO}
+            width={58}
+            allowDecimals={false}
+            label={{
+              value: 'Registros',
+              angle: -90,
+              position: 'insideLeft',
+              offset: 14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
+            }}
+          />
         <Tooltip
           cursor={{ fill: 'var(--grade)', fillOpacity: 0.5 }}
           content={({ active, payload }) => {
@@ -694,6 +723,11 @@ export function GraficoRegistrosPorMes({
         />
       </BarChart>
     </ResponsiveContainer>
+    <p className="nota-grafico">
+      Histórico temporal da alimentação e novos cadastros de argamassas no laboratório.
+      Cálculo: agregação mensal de registros pela data de inclusão da formulação.
+    </p>
+  </>
   );
 }
 
@@ -722,7 +756,7 @@ export function GraficoDensidadesProduto({
         <BarChart
           data={comRotulo}
           layout="vertical"
-          margin={{ top: 6, right: 18, bottom: 20, left: 6 }}
+          margin={{ top: 6, right: 18, bottom: 30, left: 12 }}
           barCategoryGap={5}
         >
           <CartesianGrid stroke="var(--grade)" horizontal={false} />
@@ -733,8 +767,8 @@ export function GraficoDensidadesProduto({
             label={{
               value: 'Densidade (kg/m³)',
               position: 'insideBottom',
-              offset: -12,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: -14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <YAxis
@@ -776,6 +810,10 @@ export function GraficoDensidadesProduto({
           { cor: CORES[3] as string, rotulo: 'Endurecida aos 28 dias' },
         ]}
       />
+      <p className="nota-grafico">
+        Transição de compacidade das misturas nos estados solto (NBR NM 45), fresco (NBR 13278) e endurecido aos 14 e 28 dias (NBR 13280).
+        Cálculo: densidade = (massa ÷ volume) × 1000 kg/m³; no estado endurecido, calcula-se a massa total dos prismas dividida pelo volume geométrico total.
+      </p>
     </>
   );
 }
@@ -799,31 +837,32 @@ export function GraficoVariacaoTemporal({
   const rotulo = metrica === 'dimensional' ? 'Variação dimensional' : 'Variação de massa';
 
   return (
-    <ResponsiveContainer width="100%" height={270}>
-      <BarChart data={comValores} margin={{ top: 18, right: 12, bottom: 20, left: 4 }}>
-        <CartesianGrid stroke="var(--grade)" vertical={false} />
-        <XAxis
-          dataKey="idadeDias"
-          {...EIXO}
-          tickFormatter={(v: number) => `${v}d`}
-          label={{
-            value: 'Idade do ensaio (dias)',
-            position: 'insideBottom',
-            offset: -12,
-            style: { fill: 'var(--tinta-suave)', fontSize: 11 },
-          }}
-        />
-        <YAxis
-          {...EIXO}
-          width={60}
-          label={{
-            value: `${rotulo} (${unidade})`,
-            angle: -90,
-            position: 'insideLeft',
-            offset: 18,
-            style: { fill: 'var(--tinta-suave)', fontSize: 11 },
-          }}
-        />
+    <>
+      <ResponsiveContainer width="100%" height={270}>
+        <BarChart data={comValores} margin={{ top: 18, right: 14, bottom: 30, left: 18 }}>
+          <CartesianGrid stroke="var(--grade)" vertical={false} />
+          <XAxis
+            dataKey="idadeDias"
+            {...EIXO}
+            tickFormatter={(v: number) => `${v}d`}
+            label={{
+              value: 'Idade do ensaio (dias)',
+              position: 'insideBottom',
+              offset: -14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
+            }}
+          />
+          <YAxis
+            {...EIXO}
+            width={66}
+            label={{
+              value: `${rotulo} (${unidade})`,
+              angle: -90,
+              position: 'insideLeft',
+              offset: 14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
+            }}
+          />
         <Tooltip
           cursor={{ fill: 'var(--grade)', fillOpacity: 0.5 }}
           content={({ active, payload }) => {
@@ -869,6 +908,12 @@ export function GraficoVariacaoTemporal({
         </Bar>
       </BarChart>
     </ResponsiveContainer>
+    <p className="nota-grafico">
+      {metrica === 'dimensional'
+        ? 'Monitoramento da retração linear por secagem com barra de desvio padrão. Cálculo conforme NBR 15261: ΔL = [(L_idade − B_idade) − (L0 − B0)] ÷ 0,25 m, com base nominal de 250 mm e compensação da barra padrão.'
+        : 'Acompanhamento da perda de água livre e dessecação da argamassa ao longo da cura com barra de desvio padrão. Cálculo: Δm = [(m_idade − m_inicial) ÷ m_inicial] × 100 (%); sinal negativo representa perda de massa.'}
+    </p>
+  </>
   );
 }
 
@@ -898,7 +943,7 @@ export function GraficoVariacaoComparativo({
   return (
     <>
       <ResponsiveContainer width="100%" height={280}>
-        <LineChart data={dados} margin={{ top: 12, right: 24, bottom: 20, left: 4 }}>
+        <LineChart data={dados} margin={{ top: 12, right: 24, bottom: 30, left: 18 }}>
           <CartesianGrid stroke="var(--grade)" vertical={false} />
           <XAxis
             dataKey="idadeDias"
@@ -907,19 +952,19 @@ export function GraficoVariacaoComparativo({
             label={{
               value: 'Idade do ensaio (dias)',
               position: 'insideBottom',
-              offset: -12,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: -14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <YAxis
             {...EIXO}
-            width={60}
+            width={66}
             label={{
               value: `${ehDimensional ? 'Variação dimensional' : 'Variação de massa'} (${unidade})`,
               angle: -90,
               position: 'insideLeft',
-              offset: 18,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: 14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <Tooltip
@@ -959,6 +1004,11 @@ export function GraficoVariacaoComparativo({
           rotulo: f.nomenclatura,
         }))}
       />
+      <p className="nota-grafico">
+        {ehDimensional
+          ? 'Comparativo das curvas de retração linear por secagem entre produtos selecionados. Cálculo NBR 15261: variação dimensional referenciada à base padrão de 250 mm.'
+          : 'Comparativo da perda ou ganho percentual de umidade ao longo do tempo (sinal negativo indica perda de massa por dessecação).'}
+      </p>
     </>
   );
 }
@@ -1047,35 +1097,36 @@ export function GraficoComparacaoProdutos({
   }
 
   return (
-    <ResponsiveContainer width="100%" height={270}>
-      <BarChart data={dados} margin={{ top: 24, right: 10, bottom: 28, left: 4 }}>
-        <CartesianGrid stroke="var(--grade)" vertical={false} />
-        <XAxis
-          dataKey="rotulo"
-          {...EIXO}
-          interval={0}
-          angle={-20}
-          textAnchor="end"
-          height={54}
-          label={{
-            value: 'Produto selecionado',
-            position: 'insideBottom',
-            offset: -22,
-            style: { fill: 'var(--tinta-suave)', fontSize: 11 },
-          }}
-        />
-        <YAxis
-          {...EIXO}
-          width={64}
-          tickFormatter={(v: number) => num(v, config.casas === 0 ? 0 : 1)}
-          label={{
-            value: `${config.rotulo} (${config.unidade})`,
-            angle: -90,
-            position: 'insideLeft',
-            offset: 18,
-            style: { fill: 'var(--tinta-suave)', fontSize: 11 },
-          }}
-        />
+    <>
+      <ResponsiveContainer width="100%" height={270}>
+        <BarChart data={dados} margin={{ top: 24, right: 14, bottom: 40, left: 18 }}>
+          <CartesianGrid stroke="var(--grade)" vertical={false} />
+          <XAxis
+            dataKey="rotulo"
+            {...EIXO}
+            interval={0}
+            angle={-20}
+            textAnchor="end"
+            height={54}
+            label={{
+              value: 'Produto selecionado',
+              position: 'insideBottom',
+              offset: -14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
+            }}
+          />
+          <YAxis
+            {...EIXO}
+            width={70}
+            tickFormatter={(v: number) => num(v, config.casas === 0 ? 0 : 1)}
+            label={{
+              value: `${config.rotulo} (${config.unidade})`,
+              angle: -90,
+              position: 'insideLeft',
+              offset: 14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
+            }}
+          />
         <Tooltip
           cursor={{ fill: 'var(--grade)', fillOpacity: 0.5 }}
           content={({ active, payload }) => {
@@ -1108,6 +1159,10 @@ export function GraficoComparacaoProdutos({
         </Bar>
       </BarChart>
     </ResponsiveContainer>
+    <p className="nota-grafico">
+      Comparativo direto da propriedade selecionada ({config.rotulo.toLowerCase()}) entre os produtos analisados para validação e especificação técnica.
+    </p>
+  </>
   );
 }
 
@@ -1185,7 +1240,7 @@ export function GraficoCorrelacaoComparativa({
   return (
     <>
       <ResponsiveContainer width="100%" height={280}>
-        <ScatterChart margin={{ top: 18, right: 18, bottom: 20, left: 4 }}>
+        <ScatterChart margin={{ top: 18, right: 18, bottom: 30, left: 18 }}>
           <CartesianGrid stroke="var(--grade)" />
           <XAxis
             type="number"
@@ -1200,8 +1255,8 @@ export function GraficoCorrelacaoComparativa({
             label={{
               value: `${config.rotuloEixo} (${config.unidade})`,
               position: 'insideBottom',
-              offset: -12,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: -14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <YAxis
@@ -1209,7 +1264,7 @@ export function GraficoCorrelacaoComparativa({
             dataKey="y"
             name="Resistência à compressão aos 28 dias"
             {...EIXO}
-            width={58}
+            width={64}
             domain={[
               (minimo: number) => Math.max(0, minimo - 0.5),
               (maximo: number) => maximo + 0.5,
@@ -1219,8 +1274,8 @@ export function GraficoCorrelacaoComparativa({
               value: 'Compressão aos 28 dias (MPa)',
               angle: -90,
               position: 'insideLeft',
-              offset: 16,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: 14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <ZAxis range={[90, 90]} />
@@ -1261,12 +1316,12 @@ export function GraficoCorrelacaoComparativa({
           rotulo: ponto.nomenclatura,
         }))}
       />
-      {semParCompleto.length > 0 ? (
-        <p className="nota-grafico">
-          Sem o par completo e, por isso, fora do gráfico:{' '}
-          {semParCompleto.map((ponto) => ponto.nomenclatura).join(', ')}.
-        </p>
-      ) : null}
+      <p className="nota-grafico">
+        Correlação comparativa entre {config.rotulo.toLowerCase()} e a resistência à compressão aos 28 dias (NBR 13279, média de 6 CPs).
+        {semParCompleto.length > 0 ? (
+          <> Sem o par completo e, por isso, fora do gráfico: {semParCompleto.map((ponto) => ponto.nomenclatura).join(', ')}.</>
+        ) : null}
+      </p>
     </>
   );
 }
@@ -1322,7 +1377,7 @@ export function GraficoGranulometria({
   return (
     <>
       <ResponsiveContainer width="100%" height={280}>
-        <ComposedChart data={dados} margin={{ top: 12, right: 16, bottom: 20, left: 2 }}>
+        <ComposedChart data={dados} margin={{ top: 12, right: 16, bottom: 30, left: 16 }}>
           <CartesianGrid stroke="var(--grade)" vertical={false} />
           <XAxis
             dataKey="peneiraMm"
@@ -1336,20 +1391,20 @@ export function GraficoGranulometria({
             label={{
               value: 'Abertura da peneira (mm) — escala logarítmica',
               position: 'insideBottom',
-              offset: -12,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: -14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <YAxis
             {...EIXO}
-            width={54}
+            width={60}
             domain={[0, 100]}
             label={{
               value: 'Retida acumulada (%)',
               angle: -90,
               position: 'insideLeft',
-              offset: 18,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: 14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <Tooltip
@@ -1423,10 +1478,9 @@ export function GraficoGranulometria({
         ]}
       />
       <p className="nota-grafico">
-        MF é o módulo de finura. Das peneiras deste ensaio, só 1,18 · 0,60 · 0,30
-        · 0,15 mm são da série normal da NBR NM 248 — o módulo sai mais baixo do
-        que num ensaio com a série completa e serve para comparar formulações
-        entre si, não com valores de referência da literatura.
+        Curva granulométrica acumulada em escala logarítmica com zonas de enquadramento da NBR 7211.
+        O Módulo de Finura (MF) é calculado pela soma das porcentagens retidas acumuladas nas peneiras da série normal (NBR NM 248) dividida por 100.
+        Peneiras deste ensaio: 1,18 · 0,60 · 0,30 · 0,15 mm (MF comparativo interno entre formulações).
       </p>
     </>
   );
@@ -1462,7 +1516,7 @@ export function GraficoFrequenciaGranulometrica({
   return (
     <>
       <ResponsiveContainer width="100%" height={280}>
-        <LineChart data={dados} margin={{ top: 12, right: 44, bottom: 20, left: 2 }}>
+        <LineChart data={dados} margin={{ top: 12, right: 44, bottom: 30, left: 16 }}>
           <CartesianGrid stroke="var(--grade)" vertical={false} />
           <XAxis
             dataKey="rotulo"
@@ -1472,20 +1526,20 @@ export function GraficoFrequenciaGranulometrica({
             label={{
               value: 'Peneira / fundo',
               position: 'insideBottom',
-              offset: -12,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: -14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <YAxis
             {...EIXO}
-            width={54}
+            width={60}
             domain={[0, 'dataMax + 5']}
             label={{
               value: 'Frequência retida (%)',
               angle: -90,
               position: 'insideLeft',
-              offset: 18,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: 14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <Tooltip
@@ -1538,9 +1592,8 @@ export function GraficoFrequenciaGranulometrica({
         }))}
       />
       <p className="nota-grafico">
-        Esta curva mostra a frequência retida em cada peneira. Ela complementa a
-        curva acumulada normativa, que é a usada para comparar com as zonas da
-        NBR 7211.
+        Distribuição diferencial da fração mássica retida em cada peneira e no fundo.
+        Cálculo: (massa retida na peneira ÷ massa total da amostra seca) × 100 (%). Permite visualizar a homogeneidade do agregado e eventuais descontinuidades.
       </p>
     </>
   );
@@ -1601,7 +1654,7 @@ export function GraficoClassificacao({
       <ResponsiveContainer width="100%" height={260}>
         <BarChart
           data={bloco.classes}
-          margin={{ top: 18, right: 10, bottom: 20, left: 2 }}
+          margin={{ top: 18, right: 12, bottom: 30, left: 16 }}
           barCategoryGap={12}
         >
           <CartesianGrid stroke="var(--grade)" vertical={false} />
@@ -1619,20 +1672,20 @@ export function GraficoClassificacao({
                 ? `Classe ${info.classe} — ${info.rotulo}`
                 : 'Classe (NBR 13281)',
               position: 'insideBottom',
-              offset: -12,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: -14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <YAxis
             {...EIXO}
-            width={52}
+            width={58}
             allowDecimals={false}
             label={{
               value: 'Quantidade de formulações',
               angle: -90,
               position: 'insideLeft',
-              offset: 16,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: 14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <Tooltip
@@ -1689,8 +1742,7 @@ export function GraficoClassificacao({
         {bloco.semDado > 0
           ? `${bloco.semDado} formulação(ões) sem o ensaio, fora da classificação. `
           : ''}
-        Faixas da NBR 13281 se sobrepõem; adotamos a classe mais alta que o valor
-        alcança.
+        Classificação normativa de desempenho conforme NBR 13281. Quando faixas normativas se sobrepõem, adota-se a classe mais alta atingida pelo valor do ensaio.
       </p>
     </>
   );
@@ -1706,6 +1758,7 @@ export function GraficoCorrelacao({
   unidadeY,
   casasX = 2,
   casasY = 2,
+  notaUso,
 }: {
   dados: Correlacao;
   rotuloX: string;
@@ -1714,6 +1767,7 @@ export function GraficoCorrelacao({
   unidadeY: string;
   casasX?: number;
   casasY?: number;
+  notaUso?: string;
 }) {
   if (dados.pontos.length === 0) {
     return <SemDados>Sem formulações com os dois ensaios preenchidos.</SemDados>;
@@ -1734,7 +1788,7 @@ export function GraficoCorrelacao({
   return (
     <>
       <ResponsiveContainer width="100%" height={280}>
-        <ScatterChart margin={{ top: 12, right: 18, bottom: 20, left: 4 }}>
+        <ScatterChart margin={{ top: 12, right: 20, bottom: 30, left: 18 }}>
           <CartesianGrid stroke="var(--grade)" />
           <XAxis
             type="number"
@@ -1745,22 +1799,22 @@ export function GraficoCorrelacao({
             label={{
               value: `${rotuloX} (${unidadeX})`,
               position: 'insideBottom',
-              offset: -12,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: -14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <YAxis
             type="number"
             dataKey="y"
             {...EIXO}
-            width={62}
+            width={66}
             tickFormatter={(v: number) => num(v, casasY === 0 ? 0 : 1)}
             label={{
               value: `${rotuloY} (${unidadeY})`,
               angle: -90,
               position: 'insideLeft',
-              offset: 18,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: 14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <ZAxis range={[70, 70]} />
@@ -1814,13 +1868,14 @@ export function GraficoCorrelacao({
         </ScatterChart>
       </ResponsiveContainer>
       <p className="nota-grafico">
+        {notaUso ? <>{notaUso} </> : null}
         {dados.regressao ? (
           <>
-            Tendência: y = {num(dados.regressao.a, 3)}·x{' '}
+            Linha de tendência: y = {num(dados.regressao.a, 3)}·x{' '}
             {dados.regressao.b >= 0 ? '+' : '−'}{' '}
             {num(Math.abs(dados.regressao.b), 3)} · R² ={' '}
             <strong>{num(dados.regressao.r2, 3)}</strong> · n ={' '}
-            {dados.regressao.n}
+            {dados.regressao.n}.
           </>
         ) : (
           'Pontos insuficientes para uma reta de tendência.'
@@ -1844,7 +1899,7 @@ export function GraficoSqueezeFlow({ dados }: { dados: PontoSqueeze[] }) {
   return (
     <>
       <ResponsiveContainer width="100%" height={280}>
-        <ScatterChart margin={{ top: 12, right: 18, bottom: 20, left: 2 }}>
+        <ScatterChart margin={{ top: 12, right: 20, bottom: 30, left: 18 }}>
           <CartesianGrid stroke="var(--grade)" />
           <XAxis
             type="number"
@@ -1855,21 +1910,21 @@ export function GraficoSqueezeFlow({ dados }: { dados: PontoSqueeze[] }) {
             label={{
               value: 'Deslocamento máximo (mm)',
               position: 'insideBottom',
-              offset: -12,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: -14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <YAxis
             type="number"
             dataKey="carga"
             {...EIXO}
-            width={56}
+            width={64}
             label={{
               value: 'Carga máxima (N)',
               angle: -90,
               position: 'insideLeft',
-              offset: 18,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: 14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <ZAxis range={[70, 70]} />
@@ -1914,10 +1969,8 @@ export function GraficoSqueezeFlow({ dados }: { dados: PontoSqueeze[] }) {
         </ScatterChart>
       </ResponsiveContainer>
       <p className="nota-grafico">
-        Cada ponto é a média das três repetições do ensaio (NBR 15839). A
-        planilha registra só o par carga/deslocamento de cada repetição, não a
-        curva completa — por isso não há aqui os três estágios (elástico,
-        plástico e enrijecimento) da curva de squeeze-flow.
+        Comportamento reológico no estado fresco sob compressão radial (squeeze-flow).
+        Cálculo conforme NBR 15839: cada ponto reflete a média das 3 repetições do ensaio para carga máxima (N) e deslocamento (mm).
       </p>
     </>
   );
@@ -1939,7 +1992,7 @@ export function GraficoDispersaoIdade({ dados }: { dados: DispersaoIdade[] }) {
       <ResponsiveContainer width="100%" height={270}>
         <BarChart
           data={comValores}
-          margin={{ top: 16, right: 12, bottom: 20, left: 2 }}
+          margin={{ top: 16, right: 14, bottom: 30, left: 16 }}
           barCategoryGap={18}
         >
           <CartesianGrid stroke="var(--grade)" vertical={false} />
@@ -1951,19 +2004,19 @@ export function GraficoDispersaoIdade({ dados }: { dados: DispersaoIdade[] }) {
             label={{
               value: 'Idade do ensaio (dias)',
               position: 'insideBottom',
-              offset: -12,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: -14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <YAxis
             {...EIXO}
-            width={58}
+            width={64}
             label={{
               value: 'Resistência (MPa)',
               angle: -90,
               position: 'insideLeft',
-              offset: 16,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: 14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <Tooltip
@@ -2032,8 +2085,8 @@ export function GraficoDispersaoIdade({ dados }: { dados: DispersaoIdade[] }) {
         ]}
       />
       <p className="nota-grafico">
-        A barra vertical é o desvio padrão entre todos os corpos de prova do
-        filtro — a média sozinha esconde a variabilidade do ensaio.
+        Avaliação da dispersão e repetibilidade dos ensaios de resistência mecânica (NBR 13279).
+        A barra vertical representa o desvio padrão amostral s = √[Σ(x − x̄)² ÷ (n − 1)] entre corpos de prova da mesma idade.
       </p>
     </>
   );
@@ -2081,7 +2134,7 @@ export function GraficoEvolucaoComparativo({
       <ResponsiveContainer width="100%" height={280}>
         <LineChart
           data={dados}
-          margin={{ top: 12, right: 44, bottom: 20, left: 2 }}
+          margin={{ top: 12, right: 48, bottom: 30, left: 16 }}
         >
           <CartesianGrid stroke="var(--grade)" vertical={false} />
           <XAxis
@@ -2091,19 +2144,19 @@ export function GraficoEvolucaoComparativo({
             label={{
               value: 'Idade do ensaio (dias)',
               position: 'insideBottom',
-              offset: -12,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: -14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <YAxis
             {...EIXO}
-            width={58}
+            width={64}
             label={{
               value: rotulo,
               angle: -90,
               position: 'insideLeft',
-              offset: 16,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: 14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <Tooltip
@@ -2174,6 +2227,10 @@ export function GraficoEvolucaoComparativo({
           rotulo: c.nomenclatura,
         }))}
       />
+      <p className="nota-grafico">
+        Comparativo da evolução da resistência ({metrica === 'compressao' ? 'compressão axial' : 'tração na flexão'}) entre formulações selecionadas.
+        Cálculo conforme NBR 13279 ({metrica === 'compressao' ? 'média de 6 corpos de prova' : 'média de 3 corpos de prova'}).
+      </p>
     </>
   );
 }

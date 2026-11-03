@@ -229,6 +229,7 @@ export default async function PaginaVisaoGeral({
               rotuloY="Deslocamento no squeeze-flow"
               unidadeX="%"
               unidadeY="mm"
+              notaUso="Avaliação conjunta da capacidade de retenção hídrica frente à mobilidade plástica no estado fresco (NBR 13277 e NBR 15839)."
             />
           </Cartao>
         ),
@@ -247,6 +248,7 @@ export default async function PaginaVisaoGeral({
               rotuloY="Resistência à tração na flexão"
               unidadeX="MPa"
               unidadeY="MPa"
+              notaUso="Correlação direta entre resistências mecânicas aos 28 dias conforme NBR 13279 (médias de 3 CPs para flexão e 6 CPs para compressão)."
             />
           </Cartao>
         ),
@@ -266,6 +268,7 @@ export default async function PaginaVisaoGeral({
               unidadeX="MPa"
               unidadeY="MPa"
               casasY={0}
+              notaUso="Correlação entre rigidez e resistência aos 28 dias. Módulo Ed via ensaio ultrassônico (NBR 15630, ν=0,2): Ed = ρ·V²·[(1+ν)(1−2ν)/(1−ν)]."
             />
           </Cartao>
         ),
@@ -285,6 +288,7 @@ export default async function PaginaVisaoGeral({
               unidadeX="MPa"
               unidadeY="MPa"
               casasY={0}
+              notaUso="Relação entre o módulo de elasticidade dinâmico por pulso ultrassônico (NBR 15630) e a tração na flexão aos 28 dias (NBR 13279)."
             />
           </Cartao>
         ),
@@ -305,6 +309,7 @@ export default async function PaginaVisaoGeral({
               unidadeY="mm/m"
               casasX={0}
               casasY={3}
+              notaUso="Relação entre a rigidez dinâmica (Ed) e a retração linear aos 28 dias medida sobre base nominal de 250 mm com barra padrão (NBR 15261)."
             />
           </Cartao>
         ),
@@ -324,6 +329,7 @@ export default async function PaginaVisaoGeral({
               unidadeX="kg/m³"
               unidadeY="MPa"
               casasY={0}
+              notaUso="Avaliação do impacto da compacidade da matriz endurecida (NBR 13280, massa ÷ volume geométrico) sobre o módulo dinâmico Ed aos 28 dias."
             />
           </Cartao>
         ),
@@ -344,6 +350,7 @@ export default async function PaginaVisaoGeral({
               unidadeY="MPa"
               casasX={1}
               casasY={2}
+              notaUso="Análise do teor de água de amassamento (água ÷ massa seca total × 100) sobre a resistência à compressão aos 28 dias (NBR 13279, média de 6 CPs)."
             />
           </Cartao>
         ),
@@ -364,6 +371,7 @@ export default async function PaginaVisaoGeral({
               unidadeY="MPa"
               casasX={0}
               casasY={2}
+              notaUso="Impacto da densidade aparente no estado endurecido (NBR 13280) sobre a resistência à compressão aos 28 dias (NBR 13279, média de 6 CPs)."
             />
           </Cartao>
         ),

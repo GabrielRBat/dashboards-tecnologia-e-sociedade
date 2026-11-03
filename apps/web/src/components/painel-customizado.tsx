@@ -93,7 +93,7 @@ export function PainelCustomizado({ painel }: { painel: PainelCalculado }) {
     return (
       <>
         <ResponsiveContainer width="100%" height={280}>
-          <ScatterChart margin={{ top: 12, right: 18, bottom: 20, left: -4 }}>
+          <ScatterChart margin={{ top: 12, right: 18, bottom: 30, left: 18 }}>
             <CartesianGrid stroke="var(--grade)" />
             <XAxis
               type="number"
@@ -104,15 +104,15 @@ export function PainelCustomizado({ painel }: { painel: PainelCalculado }) {
               label={{
                 value: comUnidade(painel.eixoX.rotulo, painel.eixoX.unidade),
                 position: 'insideBottom',
-                offset: -12,
-                style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+                offset: -14,
+                style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
               }}
             />
             <YAxis
               type="number"
               dataKey="y"
               {...EIXO}
-              width={62}
+              width={66}
               tickFormatter={(v: number) => num(v, painel.eixoY?.casas === 0 ? 0 : 1)}
               label={{
                 value: comUnidade(
@@ -121,8 +121,8 @@ export function PainelCustomizado({ painel }: { painel: PainelCalculado }) {
                 ),
                 angle: -90,
                 position: 'insideLeft',
-                offset: 20,
-                style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+                offset: 14,
+                style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
               }}
             />
             <ZAxis range={[70, 70]} />
@@ -178,8 +178,9 @@ export function PainelCustomizado({ painel }: { painel: PainelCalculado }) {
         <p className="nota-grafico">
           {r ? (
             <>
-              R² = <strong>{num(r.r2, 3)}</strong> · n = {r.n} ·{' '}
-              {leituraR2(r.r2)}
+              Reta de regressão linear: y = {num(r.a, 3)}·x {r.b >= 0 ? '+' : '−'}{' '}
+              {num(Math.abs(r.b), 3)} · R² = <strong>{num(r.r2, 3)}</strong> · n ={' '}
+              {r.n} ({leituraR2(r.r2)}).
             </>
           ) : (
             'Pontos insuficientes para uma reta de tendência.'
@@ -205,7 +206,7 @@ export function PainelCustomizado({ painel }: { painel: PainelCalculado }) {
       <ResponsiveContainer width="100%" height={280}>
         <BarChart
           data={barras}
-          margin={{ top: 18, right: 12, bottom: 20, left: -14 }}
+          margin={{ top: 18, right: 12, bottom: barras.length > 6 ? 36 : 30, left: 16 }}
           barCategoryGap={12}
         >
           <CartesianGrid stroke="var(--grade)" vertical={false} />
@@ -223,14 +224,14 @@ export function PainelCustomizado({ painel }: { painel: PainelCalculado }) {
                 : {
                     value: comUnidade(painel.eixoX.rotulo, painel.eixoX.unidade),
                     position: 'insideBottom',
-                    offset: -12,
-                    style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+                    offset: -14,
+                    style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
                   }
             }
           />
           <YAxis
             {...EIXO}
-            width={56}
+            width={60}
             allowDecimals={!contagem}
             label={{
               value: contagem
@@ -241,8 +242,8 @@ export function PainelCustomizado({ painel }: { painel: PainelCalculado }) {
                   ),
               angle: -90,
               position: 'insideLeft',
-              offset: 18,
-              style: { fill: 'var(--tinta-suave)', fontSize: 11 },
+              offset: 14,
+              style: { fill: 'var(--tinta-suave)', fontSize: 11, textAnchor: 'middle' },
             }}
           />
           <Tooltip
